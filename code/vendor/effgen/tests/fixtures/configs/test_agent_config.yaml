@@ -1,0 +1,11 @@
+agent:
+  name: test-agent
+  max_iterations: 5
+  temperature: 0.1
+  enable_sub_agents: false
+  enable_memory: false
+  system_prompt: "You are a helpful test assistant."
+
+tools:
+  - calculator
+  - datetime

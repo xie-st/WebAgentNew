@@ -1,0 +1,24 @@
+# Model Battle
+
+**Prompt:** Explain a B-tree in two sentences.
+
+| Model | Result | TTFT | Latency | Tokens (in/out) | Cost |
+|-------|--------|------|---------|-----------------|------|
+| openai:gpt-5-nano | answered | 12.13s | 12.89s | 25/1103 | $0.000442 |
+| gemini:gemini-3.1-flash-lite | answered | 2.51s | 3.77s | 21/63 | $0.000100 |
+
+## Verdict
+
+- **Fastest**: gemini:gemini-3.1-flash-lite — answered in 3.77s
+- **Cheapest**: gemini:gemini-3.1-flash-lite — $0.000100 for this run
+- **Longest**: openai:gpt-5-nano — 348 characters
+
+## openai:gpt-5-nano
+
+A B-tree is a self-balancing, multi-way search tree in which each node can contain multiple keys and have many children, keeping the tree shallow for efficient disk access. All leaves are at the same depth, and internal nodes guide searches by key ranges, allowing insert, delete, and search operations to run in logarithmic time on large datasets.
+
+## gemini:gemini-3.1-flash-lite
+
+A B-tree is a self-balancing search tree data structure that maintains sorted data and allows searches, sequential access, insertions, and deletions in logarithmic time. It is optimized for systems that read and write large blocks of data by allowing nodes to contain more than two children, which minimizes disk I/O operations.
+
+_2/2 answered in 16.40s; total cost $0.000542._

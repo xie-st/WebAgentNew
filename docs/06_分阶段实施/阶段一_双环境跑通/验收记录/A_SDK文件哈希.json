@@ -1,0 +1,15 @@
+{
+  "agent_logic.py": "a2e32a65f6268ed1bc5daa88d1169bb4275351546e11a9f76fbb8eaf324a2718",
+  "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+  "my_agent.py": "124578a6986017b6d7a292de22e5815ccf9305ea3f38b27354bd5e26e49b247d",
+  "README.zh-CN.md": "6de4476ad36a841bd23ed769b395ae6cb5c6d6b62e9090c0f3ca3fb1e209923e",
+  "start-agent.cmd": "ddcbd2fdde168af59ce1683f96d50913adeac368728224adb134e6452c1ed586",
+  "third_party_agent/browser.py": "7fe94a73de8a4b27deaa4d664a70657d1fe4be6c278c266e854b9234a18a7373",
+  "third_party_agent/example.py": "314e58b423ab8babdf244921484f51422a353dc7bd43e9bffcc5a0f2f286140b",
+  "third_party_agent/model.py": "fad9c07fa33c3137cff22def2d6d56f77761afe3b8d6c835bfa80209ff2eaf2c",
+  "third_party_agent/outbound.py": "cfcb26a929b144d4fb3392b557e60068352114388c9a43a7423f93bb519fabe1",
+  "third_party_agent/README.zh-CN.md": "6de4476ad36a841bd23ed769b395ae6cb5c6d6b62e9090c0f3ca3fb1e209923e",
+  "third_party_agent/session.py": "d5e04cea64e791c32f20ab91162e7c4dd3217b6bf56272a4ea3029178cf394f7",
+  "third_party_agent/__init__.py": "f64ba6602436be965754be2d035b777e261b2cbcd8863cc3e01a7653d9972705",
+  "third_party_agent/__main__.py": "ac03873d479cb59416ada01669030a61ffcfc4b464985e8ea9095f0ba26cd232"
+}

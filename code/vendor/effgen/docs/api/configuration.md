@@ -1,0 +1,84 @@
+# Configuration Reference
+
+## AgentConfig
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `name` | `str` | (required) | Agent identifier |
+| `model` | `BaseModel \| str` | (required) | Model instance or ID |
+| `tools` | `List[BaseTool]` | `[]` | Tools available to the agent |
+| `system_prompt` | `str` | `"You are a helpful AI assistant."` | System prompt |
+| `max_iterations` | `int` | `10` | The most model turns one run may take. `run(max_iterations=...)` sets it for one call, and every threshold the loop derives from it — when the answer reminder starts, how many repeated calls read as a loop — follows the value the run is using |
+| `temperature` | `float` | `0.7` | Generation temperature |
+| `enable_sub_agents` | `bool` | `True` | Allow task decomposition |
+| `enable_memory` | `bool` | `True` | Enable conversation memory |
+| `enable_streaming` | `bool` | `False` | Enable token streaming |
+| `max_context_length` | `int \| None` | `None` | The context window to assume, overriding the one the adapter declares. Read by `context_budget` below, which is what gives it an effect |
+| `context_budget` | `int \| float \| str \| None` | `"auto"` | How many prompt tokens one run may send. `"auto"` derives it from the window the model declares, less what the run reserves for its own reply, and leaves the run unbounded when the model declares no usable window; an `int` is that many tokens; a `float` in `(0, 1]` is that share of the window; `None` is unbounded. A run that reaches the budget shortens its own conversation instead of growing until the provider refuses it, and raises `ContextBudgetExceededError` — before sending anything — when it cannot. What it did comes back on `response.metadata["context_budget"]` |
+| `compaction` | `CompactionPolicy \| str \| None` | `None` | What the run gives up when it reaches `context_budget`. `None` and `"shorten_oldest_first"` select `ShortenOldestFirst`, which makes no model call; `"summarize_with_model"` selects `SummarizeWithModel`, which has the agent's own model write a summary of what left. The question, the framing instructions, the session's earlier turns and the most recent two cycles are never given up |
+| `system_prompt_template` | `str \| None` | `None` | Custom prompt template |
+| `verbose_tools` | `bool \| None` | `None` | Verbose tool descriptions |
+| `fallback_chain` | `Dict \| None` | `None` | Tool fallback mapping |
+| `enable_fallback` | `bool` | `True` | Enable fallback chains |
+| `cite_sources` | `bool` | `False` | Ask for inline `[1]` citation markers when answering from retrieved passages |
+| `tool_contract` | `str \| None` | `None` | What the model is told about the attached tools. `None` selects it from the tools' declared categories; a string is stated verbatim; `""` states nothing |
+| `tool_use` | `ToolUsePolicy \| str \| None` | `None` | Whether a run holding these tools has to call one. `None` reads it from the tools' declared categories; `"required"` refuses an answer written with no call; `"auto"` leaves it to the model; `"sparing"` adds that a run which already has the answer should give it |
+| `capability_probe` | `bool` | `True` | Whether `tool_calling_mode="auto"` may measure, once per model, what a model served behind a `base_url` or run on a local engine does when handed a tool, and resolve against it. The result is stored (`~/.effgen/capabilities.json`, shown by `effgen doctor`) and reused. `False`, or `EFFGEN_CAPABILITY_PROBE=0`, resolves `auto` from the model's declaration alone. Cloud adapters are never probed |
+| `prompt_protocol` | `str` | `"auto"` | How the run's conversation reaches the model. `"flat"` sends the run's own steps as one string carrying the transcript; `"messages"` sends a system turn, the task, the model's reasoning beside the tool call it made, and each result answering that call; `"auto"` sends the whole of one conversation in one protocol — a run that continues a session sends its own steps as the turns they were, a run that continues nothing keeps them in the flat string. On a model whose adapter takes a conversation, a caller's `system_prompt` and a session's earlier turns travel as their own messages whichever value is set. Falls back to `"flat"`, with a logged reason, on a model, a loop or a turn that cannot carry the shape. The protocol a run used comes back on `response.metadata["prompt_protocol"]` |
+| `recover_lost_tool_calls` | `bool` | `True` | Whether a tool call the model wrote but the runtime could not run is recovered: arguments that are JSON with raw line breaks, quoted the way Python quotes them, whose last string was closed before the brackets that end it, or whose string values carry unescaped double quotes, and a whole call object followed by other text inside its tag, are read and the call runs; when the agent holds exactly one code-execution tool, a program written in a fenced block before an empty call tag is that call's argument; and a call that could not be read at all is asked for once more with a call required where the provider enforces it. `False` restores the strict reader of earlier releases. Arguments that arrive as a string, a call missing a required argument (asked for again, not dispatched) and positional values are handled the same way under either setting. `run(recover_lost_tool_calls=...)` sets it for one call; delegated sub-agents inherit it |
+| `max_turns_without_progress` | `int \| None` | `2` | How many turns in a row may bring no new tool result before the run is asked for its answer. A turn brings a new result when a tool it called returned something the conversation does not already show in full. The count starts after the run's first new result (before it, only a turn whose every call was declined counts); the next turn offers no tools and asks for the answer. A turn that declares no action after a result (`Action: None`, `Action: (continue reasoning)`) is asked at once. A run that is asked and still writes no answer, or is about to stop without one, gets one closing request: its own calls and results with no tools, whose reply is the answer. `None` turns all of this off and restores the earlier loop. `run(max_turns_without_progress=...)` sets it for one call; a value below 1 raises `ValueError` |
+
+## Memory Config
+
+Nested in `AgentConfig.memory_config`:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `short_term_max_tokens` | `int` | `4096` | Max tokens in short-term memory |
+| `short_term_max_messages` | `int` | `100` | Max messages to retain |
+| `summarization_threshold` | `float` | `0.8` | Share of `short_term_max_tokens` that triggers summarization |
+| `keep_recent_messages` | `int` | `4` | Recent messages never summarized |
+| `summary_budget_ratio` | `float` | `0.4` | Share of `short_term_max_tokens` the retained summaries may occupy; older summaries are folded together to stay inside it |
+| `long_term_backend` | `str` | `"sqlite"` | Storage backend |
+| `long_term_persist_path` | `str \| None` | `None` | Persistence directory |
+| `auto_summarize` | `bool` | `True` | Auto-summarize old context |
+
+## YAML Configuration File
+
+```yaml
+agent:
+  name: my-agent
+  model: Qwen/Qwen2.5-3B-Instruct
+  temperature: 0.7
+  max_iterations: 10
+  system_prompt: "You are a helpful assistant."
+
+tools:
+  - calculator
+  - python_repl
+  - web_search
+
+memory:
+  short_term_max_tokens: 4096
+  long_term_backend: sqlite
+  auto_summarize: true
+```
+
+Load with:
+```python
+from effgen import ConfigLoader
+config = ConfigLoader().load_config("config.yaml")
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `EFFGEN_PLUGINS_DIR` | Custom plugin directory path |
+| `EFFGEN_API_KEY` | API server authentication key |
+| `EFFGEN_RATE_LIMIT` | Per-client API rate limit in requests/min (unset or `0` = disabled) |
+| `CUDA_VISIBLE_DEVICES` | GPU selection for model loading |
+| `OPENAI_API_KEY` | OpenAI API key (for OpenAI backend) |
+| `ANTHROPIC_API_KEY` | Anthropic API key (for Claude backend) |
+| `GOOGLE_API_KEY` | Google API key (for Gemini backend) |
+| `CEREBRAS_API_KEY` | Cerebras Cloud API key (for Cerebras backend) |

@@ -1,0 +1,27 @@
+effGen {{ .Chart.AppVersion }} has been deployed!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Service: {{ include "effgen.fullname" . }}
+  Namespace: {{ .Release.Namespace }}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+{{- if .Values.ingress.enabled }}
+  URL: https://{{ (first .Values.ingress.hosts).host }}/
+{{- else }}
+  Access the API via port-forward:
+
+    kubectl port-forward -n {{ .Release.Namespace }} \
+      svc/{{ include "effgen.fullname" . }} 8080:80
+
+  Then: curl http://localhost:8080/health
+{{- end }}
+
+{{- if or (eq (.Values.env.EFFGEN_DEV_MODE | toString) "1") (eq (.Values.env.EFFGEN_DEV_MODE | toString) "true") }}
+
+  ⚠️  WARNING: Running in DEV MODE — authentication is DISABLED.
+     Set env.EFFGEN_DEV_MODE=0 and configure OIDC for production.
+{{- end }}
+
+Docs:
+  Docker  → docs/deploy/docker.md
+  K8s/Helm → docs/deploy/kubernetes.md

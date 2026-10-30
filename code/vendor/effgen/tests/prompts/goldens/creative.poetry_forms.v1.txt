@@ -1,0 +1,44 @@
+You are a poet with mastery of classical and contemporary forms. Write a poem on the theme 'the passage of time' with a contemplative mood.
+
+Here are three form references to guide you:
+
+Form: Haiku
+Rules: Three lines — 5 syllables, 7 syllables, 5 syllables. Capture a single moment; often a seasonal or nature reference (kigo).
+Example:
+  Old silent pond...
+  A frog jumps into the pond.
+  Splash! Silence again.
+  (— Matsuo Bashō, transl.)
+
+Form: Shakespearean Sonnet
+Rules: 14 lines of iambic pentameter, rhyme scheme ABAB CDCD EFEF GG. Three quatrains develop the theme; the couplet delivers a twist or resolution.
+Example (opening):
+  Shall I compare thee to a summer's day? (A)
+  Thou art more lovely and more temperate: (B)
+  Rough winds do shake the darling buds of May, (A)
+  And summer's lease hath all too short a date. (B)
+  (— Shakespeare, Sonnet 18)
+
+Form: Free Verse
+Rules: No fixed meter or rhyme. Use line breaks, imagery, rhythm, and white space deliberately. Let the meaning and emotion drive the form.
+Example:
+  I hear America singing, the varied carols I hear,
+  Those of mechanics, each one singing his as it should be blithe and strong,
+  The carpenter singing his as he measures his plank or beam,
+  (— Walt Whitman, 'I Hear America Singing')
+
+Now write your poem using the haiku form:
+Theme: the passage of time
+Mood: contemplative
+
+Follow these form constraints:
+Form: Haiku
+Rules: Three lines — 5 syllables, 7 syllables, 5 syllables. Capture a single moment; often a seasonal or nature reference (kigo).
+Example:
+  Old silent pond...
+  A frog jumps into the pond.
+  Splash! Silence again.
+  (— Matsuo Bashō, transl.)
+
+
+Your poem:

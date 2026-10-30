@@ -1,0 +1,7 @@
+Team: Platform Engineering
+Mission: Build reliable, scalable infrastructure that enables product teams to ship fast.
+Timeframe: Q3 2025
+Priorities:
+1. reduce system downtime to under 0.1% monthly
+2. cut developer onboarding time in half
+3. migrate 80% of services to Kubernetes

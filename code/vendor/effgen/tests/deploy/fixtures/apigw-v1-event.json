@@ -1,0 +1,43 @@
+{
+  "resource": "/health",
+  "path": "/health",
+  "httpMethod": "GET",
+  "headers": {
+    "Accept": "application/json",
+    "Host": "abc123.execute-api.us-east-1.amazonaws.com",
+    "User-Agent": "effgen-test/1.0",
+    "X-Amzn-Trace-Id": "Root=1-00000000-000000000000000000000002",
+    "X-Forwarded-For": "1.2.3.4",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "multiValueHeaders": {
+    "Accept": ["application/json"]
+  },
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourceId": "abc",
+    "resourcePath": "/health",
+    "httpMethod": "GET",
+    "extendedRequestId": "test-ext-id",
+    "requestTime": "01/Jan/2026:00:00:00 +0000",
+    "path": "/prod/health",
+    "accountId": "123456789012",
+    "protocol": "HTTP/1.1",
+    "stage": "prod",
+    "domainPrefix": "abc123",
+    "requestTimeEpoch": 1767225600000,
+    "requestId": "test-request-id-002",
+    "identity": {
+      "sourceIp": "1.2.3.4",
+      "userAgent": "effgen-test/1.0"
+    },
+    "domainName": "abc123.execute-api.us-east-1.amazonaws.com",
+    "apiId": "abc123"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

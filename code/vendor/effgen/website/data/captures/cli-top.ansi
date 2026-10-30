@@ -1,0 +1,69 @@
+effGen 1.0.0 — wangserv — 2026-08-20T16:56:29Z
+server http://127.0.0.1:8124 reachable
+
+[3m                    Activity — completed runs, local run history (all processes)                    [0m
+┏━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃[1;36m [0m[1;36mTime    [0m[1;36m [0m┃[1;36m [0m[1;36mStatus[0m[1;36m [0m┃[1;36m [0m[1;36mModel                    [0m[1;36m [0m┃[1;36m [0m[1;36mDuration[0m[1;36m [0m┃[1;36m [0m[1;36mCost     [0m[1;36m [0m┃[1;36m [0m[1;36mTask                     [0m[1;36m [0m┃
+┡━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 12:56:28 │ error  │ no-such-model             │ 217ms    │ —         │ user: hi                  │
+│ 12:56:28 │ ok     │ gemini-3.1-flash-lite     │ 8.91s    │ $0.000008 │ user: What is 9 squared?  │
+│ 12:56:19 │ ok     │ gemini-3.1-flash-lite     │ 2.36s    │ $0.000052 │ user: Give me one fact    │
+│          │        │                           │          │           │ about Kyoto.              │
+│ 12:56:17 │ ok     │ gemini-3.1-flash-lite     │ 713ms    │ $0.000024 │ user: Name one property   │
+│          │        │                           │          │           │ of a B-tree.              │
+│ 12:56:16 │ ok     │ gemini-3.1-flash-lite     │ 4.15s    │ $0.000010 │ user: What is 25 * 17?    │
+│ 12:56:07 │ ok     │ gemini:gemini-3.1-flash-l │ 4.87s    │ $0.000955 │ what does textkit export? │
+│          │        │ ite                       │          │           │                           │
+│ 12:55:58 │ ok     │ openai:gpt-5-nano         │ 3.49s    │ $0.000177 │ What is 2 ** 40? Use the  │
+│          │        │                           │          │           │ calculator tool.          │
+│ 12:55:51 │ ok     │ openai:gpt-5-nano         │ 2.86s    │ $0.000129 │ What is the boiling point │
+│          │        │                           │          │           │ of water in Fahrenheit?   │
+│ 12:55:46 │ ok     │ gemini:gemini-3.1-flash-l │ 11.59s   │ $0.000104 │ Summarise what a B-tree   │
+│          │        │ ite                       │          │           │ is, in one sentence.      │
+│ 12:55:30 │ ok     │ gemini:gemini-3.1-flash-l │ 2.21s    │ $0.000077 │ What is 18723 * 4409? Use │
+│          │        │ ite                       │          │           │ the calculator tool.      │
+└──────────┴────────┴───────────────────────────┴──────────┴───────────┴───────────────────────────┘
+
+[3m       Traffic — this server process since start       [0m
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓
+┃[1;36m [0m[1;36mMetric                     [0m[1;36m [0m┃[1;36m [0m[1;36mValue                [0m[1;36m [0m┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Generation requests         │ 5                     │
+│ Errors                      │ 1 (20.0%)             │
+│ Latency p50 / p95 / p99     │ 1.75s / 8.75s / 9.75s │
+│ Tokens                      │ 136                   │
+│ HTTP responses (all routes) │ 200×5, 404×1          │
+└─────────────────────────────┴───────────────────────┘
+
+[3m                     Per-model — this server process since start                      [0m
+┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━┓
+┃[1;36m [0m[1;36mModel                [0m[1;36m [0m┃[1;36m [0m[1;36mProvider[0m[1;36m [0m┃[1;36m [0m[1;36mCalls[0m[1;36m [0m┃[1;36m [0m[1;36mErrors[0m[1;36m [0m┃[1;36m [0m[1;36mError rate[0m[1;36m [0m┃[1;36m [0m[1;36mp95  [0m[1;36m [0m┃[1;36m [0m[1;36mCost     [0m[1;36m [0m┃
+┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━┩
+│ gemini-3.1-flash-lite │ gemini   │ 4     │ 0      │ 0.0%       │ 9.00s │ $0.000094 │
+│ no-such-model         │ gemini   │ 1     │ 1      │ 100.0%     │ 242ms │ —         │
+└───────────────────────┴──────────┴───────┴────────┴────────────┴───────┴───────────┘
+
+[3m Spend — local cost ledger, last 24 hours [0m
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃[1;36m [0m[1;36mMetric      [0m[1;36m [0m┃[1;36m [0m[1;36mValue                  [0m[1;36m [0m┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Total        │ $0.001536               │
+│ Requests     │ 10                      │
+│ Daily budget │ $1.00 (0.1% used)       │
+│ Burn rate    │ $0.001536/h (last hour) │
+└──────────────┴─────────────────────────┘
+
+[3m        GPU — physical devices, all processes         [0m
+┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━┓
+┃[1;36m [0m[1;36mGPU[0m[1;36m [0m┃[1;36m [0m[1;36mName      [0m[1;36m [0m┃[1;36m [0m[1;36mMemory          [0m[1;36m [0m┃[1;36m [0m[1;36mMem %[0m[1;36m [0m┃[1;36m [0m[1;36mUtil[0m[1;36m [0m┃
+┡━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━┩
+│ 0   │ NVIDIA A40 │ 44.33 / 44.42 GB │ 100%  │ 96%  │
+│ 1   │ NVIDIA A40 │ 0.26 / 44.42 GB  │ 1%    │ 0%   │
+│ 2   │ NVIDIA A40 │ 44.38 / 44.42 GB │ 100%  │ 100% │
+│ 3   │ NVIDIA A40 │ 44.38 / 44.42 GB │ 100%  │ 100% │
+│ 4   │ NVIDIA A40 │ 44.38 / 44.42 GB │ 100%  │ 100% │
+│ 5   │ NVIDIA A40 │ 44.38 / 44.42 GB │ 100%  │ 100% │
+│ 6   │ NVIDIA A40 │ 43.93 / 44.42 GB │ 99%   │ 100% │
+│ 7   │ NVIDIA A40 │ 43.93 / 44.42 GB │ 99%   │ 100% │
+└─────┴────────────┴──────────────────┴───────┴──────┘
+

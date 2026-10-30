@@ -1,0 +1,13 @@
+{
+  "state": "done",
+  "completed": 24,
+  "planted_sample_ids": [
+    "arc_e-0",
+    "arc_e-7",
+    "arc_e-13",
+    "arc_e-17",
+    "arc_e-19"
+  ],
+  "planted_k": 5,
+  "accuracy": 50.0
+}

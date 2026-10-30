@@ -1,0 +1,38 @@
+You are a database expert and technical writer.
+
+Explain this SQL query to a business stakeholder with no SQL background. Avoid jargon; describe what data the query retrieves and why it might be useful.
+
+Input schema:
+```sql
+CREATE TABLE customers (
+    customer_id INTEGER PRIMARY KEY,
+    name VARCHAR(120) NOT NULL
+);
+
+CREATE TABLE orders (
+    order_id INTEGER PRIMARY KEY,
+    customer_id INTEGER NOT NULL,
+    order_date DATE NOT NULL,
+    total_amt NUMERIC(12,2) NOT NULL
+);
+```
+
+SQL query:
+```sql
+SELECT c.name, COUNT(o.order_id) AS order_count,
+       SUM(o.total_amt) AS total_spend
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.order_date >= '2023-01-01'
+  AND o.order_date <  '2024-01-01'
+GROUP BY c.customer_id, c.name
+HAVING COUNT(o.order_id) > 3
+ORDER BY total_spend DESC;
+```
+
+Structure your explanation as:
+  1. One-sentence summary of what the query does.
+  2. Step-by-step breakdown of each clause.
+  3. What the result set looks like (columns, row meaning).
+
+Write in clear prose. Mention the referenced table names from the input schema or SQL query when describing the result.

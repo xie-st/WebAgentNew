@@ -1,0 +1,8 @@
+# Node dependencies — installed via `npm ci`, never committed.
+node_modules/
+
+# Compiled output — produced by `npm run compile`.
+out/
+
+# Packaged extension artifact — produced by `vsce package`.
+*.vsix

@@ -1,0 +1,197 @@
+/* The tool gallery: 66 cards, a search box and a row of category filters.
+   Built out of the same surface, border and accent the callouts and parameter
+   tables already use, so a card reads as one more block in the page rather than
+   as a widget dropped into it. */
+
+.tool-gallery-controls {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 2rem 0 1rem;
+  padding: 1rem 0 0.75rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tool-gallery-search {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+}
+
+.tool-gallery-search:focus-within {
+  border-color: var(--accent-primary);
+}
+
+.tool-gallery-search input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.tool-gallery-search input::placeholder {
+  color: var(--text-muted);
+}
+
+/* The input already draws a ring on the wrapper, so a second one inside it is
+   noise. Every other control here keeps the global focus ring. */
+.tool-gallery-search input:focus-visible {
+  outline: none;
+}
+
+.tool-gallery-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tool-gallery-filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.tool-gallery-filters button:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.tool-gallery-filters button.is-active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.tool-gallery-filters button span {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+}
+
+.tool-gallery-filters button.is-active span {
+  color: var(--accent-secondary);
+}
+
+.tool-gallery-count,
+.tool-gallery-empty {
+  margin: 0.75rem 0 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.tool-card {
+  margin: 0 0 2.5rem;
+  padding: 1.5rem 0 0;
+  border-top: 1px solid var(--border-color);
+  scroll-margin-top: calc(var(--header-height) + 5rem);
+}
+
+.tool-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.tool-card-head h2 {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  font-size: 1.15rem;
+}
+
+.tool-card-head h2 code {
+  background: none;
+  padding: 0;
+  color: var(--accent-primary);
+  font-size: 1em;
+}
+
+.tool-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tool-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-tertiary);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.tool-badge-native {
+  border-color: var(--accent-tertiary);
+  color: var(--accent-tertiary);
+}
+
+.tool-badge-key {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.tool-badge-approval {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.tool-badge-quiet {
+  color: var(--text-muted);
+}
+
+.tool-card-class {
+  margin: 0 0 0.75rem;
+  overflow-wrap: break-word;
+}
+
+.tool-card-class code {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+}
+
+.tool-card-description {
+  margin: 0 0 1rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.tool-card-note {
+  margin: 0.75rem 0 0;
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  .tool-gallery-controls {
+    position: static;
+  }
+}

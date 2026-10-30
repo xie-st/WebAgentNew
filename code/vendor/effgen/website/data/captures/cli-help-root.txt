@@ -1,0 +1,74 @@
+usage: effgen [-h] [--version] [-v] [-q] [--log-file LOG_FILE] [--no-animation]
+              [--theme {default,high-contrast,monochrome,light}] [--completion {bash,zsh,fish}]
+              {run,resume,sessions,runs,chat,code,serve,top,monitor,config,tools,models,examples,health,doctor,create-plugin,presets,quickstart,tutorial,workflow,batch,eval,compare,battle,debug,cost,report,prompts,loadtest}
+              ...
+
+effGen v1.0.0 - CLI for agent framework
+
+positional arguments:
+  {run,resume,sessions,runs,chat,code,serve,top,monitor,config,tools,models,examples,health,doctor,create-plugin,presets,quickstart,tutorial,workflow,batch,eval,compare,battle,debug,cost,report,prompts,loadtest}
+                        Command to run
+    run                 Run an agent with a task
+    resume              Resume an interrupted agent run from a saved checkpoint snapshot (distinct
+                        from a conversation session — see `--session-id`)
+    sessions            Browse and manage saved conversations
+    runs                Browse agent run history
+    chat                Interactive chat mode
+    code                Coding agent: writes code, runs it, and fixes what fails
+    serve               Start API server
+    top                 Live terminal view of runs, traffic, spend and GPU
+    monitor             Alias for `effgen top`
+    config              Configuration management
+    tools               Tool management
+    models              Model management
+    examples            Run example scripts
+    health              Check effGen infrastructure health (contacts external services)
+    doctor              Check provider keys, the system, and what effgen code needs
+    create-plugin       Generate a plugin project scaffold
+    presets             List available agent presets
+    quickstart          Guided first run: pick a model, run an agent, then write and run code
+    tutorial            Alias of quickstart — the same guided first run
+    workflow            Run a DAG-based workflow
+    batch               Run batch queries from a file
+    eval                Evaluate an agent against a test suite
+    compare             Compare multiple models on a test suite
+    battle              Race several models on one prompt, side by side
+    debug               Run an agent in interactive debug mode
+    cost                View cost spend and manage budgets
+    report              Render a saved run/compare/eval/cost/loadtest JSON result as an HTML
+                        report
+    prompts             Prompt library management
+    loadtest            Run a load test against a local mock or a live provider
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  -v, --verbose         Verbose output (show DEBUG/INFO logs)
+  -q, --quiet           Quiet output (errors only)
+  --log-file LOG_FILE   Log file path
+  --no-animation        Disable live spinners/progress animation (also via NO_COLOR or
+                        EFFGEN_NO_ANIM=1)
+  --theme {default,high-contrast,monochrome,light}
+                        Color theme for terminal output (also via EFFGEN_THEME). high-contrast
+                        targets low-vision readers; monochrome keeps structure without hue;
+                        NO_COLOR still turns color off entirely
+  --completion {bash,zsh,fish}
+                        Print shell completion script and exit
+
+Examples:
+  effgen run "What is 25 * 17?" --model Qwen/Qwen2.5-1.5B-Instruct
+  effgen run "Summarize quantum computing" -m gpt-5-nano --provider openai
+  effgen run "Tell me a joke" -m groq:llama-3.1-8b-instant
+  effgen chat -m gpt-5-nano --provider openai
+  effgen models list                 # provider registry overview
+  effgen models list --provider groq # full per-model detail
+  effgen doctor --live --cheap       # confirm providers are actually usable
+  effgen tools list
+
+Model id formats:
+  - Local HuggingFace repo:   Qwen/Qwen2.5-1.5B-Instruct
+  - Provider-prefixed:        openai:gpt-5-nano   groq:llama-3.1-8b-instant
+  - Bare id + --provider:     -m gpt-5-nano --provider openai
+  Providers: openai, anthropic, gemini, cerebras, groq, together,
+             fireworks, replicate, hf
+        

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<!-- No data-theme is set on first paint so the CSS follows the OS color scheme
+     with no JavaScript; app.js overrides only when the user has a stored choice. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>effGen Dashboard</title>
+  <link rel="stylesheet" href="webui.css" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- All assets are served locally; the page renders with no external network. -->
+</head>
+<body>
+  <a class="eff-skip-link" href="#main-content">Skip to content</a>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="logo"><span aria-hidden="true">⚡</span> effGen</h1>
+      <span class="version" id="header-version"></span>
+    </div>
+    <div class="header-right">
+      <a class="nav-link" href="/playground">Playground</a>
+      <span class="eff-sr-only" id="theme-status" role="status" aria-live="polite"></span>
+      <span class="status" id="status" role="status" aria-live="polite">
+        <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+        <span id="status-text">Connecting…</span>
+      </span>
+      <button id="theme-btn" type="button" aria-label="Switch color theme" title="Switch color theme">
+        <span aria-hidden="true" id="theme-icon">◐</span>
+      </button>
+      <button id="refresh-btn" type="button" aria-label="Refresh data now" title="Refresh data now">
+        <span aria-hidden="true">↺</span>
+      </button>
+      <button id="palette-btn" type="button" aria-label="Open the command palette"
+              title="Open the command palette">
+        <span aria-hidden="true">⌕</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="auth-banner" class="auth-banner" role="alert" hidden></div>
+
+  <nav class="eff-panel-nav" id="panel-nav" aria-label="Dashboard sections">
+    <a href="#summary-cards" data-panel-jump="summary-cards">Summary</a>
+    <a href="#panel-slo" data-panel-jump="panel-slo">SLO</a>
+    <a href="#panel-latency-chart" data-panel-jump="panel-latency-chart">Latency</a>
+    <a href="#panel-by-model" data-panel-jump="panel-by-model">By model</a>
+    <a href="#panel-by-status" data-panel-jump="panel-by-status">Status codes</a>
+    <a href="#panel-by-route" data-panel-jump="panel-by-route">By route</a>
+    <a href="#panel-agent-runs" data-panel-jump="panel-agent-runs">Recent runs</a>
+    <a href="#panel-history" data-panel-jump="panel-history">History</a>
+    <a href="#panel-spans" data-panel-jump="panel-spans">Spans</a>
+    <a href="#panel-waterfall" data-panel-jump="panel-waterfall">Timeline</a>
+    <a href="#panel-topology" data-panel-jump="panel-topology">Topology</a>
+    <a href="#panel-catalog" data-panel-jump="panel-catalog">Catalog</a>
+    <a href="#panel-metrics" data-panel-jump="panel-metrics">Metrics</a>
+    <span class="eff-palette-hint" id="palette-hint"></span>
+  </nav>
+
+  <main class="main" id="main-content" tabindex="-1">
+
+    <!-- Row 1: summary cards -->
+    <section class="row cards" id="summary-cards" tabindex="-1" aria-label="Summary metrics">
+      <div class="card" id="card-requests">
+        <div class="card-label">Total Requests</div>
+        <div class="card-value" id="val-requests" aria-live="polite">—</div>
+      </div>
+      <div class="card" id="card-errors">
+        <div class="card-label">Model-call Errors</div>
+        <div class="card-value" id="val-errors" aria-live="polite">—</div>
+        <div class="card-sub" id="sub-errors"></div>
+      </div>
+      <div class="card" id="card-latency">
+        <div class="card-label">Avg Latency</div>
+        <div class="card-value" id="val-latency" aria-live="polite">—</div>
+        <div class="card-sub" id="sub-latency"></div>
+      </div>
+      <div class="card" id="card-cost">
+        <div class="card-label">Cost (session)</div>
+        <div class="card-value" id="val-cost" aria-live="polite">—</div>
+        <div class="card-sub" id="sub-cost"></div>
+      </div>
+      <div class="card" id="card-tokens">
+        <div class="card-label">Tokens Used</div>
+        <div class="card-value" id="val-tokens" aria-live="polite">—</div>
+      </div>
+    </section>
+
+    <!-- Row 2: SLO burn rates + Latency chart -->
+    <section class="row two-col">
+      <div class="panel" id="panel-slo" tabindex="-1">
+        <h2>SLO Burn Rates</h2>
+        <div id="slo-list">
+          <div class="slo-row">
+            <span class="slo-name">p99 latency</span>
+            <div class="slo-bar-bg" role="img" id="slo-p99-img" aria-label="p99 latency">
+              <div class="slo-bar" id="slo-p99"></div>
+            </div>
+            <span class="slo-pct" id="slo-p99-pct">—</span>
+          </div>
+          <div class="slo-row">
+            <span class="slo-name">error rate</span>
+            <div class="slo-bar-bg" role="img" id="slo-err-img" aria-label="error rate burn">
+              <div class="slo-bar slo-bar-err" id="slo-err"></div>
+            </div>
+            <span class="slo-pct" id="slo-err-pct">—</span>
+          </div>
+          <div class="slo-row">
+            <span class="slo-name">availability</span>
+            <div class="slo-bar-bg" role="img" id="slo-avail-img" aria-label="availability">
+              <div class="slo-bar slo-bar-ok" id="slo-avail"></div>
+            </div>
+            <span class="slo-pct" id="slo-avail-pct">—</span>
+          </div>
+        </div>
+        <div class="slo-detail" id="slo-detail" aria-live="polite"></div>
+      </div>
+
+      <div class="panel" id="panel-latency-chart" tabindex="-1">
+        <h2>Request Latency (recent)</h2>
+        <div class="chart-wrap">
+          <canvas id="latency-chart" height="150" role="img"
+                  aria-label="Recent average request latency trend"></canvas>
+          <p class="chart-empty" id="chart-empty" hidden>No latency samples yet.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 3: per-model breakdown -->
+    <section class="panel" id="panel-by-model" tabindex="-1">
+      <h2>By Model</h2>
+      <div class="table-wrapper">
+        <table id="by-model-table">
+          <caption class="eff-sr-only">Calls, error rate, latency, tokens and cost per model and provider</caption>
+          <thead>
+            <tr>
+              <th scope="col" data-sort="model">
+                <button type="button" class="sort-btn" data-sort="model">Model</button></th>
+              <th scope="col" data-sort="provider">
+                <button type="button" class="sort-btn" data-sort="provider">Provider</button></th>
+              <th scope="col" data-sort="calls" aria-sort="descending">
+                <button type="button" class="sort-btn" data-sort="calls">Calls</button></th>
+              <th scope="col" data-sort="error_rate">
+                <button type="button" class="sort-btn" data-sort="error_rate">Error rate</button></th>
+              <th scope="col" data-sort="p95_latency_s">
+                <button type="button" class="sort-btn" data-sort="p95_latency_s">p95</button></th>
+              <th scope="col">Outcome</th>
+              <th scope="col">Tokens (in/out)</th>
+              <th scope="col" data-sort="cost_usd">
+                <button type="button" class="sort-btn" data-sort="cost_usd">Cost</button></th>
+            </tr>
+          </thead>
+          <tbody id="by-model-tbody">
+            <tr><td colspan="8" class="empty-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="panel-sub" id="by-model-unattributed" hidden></p>
+    </section>
+
+    <!-- Row 4: HTTP responses by status -->
+    <section class="panel" id="panel-by-status" tabindex="-1">
+      <h2>HTTP Responses by Status</h2>
+      <div class="status-chips" id="status-chips">
+        <span class="empty-row">Loading…</span>
+      </div>
+    </section>
+
+    <!-- Row 4b: responses by route, with a denominator per route -->
+    <section class="panel" id="panel-by-route" tabindex="-1">
+      <h2>Responses by Route</h2>
+      <p class="panel-sub">Requests, failures and the share of each route's traffic that failed.
+        Anything outside the recorded route list — the dashboard's own polling, and any
+        unrouted request — is counted as <code>other</code>, not as user traffic.</p>
+      <div class="table-wrapper">
+        <table id="by-route-table">
+          <caption class="eff-sr-only">HTTP requests, errors and error rate per route and method</caption>
+          <thead>
+            <tr>
+              <th scope="col" data-sort="route">
+                <button type="button" class="sort-btn" data-sort="route">Route</button></th>
+              <th scope="col">Method</th>
+              <th scope="col" data-sort="requests">
+                <button type="button" class="sort-btn" data-sort="requests">Requests</button></th>
+              <th scope="col" data-sort="errors">
+                <button type="button" class="sort-btn" data-sort="errors">Errors</button></th>
+              <th scope="col" data-sort="error_rate" aria-sort="descending">
+                <button type="button" class="sort-btn" data-sort="error_rate">Error rate</button></th>
+              <th scope="col">By class</th>
+            </tr>
+          </thead>
+          <tbody id="by-route-tbody">
+            <tr><td colspan="6" class="empty-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Row 5: recent agent runs -->
+    <section class="panel" id="panel-agent-runs" tabindex="-1">
+      <h2>Recent Agent Runs</h2>
+      <div class="table-wrapper">
+        <table id="runs-table">
+          <caption class="eff-sr-only">The most recent agent runs</caption>
+          <thead>
+            <tr>
+              <th scope="col">Time</th>
+              <th scope="col">Model</th>
+              <th scope="col">Tokens (in/out)</th>
+              <th scope="col">Cost</th>
+              <th scope="col">Duration</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody id="runs-tbody">
+            <tr><td colspan="6" class="empty-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Run & session history -->
+    <section class="panel" id="panel-history" tabindex="-1">
+      <h2>History</h2>
+      <p class="panel-sub" id="history-sub">Loading stored runs…</p>
+      <div class="catalog-toolbar" role="group" aria-label="History filters">
+        <label class="cat-field">
+          <span class="cat-label">Search</span>
+          <input type="search" id="hist-search" placeholder="task, model, run id"
+                 autocomplete="off" aria-label="Search run history" />
+        </label>
+        <label class="cat-field">
+          <span class="cat-label">Status</span>
+          <select id="hist-status" aria-label="Filter runs by status">
+            <option value="">all</option>
+            <option value="ok">ok</option>
+            <option value="error">failed</option>
+          </select>
+        </label>
+      </div>
+      <div class="table-wrapper">
+        <table id="history-table">
+          <caption class="eff-sr-only">Stored runs, newest first</caption>
+          <thead>
+            <tr>
+              <th scope="col">When</th>
+              <th scope="col">Model</th>
+              <th scope="col">Task</th>
+              <th scope="col" class="num">Cost</th>
+              <th scope="col" class="num">Duration</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="6" class="empty-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="history-detail" class="history-detail" aria-live="polite" hidden></div>
+      <h3 class="history-heading">Saved Sessions</h3>
+      <div class="table-wrapper">
+        <table id="history-sessions-table">
+          <caption class="eff-sr-only">Saved chat sessions</caption>
+          <thead>
+            <tr>
+              <th scope="col">Session</th>
+              <th scope="col" class="num">Messages</th>
+              <th scope="col">Model</th>
+              <th scope="col" class="num">Cost</th>
+              <th scope="col">Updated</th>
+            </tr>
+          </thead>
+          <tbody id="history-sessions-tbody">
+            <tr><td colspan="5" class="empty-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Row 6: live span stream -->
+    <section class="panel" id="panel-spans" tabindex="-1">
+      <h2>Live Span Stream</h2>
+      <div class="span-toolbar">
+        <button id="span-clear-btn" type="button">Clear</button>
+        <label>
+          <input type="checkbox" id="span-pause-cb" /> Pause
+        </label>
+        <span id="span-count">0 spans</span>
+      </div>
+      <div id="span-stream" class="span-stream" role="log" aria-label="Live span stream"></div>
+    </section>
+
+    <section class="panel" id="panel-waterfall" tabindex="-1">
+      <h2>Run Timeline</h2>
+      <p class="panel-sub">Spans grouped by run — bars positioned by start offset, width by duration.</p>
+      <div id="waterfall" class="waterfall" role="group" aria-label="Per-run span waterfall">
+        <p class="empty-row" id="waterfall-empty">No runs recorded yet.</p>
+      </div>
+    </section>
+
+    <!-- Multi-agent topology graph -->
+    <section class="panel" id="panel-topology" tabindex="-1">
+      <h2>Agent Topology</h2>
+      <p class="panel-sub" id="topology-sub">Loading recorded executions…</p>
+      <div class="catalog-toolbar" role="group" aria-label="Topology controls">
+        <label class="cat-field">
+          <span class="cat-label">Execution</span>
+          <select id="topo-select" aria-label="Choose a team or workflow execution">
+            <option value="">—</option>
+          </select>
+        </label>
+      </div>
+      <ul class="topo-legend" aria-label="Node status key">
+        <li><span class="topo-key topo-ok" aria-hidden="true">●</span> ok</li>
+        <li><span class="topo-key topo-running" aria-hidden="true">◐</span> running</li>
+        <li><span class="topo-key topo-skipped" aria-hidden="true">⊘</span> skipped</li>
+        <li><span class="topo-key topo-error" aria-hidden="true">✗</span> failed</li>
+        <li><span class="topo-key" aria-hidden="true">▭</span> agent</li>
+        <li><span class="topo-key" aria-hidden="true">⬭</span> tool</li>
+      </ul>
+      <div class="topo-wrap">
+        <svg id="topo-svg" class="topo-svg" role="group"
+             aria-label="Multi-agent topology graph: agents, tools, and the edges between them"></svg>
+        <p class="empty-row" id="topo-empty">No multi-agent activity recorded yet.</p>
+      </div>
+      <div id="topo-detail" class="history-detail" aria-live="polite" hidden></div>
+    </section>
+
+    <!-- Model catalog browser -->
+    <section class="panel" id="panel-catalog" tabindex="-1">
+      <h2>Model Catalog</h2>
+      <p class="panel-sub" id="catalog-sub">Loading catalog…</p>
+      <div class="catalog-toolbar" role="group" aria-label="Catalog filters">
+        <label class="cat-field">
+          <span class="cat-label">Search</span>
+          <input type="search" id="cat-search" placeholder="id, family, provider"
+                 autocomplete="off" aria-label="Search models" />
+        </label>
+        <label class="cat-field">
+          <span class="cat-label">Provider</span>
+          <select id="cat-provider" aria-label="Filter by provider">
+            <option value="">all</option>
+          </select>
+        </label>
+        <label class="cat-field">
+          <span class="cat-label">Sort</span>
+          <select id="cat-sort" aria-label="Sort models">
+            <option value="provider">provider</option>
+            <option value="id">id</option>
+            <option value="context">context</option>
+            <option value="max-out">max output</option>
+            <option value="price-in">$/1M in</option>
+            <option value="price-out">$/1M out</option>
+          </select>
+        </label>
+        <label class="cat-check"><input type="checkbox" id="cat-tools" /> Tools</label>
+        <label class="cat-check"><input type="checkbox" id="cat-vision" /> Vision</label>
+        <label class="cat-check"><input type="checkbox" id="cat-audio" /> Audio</label>
+        <label class="cat-check"><input type="checkbox" id="cat-free" /> Free</label>
+        <label class="cat-field">
+          <span class="cat-label">Min context</span>
+          <input type="number" id="cat-min-context" min="0" step="1000"
+                 placeholder="0" aria-label="Minimum context window" />
+        </label>
+      </div>
+      <div class="table-wrapper">
+        <table id="catalog-table">
+          <caption class="eff-sr-only">Model catalog: context window, output limit, price and capabilities</caption>
+          <thead>
+            <tr>
+              <th scope="col">Provider</th>
+              <th scope="col">Model ID</th>
+              <th scope="col" class="num">Context</th>
+              <th scope="col" class="num">Max Out</th>
+              <th scope="col" class="num">$/1M in</th>
+              <th scope="col" class="num">$/1M out</th>
+              <th scope="col">Tools</th>
+              <th scope="col">Vision</th>
+              <th scope="col">Free</th>
+            </tr>
+          </thead>
+          <tbody id="catalog-tbody">
+            <tr><td colspan="9" class="empty-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="catalog-footer">
+        <button id="cat-prev" type="button" disabled>‹ Prev</button>
+        <span id="cat-page-info" aria-live="polite">—</span>
+        <button id="cat-next" type="button" disabled>Next ›</button>
+      </div>
+    </section>
+
+    <!-- Row 7: raw metrics -->
+    <section class="panel" id="panel-metrics" tabindex="-1">
+      <h2>Prometheus Metrics (raw)</h2>
+      <div class="table-wrapper">
+        <table id="metrics-table">
+          <caption class="eff-sr-only">Raw Prometheus metric samples</caption>
+          <thead><tr><th scope="col">Metric</th><th scope="col">Value</th></tr></thead>
+          <tbody id="metrics-tbody">
+            <tr><td colspan="2" class="empty-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="webui.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Product: ContractIQ
+Target: legal teams at mid-size companies
+Problem: Contract review takes 3-5 days per agreement; legal teams drowning in volume, missing risk clauses and delaying deals.
+Solution: AI reviews contracts in under 2 minutes, flags risky clauses, summarizes obligations, suggests redlines.
+Differentiator: Trained on 10M+ enterprise contracts, integrates with DocuSign and Ironclad.

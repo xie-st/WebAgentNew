@@ -1,0 +1,8 @@
+[
+  "Thought: enter the catalog query.\nAction: web_type\nAction Input: {\"target\": \"1\", \"text\": \"quantum\"}",
+  "Thought: submit the local search.\nAction: web_click\nAction Input: {\"target\": \"2\"}",
+  "Thought: open the first result.\nAction: web_click\nAction Input: {\"target\": \"1\"}",
+  "Thought: fill the draft box with the task text.\nAction: web_type\nAction Input: {\"target\": \"1\", \"text\": \"Draft for quantum note\"}",
+  "Thought: show the draft preview without submitting.\nAction: web_click\nAction Input: {\"target\": \"2\"}",
+  "Thought: the preview is visible; the task did not submit.\nFinal Answer: Local chain completed: searched, opened detail, filled the draft, previewed it, and captured the screenshot without submitting."
+]

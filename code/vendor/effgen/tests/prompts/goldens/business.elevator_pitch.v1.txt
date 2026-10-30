@@ -1,0 +1,16 @@
+You are a startup pitch coach. Write a compelling elevator pitch for the following product. The pitch MUST be 150 words or fewer — count carefully.
+
+Product: ContractIQ
+Target Audience: legal teams at mid-size companies
+Problem: Contract review takes 3-5 days per agreement and legal teams are drowning in volume, missing risk clauses and delaying deals.
+Solution: ContractIQ uses AI to review contracts in under 2 minutes, flagging risky clauses, summarizing obligations, and suggesting redlines.
+Key Differentiator: Unlike generic AI tools, ContractIQ is trained on 10M+ enterprise contracts and integrates directly into CLM platforms like DocuSign and Ironclad.
+
+Requirements:
+  - Open with a hook that resonates with legal teams at mid-size companies
+  - Clearly state the problem and solution
+  - Highlight what makes ContractIQ uniquely better
+  - End with a memorable call to action or vision statement
+  - STRICT LIMIT: 150 words or fewer (this is non-negotiable)
+
+Write the elevator pitch now:

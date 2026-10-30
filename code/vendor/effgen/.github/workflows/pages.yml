@@ -1,0 +1,153 @@
+name: Website
+
+# Builds the marketing site and the documentation SPA and publishes both to
+# GitHub Pages:
+#
+#   https://ctrl-gaurav.github.io/effGen/        the landing site (Next.js)
+#   https://ctrl-gaurav.github.io/effGen/docs/   the documentation (Vite + React)
+#
+# The docs bundle is built first, into the landing site's public/docs directory,
+# so a single static export carries both.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+# A project page is served under /<repo>, and that path is case-sensitive even
+# though the repository URL is not. Both prefixes are taken from the repository
+# itself so a rename carries the site with it instead of silently serving a
+# bundle whose assets all point at the old name.
+env:
+  BASE_PATH: /${{ github.event.repository.name }}
+  DOCS_BASE_PATH: /${{ github.event.repository.name }}/docs/
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a queued run supersedes a waiting one but never
+# cancels a publish already in flight.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site + docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            website/package-lock.json
+            website/effgen-docs/package-lock.json
+
+      - name: Install landing-site dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Install documentation dependencies
+        working-directory: website/effgen-docs
+        run: npm ci
+
+      - name: Build the documentation into the landing site's public/docs
+        working-directory: website/effgen-docs
+        env:
+          DOCS_BASE_PATH: ${{ env.DOCS_BASE_PATH }}
+        run: npm run build
+
+      # The landing site's sitemap lists the 72 documentation pages, and it reads
+      # them from data/docsRoutes.json because effgen-docs/ is outside its
+      # TypeScript project. `npm run build` regenerates that file; this job runs
+      # `next build` directly, so it checks the checked-in copy instead of
+      # letting the sitemap and the step below quietly fall behind the docs.
+      - name: Check the documentation route list is current
+        working-directory: website
+        run: node scripts/gen_docs_routes.mjs --check
+
+      - name: Build the landing site
+        working-directory: website
+        env:
+          NEXT_STATIC_EXPORT: "1"
+          NEXT_PUBLIC_BASE_PATH: ${{ env.BASE_PATH }}
+        run: npx next build
+
+      - name: Give every documentation route a file to be served from
+        working-directory: website
+        run: |
+          # The docs are a single-page app: the browser routes /docs/agents
+          # client-side, but a static host has to answer that URL with something
+          # first. The list comes from data/docsRoutes.json, which the generator
+          # above writes out of the documentation's own table of contents, so a
+          # page added there is picked up here without this list going stale.
+          #
+          # It is read as JSON rather than scraped out of the JSX. The router
+          # builds its routes from that table of contents in a loop, so there is
+          # no literal path in App.tsx to scrape: a text search finds the
+          # catch-all "*" and nothing else, and the shell then expands it into a
+          # directory listing. Every page still returns 200 and every deep link
+          # 404s, which is the failure this step exists to prevent.
+          node -e '
+            const { mkdirSync, copyFileSync, readFileSync } = require("node:fs");
+            const routes = JSON.parse(readFileSync("data/docsRoutes.json", "utf8"));
+            const paths = [
+              ...routes.pages.map((p) => p.path),
+              // Retired addresses. The app answers each with a redirect, so it
+              // needs a file here too or an old bookmark never reaches it.
+              ...routes.redirects.map((r) => r.path),
+            ];
+            if (paths.length === 0) {
+              console.error("no documentation routes — data/docsRoutes.json is empty");
+              process.exit(1);
+            }
+            for (const path of paths) {
+              if (!path.startsWith("/")) {
+                console.error(`route ${path} is not site-absolute`);
+                process.exit(1);
+              }
+              mkdirSync(`out/docs${path}`, { recursive: true });
+              copyFileSync("out/docs/index.html", `out/docs${path}/index.html`);
+            }
+            console.log(
+              `materialised ${routes.pages.length} documentation routes ` +
+              `and ${routes.redirects.length} retired addresses`
+            );
+          '
+
+      - name: Check both entry points made it into the export
+        working-directory: website
+        run: |
+          test -f out/index.html || { echo "landing page missing from the export"; exit 1; }
+          test -f out/docs/index.html || { echo "documentation missing from the export"; exit 1; }
+          test -f out/docs/introduction/index.html || { echo "documentation routes missing"; exit 1; }
+          # Pages serves this tree as-is: Jekyll must not reprocess it, or every
+          # asset directory Next names with a leading underscore is dropped.
+          touch out/.nojekyll
+          echo "landing:" && ls out | head -20
+          echo "docs:" && ls out/docs | head -10
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/out
+
+  deploy:
+    name: Publish to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

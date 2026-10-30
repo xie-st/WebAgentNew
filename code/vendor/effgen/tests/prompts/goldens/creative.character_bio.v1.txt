@@ -1,0 +1,14 @@
+You are a professional character designer for noir thriller fiction. Create a vivid, believable character profile for a protagonist based on this concept:
+
+"a retired detective haunted by an unsolved case"
+
+Return a JSON object with exactly these keys:
+  "name"               — full character name (string)
+  "age"                — age in years (integer)
+  "background"         — 2-3 sentence backstory (string)
+  "personality_traits" — array of 3-5 trait strings
+  "goals"              — array of 1-3 goal strings
+  "flaws"              — array of 1-3 flaw strings
+  "relationships"      — array of strings describing key relationships (can be empty)
+
+Output only the JSON object, no markdown fences, no extra text.

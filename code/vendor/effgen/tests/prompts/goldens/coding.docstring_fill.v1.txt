@@ -1,0 +1,42 @@
+You are an expert Python technical writer.
+
+Add Google-style docstrings to every function and class in the code below that is currently missing one.
+
+Use this docstring format:
+"""Short one-line summary.
+
+Args:
+    param_name (type): Description.
+
+Returns:
+    type: Description.
+
+Raises:
+    ExceptionType: When and why it is raised.
+"""
+
+Rules:
+  - Infer parameter types and return types from usage patterns and names.
+  - Include an 'Args' (or equivalent) section only if the function has parameters.
+  - Include a 'Returns' section only if the function returns a non-None value.
+  - Include a 'Raises' section only if exceptions are explicitly raised.
+  - Preserve all existing code exactly — only add docstrings, change nothing else.
+  - Output the full updated code, no markdown fences, no extra commentary.
+
+Code:
+```python
+def merge_sorted(a, b):
+    result = []
+    i = j = 0
+    while i < len(a) and j < len(b):
+        if a[i] <= b[j]:
+            result.append(a[i])
+            i += 1
+        else:
+            result.append(b[j])
+            j += 1
+    result.extend(a[i:])
+    result.extend(b[j:])
+    return result
+
+```

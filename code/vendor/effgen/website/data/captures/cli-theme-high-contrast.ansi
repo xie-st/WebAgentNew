@@ -1,0 +1,22 @@
+
+[1;96mModel: gemini:gemini-3.1-flash-lite[0m
+┌───────────────────────────┬───────────────────────┐
+│[1;97m [0m[1;97mProvider                 [0m[1;97m [0m│ gemini                │
+│[1;97m [0m[1;97mDisplay name             [0m[1;97m [0m│ gemini-3.1-flash-lite │
+│[1;97m [0m[1;97mFamily                   [0m[1;97m [0m│ flash-lite            │
+│[1;97m [0m[1;97mContext window           [0m[1;97m [0m│ 1,000,000             │
+│[1;97m [0m[1;97mMax output               [0m[1;97m [0m│ 32,768                │
+│[1;97m [0m[1;97mPrice ($/1M in / out)    [0m[1;97m [0m│ $0.25/$1.5            │
+│[1;97m [0m[1;97mTool calling             [0m[1;97m [0m│ yes                   │
+│[1;97m [0m[1;97mCoding                   [0m[1;97m [0m│ suitable              │
+│[1;97m [0m[1;97mVision                   [0m[1;97m [0m│ yes                   │
+│[1;97m [0m[1;97mAudio                    [0m[1;97m [0m│ yes                   │
+│[1;97m [0m[1;97mFree tier                [0m[1;97m [0m│ yes                   │
+│[1;97m [0m[1;97mRate limits (rpm/tpm/rpd)[0m[1;97m [0m│ 15 / 250000 / 500     │
+│[1;97m [0m[1;97mDeprecated               [0m[1;97m [0m│ no                    │
+│[1;97m [0m[1;97mPrice source             [0m[1;97m [0m│ bundled-catalog       │
+│[1;97m [0m[1;97mVerified on              [0m[1;97m [0m│ 2026-08-13            │
+│[1;97m [0m[1;97mAuth ready               [0m[1;97m [0m│ no (set key)          │
+└───────────────────────────┴───────────────────────┘
+
+[37mUse: [0m[96meffgen run --provider gemini -m gemini-3.1-flash-lite "..."[0m

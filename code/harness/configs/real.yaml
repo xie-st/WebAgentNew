@@ -1,0 +1,37 @@
+schema_version: webagent.config.v1
+profile: real
+backend: playwright
+runtime_dir: runtime
+
+agent:
+  strategy: single
+  tool_calling_mode: react
+  max_iterations: null
+  capability_probe: false
+  sub_agents: false
+  fallback: false
+  speculative_execution: false
+  cross_task_memory: false
+
+model:
+  provider: openai_compatible
+  name: unified-model
+  context_length: 32768
+  tokenizer: tiktoken:cl100k_base
+  token_count_source: estimated
+  # Names only. The runtime reads values from its own environment.
+  base_url_env: WEBAGENT_MODEL_BASE_URL
+  api_key_env: WEBAGENT_MODEL_API_KEY
+
+budget:
+  input_tokens: 24000
+  planned_context_tokens: 32768
+  max_model_calls: null
+
+limits:
+  max_messages: 256
+  max_request_bytes: 1048576
+
+logging:
+  level: INFO
+  redact_extra: []

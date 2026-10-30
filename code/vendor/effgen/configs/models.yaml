@@ -1,0 +1,218 @@
+# Model Configuration
+#
+# Example model definitions for the effGen framework. These are convenience
+# aliases for `effgen run --config` style usage; the authoritative, always-current
+# catalog (ids, context windows, pricing, capabilities, deprecation) lives in the
+# model registry and is shown by `effgen models list` / `effgen models info`.
+# Refresh the live catalog any time with `effgen models refresh`.
+#
+# Supported model types:
+# - huggingface: Local models via HuggingFace Transformers / vLLM
+# - openai / anthropic / google / groq / cerebras / together / fireworks: API models
+
+models:
+  # =============================================================================
+  # SMALL LANGUAGE MODELS (SLMs) — Local Inference
+  # =============================================================================
+
+  # Qwen2.5 1.5B — tiny, fast default for local agents
+  qwen25_1_5b:
+    type: huggingface
+    model_id: Qwen/Qwen2.5-1.5B-Instruct
+    inference_engine: transformers  # Options: vllm, transformers, mlx
+    gpu_devices: [0]
+    dtype: bfloat16
+    max_length: 32768
+    temperature: 0.7
+    top_p: 0.9
+
+  # Llama 3.2 3B — small instruction-tuned model
+  llama32_3b:
+    type: huggingface
+    model_id: meta-llama/Llama-3.2-3B-Instruct
+    inference_engine: transformers
+    gpu_devices: [0]
+    dtype: bfloat16
+    max_length: 131072
+    temperature: 0.7
+    top_p: 0.9
+
+  # Qwen2.5 7B — strong general-purpose local model
+  qwen25_7b:
+    type: huggingface
+    model_id: Qwen/Qwen2.5-7B-Instruct
+    inference_engine: vllm
+    gpu_devices: [0]
+    dtype: bfloat16
+    max_length: 32768
+    max_model_len: 32768
+    gpu_memory_utilization: 0.9
+    temperature: 0.7
+
+  # Phi-4 mini — Microsoft's efficient small model
+  phi4_mini:
+    type: huggingface
+    model_id: microsoft/Phi-4-mini-instruct
+    inference_engine: transformers
+    gpu_devices: [0]
+    dtype: bfloat16
+    max_length: 16384
+    temperature: 0.7
+
+  # =============================================================================
+  # CLOUD MODELS — API-based (cheapest current defaults first)
+  # =============================================================================
+
+  # OpenAI GPT-5 nano — cheapest current OpenAI chat model
+  gpt5_nano:
+    type: openai
+    model_name: gpt-5-nano
+    max_tokens: 4096
+    temperature: 0.7
+    timeout: 60
+    max_retries: 3
+
+  # OpenAI GPT-5 mini — low-cost, more capable
+  gpt5_mini:
+    type: openai
+    model_name: gpt-5-mini
+    max_tokens: 8192
+    temperature: 0.7
+
+  # Google Gemini 3.1 Flash-Lite — cheapest current Gemini
+  gemini_flash_lite:
+    type: google
+    model_name: gemini-3.1-flash-lite
+    max_tokens: 8192
+    temperature: 0.7
+
+  # Google Gemini 2.5 Flash — fast, capable
+  gemini_flash:
+    type: google
+    model_name: gemini-2.5-flash
+    max_tokens: 8192
+    temperature: 0.7
+
+  # Groq GPT-OSS 20B — fast hosted open model (Groq's default)
+  groq_gpt_oss_20b:
+    type: groq
+    model_name: openai/gpt-oss-20b
+    max_tokens: 8192
+    temperature: 0.7
+
+  # Cerebras GPT-OSS 120B — fast hosted open model (live default)
+  cerebras_gpt_oss:
+    type: cerebras
+    model_name: gpt-oss-120b
+    max_tokens: 8192
+    temperature: 0.7
+
+  # Anthropic Claude Haiku 4 (fastest Claude)
+  claude_haiku:
+    type: anthropic
+    model_name: claude-haiku-4
+    max_tokens: 4096
+    temperature: 0.7
+
+  # Anthropic Claude Sonnet 4.5 (balanced)
+  claude_sonnet:
+    type: anthropic
+    model_name: claude-sonnet-4.5
+    max_tokens: 8192
+    temperature: 0.7
+
+# =============================================================================
+# MODEL SELECTION CONFIGURATION
+# =============================================================================
+
+# Default model for agents (if not specified) — a tiny local model
+default_model: qwen25_1_5b
+
+# Fallback chain — try models in order if one fails
+fallback_chain:
+  - qwen25_1_5b       # Try tiny local SLM first
+  - qwen25_7b         # Fallback to larger local model
+  - gpt5_nano         # Fallback to cheap API model
+  - claude_haiku      # Final fallback
+
+# Model aliases for convenience
+aliases:
+  fast: qwen25_1_5b
+  balanced: qwen25_7b
+  powerful: gpt5_mini
+  cheap: gpt5_nano
+  local: qwen25_1_5b
+  api: gpt5_nano
+
+# =============================================================================
+# MODEL SELECTION STRATEGIES
+# =============================================================================
+
+# Task-based model routing
+task_routing:
+  enabled: true
+  routes:
+    simple:
+      keywords: [summary, translate, extract, format]
+      model: qwen25_1_5b
+    coding:
+      keywords: [code, program, function, debug, implement]
+      model: qwen25_7b
+      fallback: claude_sonnet
+    reasoning:
+      keywords: [analyze, reason, logic, solve, complex]
+      model: gpt5_mini
+      fallback: claude_sonnet
+    creative:
+      keywords: [write, story, creative, generate, brainstorm]
+      model: claude_sonnet
+      temperature_override: 0.9
+    research:
+      keywords: [research, find, search, investigate]
+      model: gpt5_mini
+      fallback: gemini_flash
+
+# =============================================================================
+# PERFORMANCE OPTIMIZATION
+# =============================================================================
+
+optimization:
+  enable_caching: true
+  cache_dir: ~/.cache/effgen/models
+  enable_batching: true
+  max_batch_size: 8
+  batch_timeout_ms: 100
+  warmup_on_start: false
+  auto_unload: true
+  idle_timeout_minutes: 30
+
+# =============================================================================
+# COST MANAGEMENT
+# =============================================================================
+
+cost_management:
+  enabled: true
+  # Per-model pricing is sourced from the live model registry (input/output per
+  # 1M tokens); see `effgen models info <id>` / `effgen cost`. Configure budgets
+  # and alert thresholds here.
+  daily_budget_usd: 100.0
+  monthly_budget_usd: 1000.0
+  alert_at_percent: 80
+  auto_fallback_on_budget: true
+
+# =============================================================================
+# ADVANCED CONFIGURATION
+# =============================================================================
+
+advanced:
+  load_balancing:
+    enabled: false
+    strategy: round_robin
+  monitoring:
+    enabled: true
+    track_latency: true
+    track_tokens: true
+    track_errors: true
+  auto_model_selection:
+    enabled: false
+    optimization_goal: balanced

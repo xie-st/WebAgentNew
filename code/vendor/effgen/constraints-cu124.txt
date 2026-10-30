@@ -1,0 +1,23 @@
+# Torch constraint for CUDA 12.1–12.7 drivers (e.g. nvidia-smi "CUDA Version: 12.4").
+#
+# WHY: a plain `pip install -e ".[all]"` (or any extra that pulls a torch-pinning
+# dep such as vLLM) lets the resolver move torch to the newest PyPI wheel, which
+# is built for a NEWER CUDA runtime than a 12.x driver supports — it then reports
+# torch.cuda.is_available() == False and silently runs on the CPU. Apply this
+# constraints file so an extras install can never replace a driver-compatible
+# torch:
+#
+#     pip install "torch>=2.0,<3" --index-url https://download.pytorch.org/whl/cu124
+#     pip install -e ".[local]" -c constraints-cu124.txt
+#
+# The --extra-index-url below lets pip find the +cu124 wheels even on a fresh env.
+# For the everything-extra [all] (which pins vLLM), use the matching vLLM/torch
+# pair from docs/installation.md instead — see "Installing vLLM".
+#
+# Regenerate/verify with: bash scripts/check_install_constraints.sh
+
+--extra-index-url https://download.pytorch.org/whl/cu124
+
+torch==2.6.0+cu124
+torchvision==0.21.0+cu124
+torchaudio==2.6.0+cu124

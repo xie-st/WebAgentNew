@@ -1,0 +1,443 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_order_independence:
+        description: "Run the order-independence lane on this run"
+        type: boolean
+        default: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install lint dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Ruff lint (zero-error policy)
+        run: ruff check effgen/
+
+  types:
+    name: Static checks (public-surface types + ratchet)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # The ratchet compares against a recorded error set, so it needs the exact
+      # mypy that recorded it. requirements-dev.txt carries that pin.
+      - name: Install type-check dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install "$(grep -E '^mypy==' requirements-dev.txt)"
+
+      # effGen ships py.typed; this lane type-checks the public surface so the
+      # annotations users see stay accurate. It is advisory (allowed to warn) —
+      # the hard gate that public stubs resolve lives in the unit tests.
+      - name: mypy (public API surface)
+        run: bash scripts/check_public_types.sh
+
+      # Gating. The recorded mypy result may improve, never regress: a new error
+      # identity, a recorded one occurring more often, or a higher total fails
+      # the build, so annotations that disagree with the code cannot accumulate.
+      # (Unannotated public signatures are a separate gate — the unit test
+      # tests/unit/test_public_signature_hints.py, at zero tolerance.)
+      # Re-record with `python scripts/mypy_ratchet.py --update`.
+      - name: mypy ratchet (recorded result may only improve)
+        run: python scripts/mypy_ratchet.py
+
+  test-unit:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Verify critical imports
+        run: |
+          python -c "
+          import effgen; print(f'effgen {effgen.__version__}')
+          from effgen.guardrails import GuardrailChain
+          from effgen.rag import DocumentIngester
+          from effgen.eval import AgentEvaluator
+          from effgen.domains import TechDomain
+          from effgen.cache import PromptCache
+          from effgen.client import EffGenClient
+          print('All imports OK')
+          "
+
+      - name: Run unit + benchmark tests
+        # Coverage is opt-in (default config has no --cov, so collect-only and
+        # parallel runs don't corrupt the data file); this job enables it
+        # explicitly. Deselect the lanes that belong to dedicated jobs below.
+        run: |
+          pytest tests/unit/ tests/benchmarks/ -v \
+            --cov=effgen --cov-report=xml --cov-report=term-missing \
+            -m "not gpu and not api and not live and not docker and not expensive" \
+            --tb=short --no-header
+
+      - name: Upload coverage
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit
+          path: coverage.xml
+
+  install-paths:
+    name: Install (${{ matrix.method }}, Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    # A release is only installable if every documented route to it works. This
+    # lane exists because a regression in the installer — an interactive prompt
+    # that no CI run can answer — reached a release candidate unnoticed: nothing
+    # here had ever installed effGen the way a user does.
+    strategy:
+      fail-fast: false
+      matrix:
+        # One interpreter, four routes. Interpreter coverage is test-unit's job;
+        # what differs between these lanes is how the package is built and
+        # installed, which does not vary by Python version.
+        python-version: ["3.11"]
+        method: [editable, wheel, sdist, plain]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-install-${{ matrix.method }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-install-
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          case "${{ matrix.method }}" in
+            editable) pip install -e . ;;
+            plain)    pip install . ;;
+            wheel)    pip install build && python -m build --wheel . && pip install dist/*.whl ;;
+            sdist)    pip install build && python -m build --sdist  . && pip install dist/*.tar.gz ;;
+          esac
+
+      - name: The package imports and its public surface is whole
+        # Run from a directory that is not the checkout, so an import can only
+        # succeed through what was installed rather than through the source tree.
+        working-directory: ${{ runner.temp }}
+        run: |
+          python -c "import effgen; print(effgen.__version__)"
+          python -c "
+          import effgen
+          broken = [n for n in effgen.__all__ if not hasattr(effgen, n)]
+          assert not broken, broken
+          print(len(effgen.__all__), 'public names, none broken')
+          "
+
+      - name: The CLI runs
+        working-directory: ${{ runner.temp }}
+        run: |
+          effgen --version
+          effgen --help > /dev/null
+          effgen doctor --json > /dev/null
+
+  installer-script:
+    name: ./install.sh runs unattended
+    runs-on: ubuntu-latest
+    # The installer must never wait for an answer nobody is there to give: a
+    # read on a closed stdin returns at once and, under `set -e`, ends the run
+    # as "Installation failed" — which is what a user sees in a pipeline, or on
+    # a second run against an environment that already exists.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Every prompt is guarded by a terminal check
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          # --noconftest and -c /dev/null: this gate reads shell scripts and
+          # needs neither the package nor the project's pytest plugins, so it
+          # runs before anything is installed. Loading either would fail here
+          # for reasons that have nothing to do with the installer.
+          python -m pytest -q --noconftest -c /dev/null -p no:cacheprovider \
+            tests/packaging/test_installer_is_unattended.py
+
+      - name: Run it with stdin closed, twice
+        # The second run is the regression: the first builds the environment,
+        # the second meets the branch that used to prompt about it. --minimal
+        # --skip-conda keeps this to the prompt behaviour under test rather
+        # than to how long a torch download takes; the heavier routes (--full,
+        # vLLM, conda) are covered by the release preflight matrix, which is
+        # not something every push should wait on.
+        run: |
+          bash install.sh --minimal --skip-conda < /dev/null
+          bash install.sh --minimal --skip-conda < /dev/null
+
+      - name: The clone is left clean
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "The installer left files behind in the clone:"
+            git status --porcelain
+            exit 1
+          fi
+          echo "git status is clean after installing"
+
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run integration tests (no GPU, no API)
+        run: |
+          pytest tests/integration/ -v -m "not gpu and not api and not live and not docker" \
+            --ignore=tests/e2e \
+            --tb=short --no-header
+
+  order-independence-schedule:
+    # Whether the lane below runs on this CI run. "Every fifth run" is a
+    # remainder, and the workflow expression language has no arithmetic
+    # operators, so the decision is made here in a job that takes a few seconds
+    # and runs on every event.
+    name: Order-independence (due this run?)
+    runs-on: ubuntu-latest
+    outputs:
+      due: ${{ steps.decide.outputs.due }}
+    steps:
+      - id: decide
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_ASKED: >-
+            ${{ github.event_name == 'workflow_dispatch'
+                && inputs.run_order_independence }}
+          PR_LABELLED: >-
+            ${{ github.event_name == 'pull_request'
+                && contains(github.event.pull_request.labels.*.name, 'order-independence') }}
+          RUN_NUMBER: ${{ github.run_number }}
+          EVERY_NTH_RUN: "5"
+        run: |
+          due=false
+          if [ "${DISPATCH_ASKED}" = "true" ] || [ "${PR_LABELLED}" = "true" ]; then
+            due=true
+          elif [ "${EVENT_NAME}" = "push" ] \
+               && [ "$(( RUN_NUMBER % EVERY_NTH_RUN ))" -eq 0 ]; then
+            due=true
+          fi
+          echo "due=${due}" >> "$GITHUB_OUTPUT"
+          echo "event=${EVENT_NAME} run=${RUN_NUMBER} -> order-independence due: ${due}"
+
+  test-order-independence:
+    # The per-directory jobs above each run in their own process, which cannot
+    # catch cross-directory test pollution (a test that only fails depending on
+    # what ran before it — e.g. a teardown that empties a global registry, or an
+    # import that mutates sys.path). This job runs the WHOLE offline suite in a
+    # single process once per collection order — fixed, reversed, a shuffle at
+    # each of four pinned seeds, and one fresh shuffle — so such isolation
+    # regressions fail CI instead of flaking a future release run.
+    #
+    # Seven passes over the whole tree take about three hours, which is too long
+    # to sit in front of every push. It runs instead on:
+    #   * every fifth push, counted by `github.run_number`, which increments
+    #     once per run of this workflow across the repository — often enough
+    #     that a pollution regression is caught within a day's work;
+    #   * any manual run of this workflow, so it can be demanded before a
+    #     release or after a change to test setup or teardown;
+    #   * a pull request labelled `order-independence`, for a change that
+    #     touches shared fixtures or global state.
+    # The cheaper lanes above still run on every push, and every failure this
+    # lane reports is reproducible locally from the seed it prints:
+    #   python scripts/run_order_matrix.py --outdir order-matrix
+    name: Order-independence (single-process offline suite)
+    runs-on: ubuntu-latest
+    needs: order-independence-schedule
+    if: needs.order-independence-schedule.outputs.due == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        # This lane runs the WHOLE tests/ tree in one process, so it needs the
+        # optional-feature deps those suites exercise (docs/image/audio/maps/rss/
+        # youtube/sql/jupyter/lambda/extra-provider SDKs/server metrics). They are
+        # CPU-friendly, pure-Python extras — the GPU-only stacks (vllm/local) and
+        # heavy vector DBs stay out. Tests whose backend needs a *system* library
+        # (zbar, tesseract, ffmpeg) skip cleanly via importorskip when it's absent.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,jupyter,api,lambda,translate,audio,prompts-data,youtube,tools-docs,rss,geo,server,tools,qr]"
+
+      - name: Full offline suite, single process (fixed, reversed, four pinned shuffles)
+        # No provider keys are set in CI, so the key-gated live tests skip. The
+        # driver runs each order in its own process, writes a per-lane timing
+        # report for each, and exits non-zero when a run had a failure that is
+        # not in tests/flake_register.toml. The pinned seeds keep a failing order
+        # reproducible from the seed alone; the reversed pass is the
+        # deterministic counterpart, where every module runs before the modules
+        # it normally follows (tests/e2e still runs last, since its CUDA state is
+        # not safe to run before the streaming tests).
+        run: |
+          python scripts/run_order_matrix.py --outdir order-matrix
+
+      - name: Full offline suite, single process (fresh shuffle)
+        # A new order every run: good at finding coupling the pinned seeds miss.
+        # A failure here is a new order each time, so the seed printed in the
+        # header is what reproduces it.
+        run: |
+          pytest tests \
+            -m "not gpu and not api and not live and not docker and not expensive" \
+            -o "addopts=" -p randomly --tb=short -q
+
+      - name: Upload the order matrix and per-lane timing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: order-matrix
+          path: order-matrix/
+          retention-days: 14
+
+  test-ambient-independence:
+    # A test that reads the developer's home directory, an environment variable
+    # nobody in the suite set, or a host on the network passes on the machine
+    # that has those things and fails on the machine that does not. This job runs
+    # the whole offline suite with all three removed, so that failure lands here
+    # rather than on whoever runs the suite next.
+    name: Ambient-environment independence (scrubbed offline suite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,jupyter,api,lambda,translate,audio,prompts-data,youtube,tools-docs,rss,geo,server,tools,qr]"
+
+      - name: Full offline suite with the ambient environment removed
+        env:
+          EFFGEN_TEST_HERMETIC: "1"
+          EFFGEN_LANE_TIMING: hermetic-lanes.json
+          EFFGEN_LANE_TIMING_TABLE: "1"
+        run: |
+          pytest tests \
+            -m "not gpu and not api and not live and not docker and not expensive" \
+            --tb=short --no-header -q
+
+      - name: Upload the per-lane timing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hermetic-lane-timing
+          path: hermetic-lanes.json
+          retention-days: 14
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+          pip install -e ".[dev]"
+
+      - name: Run bandit security linter
+        run: bandit -r effgen/ -c pyproject.toml --exit-zero -f json -o bandit-report.json
+
+      - name: Run security test suite (-m security)
+        # The `security` marker is applied by directory (tests/security/) in
+        # tests/conftest.py. Docker/gitleaks-gated cases skip with clear reasons
+        # on this runner; the full CI image runs them as required checks.
+        run: |
+          pytest -m "security and not docker and not live" \
+            --tb=short --no-header
+
+      - name: Check dependency vulnerabilities
+        run: pip install -r requirements.txt && safety check --output json || true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: bandit-report.json

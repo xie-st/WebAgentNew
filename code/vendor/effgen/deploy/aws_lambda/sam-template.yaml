@@ -1,0 +1,188 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  effGen — serverless deployment via AWS Lambda + API Gateway HTTP API.
+  The FastAPI application is wrapped with the Mangum ASGI adapter so the
+  same app codebase runs unchanged on Lambda.
+
+# ---------------------------------------------------------------------------
+# Parameters — override at deploy time:
+#   sam deploy --parameter-overrides Environment=prod ApiKeySecretArn=arn:...
+# ---------------------------------------------------------------------------
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, staging, prod]
+    Description: Deployment environment (controls auth enforcement).
+
+  EffgenTimeoutSeconds:
+    Type: Number
+    Default: 29
+    MinValue: 1
+    MaxValue: 29
+    Description: >
+      Per-invocation timeout budget (seconds).  Must be < Lambda timeout (30s).
+
+  ApiKeySecretArn:
+    Type: String
+    Default: ""
+    Description: >
+      ARN of the AWS SecretsManager secret containing provider API keys as a
+      JSON object, e.g. {"CEREBRAS_API_KEY": "...", "GROQ_API_KEY": "..."}.
+      Leave empty to inject keys via plain environment variables instead.
+
+  OidcIssuer:
+    Type: String
+    Default: ""
+    Description: >
+      OIDC issuer URL for JWT validation (e.g. https://your-tenant.auth0.com/).
+      Required in prod; leave empty in dev (EFFGEN_DEV_MODE=1 is set automatically).
+
+  OidcClientId:
+    Type: String
+    Default: ""
+    Description: JWT audience claim (client_id from the OIDC provider).
+
+  OidcJwksUri:
+    Type: String
+    Default: ""
+    Description: >
+      JWKS endpoint URL.  Leave empty for auto-discovery from the issuer's
+      /.well-known/openid-configuration.
+
+# ---------------------------------------------------------------------------
+# Conditions
+# ---------------------------------------------------------------------------
+Conditions:
+  IsDevMode: !Equals [!Ref Environment, dev]
+  HasApiKeySecret: !Not [!Equals [!Ref ApiKeySecretArn, ""]]
+
+# ---------------------------------------------------------------------------
+# Globals — applied to all AWS::Serverless::Function resources
+# ---------------------------------------------------------------------------
+Globals:
+  Function:
+    Runtime: python3.13
+    MemorySize: 1024
+    Timeout: 30          # Lambda hard limit — EFFGEN_TIMEOUT_SECONDS must be < this
+    Environment:
+      Variables:
+        # Runtime knobs
+        EFFGEN_TIMEOUT_SECONDS: !Ref EffgenTimeoutSeconds
+        # Auth — dev mode auto-set when Environment=dev
+        EFFGEN_DEV_MODE: !If [IsDevMode, "1", "0"]
+        EFFGEN_OIDC_ISSUER: !Ref OidcIssuer
+        EFFGEN_OIDC_CLIENT_ID: !Ref OidcClientId
+        EFFGEN_OIDC_JWKS_URI: !Ref OidcJwksUri
+        # Audit logs go to ephemeral Lambda /tmp (streamed to CloudWatch Logs)
+        EFFGEN_AUDIT_DIR: /tmp/effgen-audit
+        # Disable Docker sandbox — Lambda containers can't run Docker-in-Docker.
+        # SubprocessSandbox is used automatically as the fallback.
+        EFFGEN_SANDBOX_BACKEND: subprocess
+    Tags:
+      Project: effgen
+      Environment: !Ref Environment
+
+# ---------------------------------------------------------------------------
+# Resources
+# ---------------------------------------------------------------------------
+Resources:
+
+  # ── API Gateway HTTP API ──────────────────────────────────────────────────
+  EffgenHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+      Description: "effGen API Gateway HTTP API"
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Authorization
+          - Content-Type
+          - X-Request-ID
+        MaxAge: 600
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 100
+        ThrottlingRateLimit: 50
+      Tags:
+        Project: effgen
+        Environment: !Ref Environment
+
+  # ── Lambda Function ───────────────────────────────────────────────────────
+  EffgenFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: "effGen FastAPI application (Mangum ASGI adapter)"
+      CodeUri: ../../          # path to the repo root (contains pyproject.toml + effgen/)
+      Handler: deploy.aws_lambda.handler.handler
+      Architectures:
+        - x86_64
+      ReservedConcurrentExecutions: 50   # guard against runaway invocations
+      Events:
+        CatchAll:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref EffgenHttpApi
+            Path: /{proxy+}
+            Method: ANY
+        RootPath:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref EffgenHttpApi
+            Path: /
+            Method: ANY
+      # Attach SecretsManager read policy only when a secret ARN is provided.
+      Policies:
+        - !If
+          - HasApiKeySecret
+          - Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref ApiKeySecretArn
+          - !Ref AWS::NoValue
+        # Allow writing audit logs to CloudWatch Logs (Lambda execution role
+        # already has AWSLambdaBasicExecutionRole for basic CW Logs access)
+        - CloudWatchLogsFullAccess
+
+  # ── Log group with explicit retention ────────────────────────────────────
+  EffgenFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${EffgenFunction}"
+      RetentionInDays: 30
+      Tags:
+        - Key: Project
+          Value: effgen
+        - Key: Environment
+          Value: !Ref Environment
+
+# ---------------------------------------------------------------------------
+# Outputs
+# ---------------------------------------------------------------------------
+Outputs:
+  EffgenApiEndpoint:
+    Description: "effGen API Gateway endpoint URL"
+    Value: !Sub "https://${EffgenHttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiEndpoint"
+
+  EffgenFunctionArn:
+    Description: "effGen Lambda function ARN"
+    Value: !GetAtt EffgenFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-FunctionArn"
+
+  EffgenFunctionRole:
+    Description: "IAM role ARN for the effGen Lambda function"
+    Value: !GetAtt EffgenFunctionRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-FunctionRoleArn"

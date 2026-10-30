@@ -1,0 +1,9 @@
+Explain "recursion" to a 10-year-old.
+
+Requirements:
+  - Use plain words a 10-year-old already knows; define any new term in passing.
+  - Anchor the explanation in ONE concrete everyday analogy.
+  - Keep it to a short paragraph (3-5 sentences).
+  - End with a single sentence that checks understanding ("Does that make sense, or should I try a different example?").
+
+Write the explanation now:

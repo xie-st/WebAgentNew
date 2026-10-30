@@ -1,0 +1,795 @@
+/* Self-hosted type. The documentation renders in Inter and JetBrains Mono, as it
+   always has; these are the same two faces, served from this repository instead
+   of fonts.googleapis.com, which the stylesheet used to reach out to on every
+   page view. Nothing about how the page looks changes — only where the bytes
+   come from. Latin variable subsets from the upstream projects, SIL Open Font
+   License 1.1; see assets/fonts/LICENSE.md. Vite emits and fingerprints each
+   file, so these URLs stay correct under a base path.
+
+   The landing site deliberately has no @font-face of its own: its stylesheet
+   asks for Inter but has never loaded it in a form its own CSS could match, so
+   it renders in the system sans stack. That is how it looks today and it is
+   left alone. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../../assets/fonts/inter-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../../assets/fonts/inter-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('../../../assets/fonts/jetbrains-mono-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('../../../assets/fonts/jetbrains-mono-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* @property for animated gradient border angle */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+:root {
+  /* Dark theme (default) — Green cyberpunk */
+  --bg-primary: #0a0f0d;
+  --bg-secondary: #0f1512;
+  --bg-tertiary: #151c18;
+  --bg-elevated: #1a221e;
+  --bg-card: #121a16;
+  --bg-code: #0c1210;
+
+  --text-primary: #e6efe9;
+  --text-secondary: #8fa89a;
+  --text-tertiary: #6c8b7a;
+  --text-muted: #688a75;
+
+  --border-color: #1e2e26;
+  --border-hover: #2d4437;
+
+  --accent-primary: #00ff88;
+  --accent-secondary: #00c96e;
+  --accent-tertiary: #00e5ff;
+  --accent-violet: #a78bfa;
+  --accent-gold: #ffd700;
+  --accent-gradient: linear-gradient(135deg, #00ff88 0%, #00c96e 50%, #00e5ff 100%);
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Enhanced glow variables */
+  --glow-primary: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
+  --glow-secondary: 0 0 15px rgba(0, 201, 110, 0.2);
+  --glow-tertiary: 0 0 15px rgba(0, 229, 255, 0.2);
+  --glow-subtle: 0 0 8px rgba(0, 255, 136, 0.08);
+
+  /* Enhanced shadow system */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 8px 25px rgba(0, 255, 136, 0.15), 0 4px 10px rgba(0, 0, 0, 0.3);
+  --shadow-glow-lg: 0 12px 40px rgba(0, 255, 136, 0.2), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-depth: 0 2px 4px rgba(0,0,0,0.3), 0 8px 16px rgba(0,0,0,0.2), 0 16px 32px rgba(0,0,0,0.1);
+
+  --sidebar-width: 280px;
+  --header-height: 64px;
+  --content-max-width: 900px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+  --transition-spring: 400ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f8f8;
+  --bg-tertiary: #f0f1f1;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-code: #f4f5f5;
+
+  --text-primary: #1a1a1a;
+  --text-secondary: #555555;
+  --text-tertiary: #6e6e6e;
+  --text-muted: #6e6e6e;
+
+  --border-color: #e2e2e2;
+  --border-hover: #cccccc;
+
+  --accent-primary: #007f45;
+  --accent-secondary: #006638;
+  --accent-tertiary: #007796;
+  /* Gold reads on the dark ground and not at all on the light one:
+     #ffd700 on white measures 1.24:1. Same hue, dark enough to read. */
+  --accent-gold: #816d00;
+
+  --glow-primary: 0 0 10px rgba(0, 137, 74, 0.1);
+  --glow-secondary: 0 0 8px rgba(0, 102, 56, 0.08);
+  --glow-tertiary: 0 0 8px rgba(0, 122, 153, 0.08);
+  --glow-subtle: none;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-glow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-depth: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   ENHANCED SCROLLBAR STYLING
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #060a08;
+  border-left: 1px solid rgba(0, 255, 136, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00ff88 0%, #00c96e 100%);
+  border-radius: 4px;
+  box-shadow: 0 0 6px rgba(0, 255, 136, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #33ffaa 0%, #00ff88 100%);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: #060a08;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-left: 1px solid rgba(0,0,0,0.03);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #999999;
+  box-shadow: none;
+}
+
+/* ============================================
+   ENHANCED SELECTION
+   ============================================ */
+::selection {
+  background: rgba(0, 255, 136, 0.3);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(0, 137, 74, 0.2);
+  color: #000;
+  text-shadow: none;
+}
+
+/* ============================================
+   LINKS — Enhanced with animated underline
+   ============================================ */
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  position: relative;
+}
+
+a:hover {
+  color: var(--accent-secondary);
+}
+
+/* ============================================
+   CODE — Enhanced inline code
+   ============================================ */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+  /* A dotted path or a long symbol has no space to break at, so on a narrow
+     screen it would run off the side of the page. This lets it break when, and
+     only when, it does not fit. */
+  overflow-wrap: break-word;
+  background: var(--bg-tertiary);
+  padding: 0.2em 0.45em;
+  border-radius: var(--radius-sm);
+  color: var(--accent-primary);
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  transition: all 0.2s ease;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.08);
+}
+
+code:hover {
+  border-color: rgba(0, 255, 136, 0.2);
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.06);
+}
+
+[data-theme="light"] code {
+  text-shadow: none;
+}
+
+[data-theme="light"] code:hover {
+  box-shadow: none;
+}
+
+pre {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  background: var(--bg-code);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  border: none;
+  text-shadow: none;
+}
+
+pre code:hover {
+  box-shadow: none;
+}
+
+/* ============================================
+   HEADINGS — Enhanced typography
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.02em; }
+h2 { font-size: 2rem; font-weight: 800; letter-spacing: -0.015em; }
+h3 { font-size: 1.5rem; font-weight: 700; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Gradient Text */
+.gradient-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-muted {
+  color: var(--text-secondary);
+}
+
+/* Neon Text Glow */
+.neon-text {
+  text-shadow:
+    0 0 10px rgba(0, 255, 136, 0.5),
+    0 0 20px rgba(0, 255, 136, 0.3),
+    0 0 40px rgba(0, 255, 136, 0.1);
+}
+
+[data-theme="light"] .neon-text {
+  text-shadow: none;
+}
+
+/* Glass Effect — Enhanced with layered blur */
+.glass-effect {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(10, 15, 13, 0.75);
+  border: 1px solid rgba(0, 255, 136, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+[data-theme="light"] .glass-effect {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Text Shimmer */
+.text-shimmer {
+  background: linear-gradient(90deg, #00ff88, #00e5ff, #a78bfa, #00ff88);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+[data-theme="light"] .text-shimmer {
+  background: linear-gradient(90deg, #00894a, #007a99, #6d28d9, #00894a);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+/* Animated Gradient Border */
+.animated-gradient-border {
+  position: relative;
+  border: none !important;
+}
+
+.animated-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--angle, 0deg), #00ff88, #00c96e, #00e5ff, #a78bfa, #00ff88);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-flow 4s linear infinite;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Card hover lift — universal utility */
+.hover-lift {
+  transition: transform var(--transition-spring), box-shadow var(--transition-spring);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Noise Overlay */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+[data-theme="light"] .noise-overlay::after {
+  opacity: 0.02;
+}
+
+/* ============================================
+   ANIMATIONS / KEYFRAMES
+   ============================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(-10px); }
+  50% { transform: translateY(0px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(0, 255, 136, 0.1), 0 0 10px rgba(0, 255, 136, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), 0 0 30px rgba(0, 255, 136, 0.15);
+  }
+}
+
+@keyframes glow-pulse-subtle {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(0, 255, 136, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(0, 255, 136, 0.15);
+  }
+}
+
+@keyframes border-flow {
+  from { --angle: 0deg; }
+  to { --angle: 360deg; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes scan-line-horizontal {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes radiate {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+}
+
+@keyframes gradient-mesh {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typing-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes rotate-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes scale-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes text-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Animation utility classes */
+.animate-fadeIn {
+  animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.animate-fadeSlideUp {
+  animation: fadeSlideUp 0.6s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp var(--transition-normal) ease-out;
+}
+
+.animate-slideIn {
+  animation: slideIn var(--transition-normal) ease-out;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-text-reveal {
+  animation: text-reveal 0.8s ease-out both;
+}
+
+/* Stagger animation delays */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+
+/* ============================================
+   ENHANCED FOCUS STATES
+   ============================================ */
+/* Every element that can take focus, not only the three that used to be listed
+   here — a select, a textarea, a details summary and anything given a tabindex
+   are all reachable by keyboard and all need the ring. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.15), 0 0 12px rgba(0, 255, 136, 0.08);
+}
+
+[data-theme="light"] button:focus-visible,
+[data-theme="light"] a:focus-visible,
+[data-theme="light"] input:focus-visible,
+[data-theme="light"] select:focus-visible,
+[data-theme="light"] textarea:focus-visible,
+[data-theme="light"] summary:focus-visible,
+[data-theme="light"] [tabindex]:focus-visible {
+  box-shadow: 0 0 0 4px rgba(0, 137, 74, 0.1);
+}
+
+/* Smooth transitions everywhere */
+button, a, input, select, textarea {
+  transition: all 0.3s ease;
+}
+
+/* Page transition wrapper */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 100%;
+    --header-height: 56px;
+  }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.25rem; }
+}
+
+/* ====== VISUALLY HIDDEN ====== */
+/* Text a screen reader announces and a pointer never sees — a live count of
+   search results, the note that a link opens on another site. It stays in the
+   accessibility tree, which is the difference between this and `display: none`. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ====== SKIP LINK ====== */
+/* The first focusable element on the page. It stays out of the layout until it
+   is focused, so a keyboard visitor can jump the sidebar and the header and a
+   pointer visitor never sees it. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 200;
+  padding: 0.625rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--accent-primary);
+  background: var(--bg-primary);
+  color: var(--accent-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ====== REDUCED MOTION ====== */
+/* `data-motion` on <html> overrides the media query in both directions, which
+   is how the reduced state is reached in a test or a review without changing an
+   OS setting. Everything that moves on this site today moves through CSS, so
+   these rules carry it; `src/hooks/useReducedMotion.ts` reads the same two
+   signals for JavaScript, for any later page that drives motion from a script
+   rather than a stylesheet. */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) *,
+  html:not([data-motion="full"]) *::before,
+  html:not([data-motion="full"]) *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+  html:not([data-motion="full"]) {
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 1ms !important;
+  transition-delay: 0ms !important;
+}
+html[data-motion="reduced"] {
+  scroll-behavior: auto !important;
+}

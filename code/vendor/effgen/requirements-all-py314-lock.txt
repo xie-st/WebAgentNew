@@ -1,0 +1,1560 @@
+# Locked dependency set for `effgen[all]` on Python 3.14.
+#
+# Plain `pip install effgen[all]` cannot resolve on 3.14. The `vllm` range is
+# wide (>=0.2.7,<1.0), and when pip backtracks over an unrelated conflict it
+# walks that range backwards until it reaches a release pinned to numba==0.61,
+# which predates 3.14 and whose source build refuses to run there. Constraining
+# vllm upward instead ends in `resolution-too-deep`. Pinning the whole set is
+# what makes the install deterministic:
+#
+#     pip install -r requirements-all-py314-lock.txt
+#     pip install --no-deps effgen
+#
+# `requirements-all-lock.txt` is the equivalent for 3.11-3.13 and is NOT usable
+# here: it pins torch==2.2.1 and vllm==0.4.1, neither of which has a 3.14 wheel.
+#
+# Regenerate with:
+#     uv pip compile --extra all --python-version 3.14 \
+#         --output-file requirements-all-py314-lock.txt pyproject.toml
+absl-py==2.5.0
+    # via
+    #   rouge-score
+    #   tensorboard
+accelerate==1.14.0
+    # via effgen (pyproject.toml)
+aiohappyeyeballs==2.7.1
+    # via aiohttp
+aiohttp==3.14.3
+    # via
+    #   effgen (pyproject.toml)
+    #   fsspec
+    #   kubernetes
+    #   vllm
+aiosignal==1.4.0
+    # via aiohttp
+annotated-doc==0.0.5
+    # via
+    #   fastapi
+    #   typer
+annotated-types==0.8.0
+    # via pydantic
+anthropic==0.122.0
+    # via
+    #   effgen (pyproject.toml)
+    #   vllm
+anyio==4.14.2
+    # via
+    #   anthropic
+    #   cerebras-cloud-sdk
+    #   google-genai
+    #   groq
+    #   httpx
+    #   httpx-ws
+    #   httpx2
+    #   mcp
+    #   openai
+    #   sse-starlette
+    #   starlette
+    #   together
+    #   watchfiles
+apache-tvm-ffi==0.1.9
+    # via
+    #   flashinfer-python
+    #   quack-kernels
+    #   tilelang
+    #   vllm
+    #   xgrammar
+argostranslate==1.11.0
+    # via effgen (pyproject.toml)
+arrow==1.4.0
+    # via isoduration
+astor==0.8.1
+    # via depyf
+asttokens==3.0.2
+    # via stack-data
+asyncio-throttle==1.0.2
+    # via effgen (pyproject.toml)
+asyncstdlib-fw==3.13.2
+    # via fireworks-ai
+attrs==26.1.0
+    # via
+    #   aiohttp
+    #   cyclopts
+    #   jsonschema
+    #   referencing
+av==18.1.0
+    # via faster-whisper
+azure-core==1.41.0
+    # via
+    #   azure-identity
+    #   azure-keyvault-secrets
+azure-identity==1.25.3
+    # via effgen (pyproject.toml)
+azure-keyvault-secrets==4.11.1
+    # via effgen (pyproject.toml)
+bcrypt==5.0.0
+    # via chromadb
+beautifulsoup4==4.15.0
+    # via yfinance
+betterproto-fw==2.0.3
+    # via fireworks-ai
+bitsandbytes==0.50.1
+    # via effgen (pyproject.toml)
+blake3==1.0.9
+    # via vllm
+blis==1.3.3
+    # via thinc
+boolean-py==5.0
+    # via license-expression
+boto3==1.43.71
+    # via effgen (pyproject.toml)
+botocore==1.43.71
+    # via
+    #   boto3
+    #   s3transfer
+brotli==1.2.0
+    # via httpx
+build==1.5.0
+    # via chromadb
+cachecontrol==0.14.4
+    # via pip-audit
+cachetools==7.1.7
+    # via
+    #   effgen (pyproject.toml)
+    #   vllm
+catalogue==2.0.10
+    # via
+    #   spacy
+    #   srsly
+    #   thinc
+cbor2==6.1.4
+    # via vllm
+cerebras-cloud-sdk==1.91.0
+    # via effgen (pyproject.toml)
+certifi==2026.7.22
+    # via
+    #   curl-cffi
+    #   httpcore
+    #   httpx
+    #   kubernetes
+    #   requests
+    #   sentry-sdk
+cffi==2.1.1
+    # via
+    #   cryptography
+    #   curl-cffi
+chardet==5.2.0
+    # via cyclonedx-bom
+charset-normalizer==3.5.0
+    # via
+    #   pdfminer-six
+    #   reportlab
+    #   requests
+chromadb==1.5.9
+    # via effgen (pyproject.toml)
+click==8.4.2
+    # via
+    #   effgen (pyproject.toml)
+    #   ddgs
+    #   duckduckgo-search
+    #   flashinfer-python
+    #   huggingface-hub
+    #   nltk
+    #   rich-toolkit
+    #   sacremoses
+    #   uvicorn
+    #   wandb
+cloudpathlib==0.24.0
+    # via weasel
+cloudpickle==3.1.2
+    # via
+    #   tilelang
+    #   vllm
+colorama==0.4.6
+    # via effgen (pyproject.toml)
+comm==0.2.3
+    # via ipykernel
+compressed-tensors==0.15.0.1
+    # via vllm
+confection==1.3.3
+    # via
+    #   spacy
+    #   thinc
+    #   weasel
+contourpy==1.3.3
+    # via matplotlib
+coverage==7.15.4
+    # via pytest-cov
+cryptography==50.0.0
+    # via
+    #   effgen (pyproject.toml)
+    #   azure-identity
+    #   google-auth
+    #   msal
+    #   pdfminer-six
+    #   pyjwt
+ctranslate2==4.8.1
+    # via
+    #   argostranslate
+    #   faster-whisper
+cuda-bindings==13.3.1
+    # via
+    #   cuda-python
+    #   torch
+cuda-core==1.0.1
+    # via cuda-python
+cuda-pathfinder==1.6.0
+    # via
+    #   cuda-bindings
+    #   cuda-core
+    #   cuda-python
+cuda-python==13.3.1
+    # via nvidia-cutlass-dsl-libs-base
+cuda-tile==1.5.0
+    # via flashinfer-python
+cuda-toolkit==13.0.2
+    # via torch
+curl-cffi==0.16.0
+    # via yfinance
+cycler==0.12.1
+    # via matplotlib
+cyclonedx-bom==7.3.1
+    # via effgen (pyproject.toml)
+cyclonedx-python-lib==11.12.0
+    # via
+    #   cyclonedx-bom
+    #   pip-audit
+cyclopts==4.22.5
+    # via together
+cymem==2.0.13
+    # via
+    #   preshed
+    #   spacy
+    #   thinc
+datasets==5.0.1
+    # via effgen (pyproject.toml)
+ddgs==9.14.4
+    # via effgen (pyproject.toml)
+debugpy==1.8.21
+    # via ipykernel
+defusedxml==0.7.1
+    # via
+    #   nltk
+    #   py-serializable
+    #   youtube-transcript-api
+depyf==0.20.0
+    # via vllm
+detect-agent==0.6.0
+    # via together
+detect-installer==0.1.0
+    # via fastapi-cloud-cli
+dill==0.4.1
+    # via
+    #   datasets
+    #   depyf
+    #   multiprocess
+diskcache==5.6.3
+    # via
+    #   llama-cpp-python
+    #   vllm
+distro==1.9.0
+    # via
+    #   anthropic
+    #   cerebras-cloud-sdk
+    #   google-genai
+    #   groq
+    #   openai
+    #   together
+dnspython==2.8.0
+    # via email-validator
+docker==7.2.0
+    # via effgen (pyproject.toml)
+docstring-parser==0.18.0
+    # via
+    #   anthropic
+    #   cyclopts
+duckduckgo-search==8.1.1
+    # via effgen (pyproject.toml)
+durationpy==0.10
+    # via kubernetes
+einops==0.8.2
+    # via
+    #   flashinfer-python
+    #   quack-kernels
+    #   vllm
+email-validator==2.3.0
+    # via
+    #   fastapi
+    #   pydantic
+emoji==2.15.0
+    # via stanza
+et-xmlfile==2.0.0
+    # via openpyxl
+executing==2.2.1
+    # via stack-data
+faiss-cpu==1.15.0
+    # via effgen (pyproject.toml)
+fake-useragent==2.2.0
+    # via ddgs
+fastapi==0.139.2
+    # via
+    #   effgen (pyproject.toml)
+    #   model-hosting-container-standards
+    #   vllm
+fastapi-cli==0.0.32
+    # via fastapi
+fastapi-cloud-cli==0.23.0
+    # via fastapi-cli
+fastar==0.11.0
+    # via
+    #   fastapi
+    #   fastapi-cloud-cli
+faster-whisper==1.2.1
+    # via effgen (pyproject.toml)
+fastjsonschema==2.22.1
+    # via nbformat
+fastsafetensors==0.3.3
+    # via vllm
+feedparser==6.0.14
+    # via effgen (pyproject.toml)
+feedparser-sgmllib==2.1.0
+    # via feedparser
+filelock==3.32.3
+    # via
+    #   cachecontrol
+    #   datasets
+    #   huggingface-hub
+    #   minisbd
+    #   together
+    #   torch
+    #   vllm
+fireworks-ai==0.17.4
+    # via effgen (pyproject.toml)
+flashinfer-cubin==0.6.8.post1
+    # via vllm
+flashinfer-python==0.6.8.post1
+    # via vllm
+flatbuffers==25.12.19
+    # via onnxruntime
+fonttools==4.63.0
+    # via matplotlib
+fqdn==1.5.1
+    # via jsonschema
+frozenlist==1.8.0
+    # via
+    #   aiohttp
+    #   aiosignal
+fsspec==2026.6.0
+    # via
+    #   datasets
+    #   huggingface-hub
+    #   torch
+gguf==0.19.0
+    # via vllm
+gitdb==4.0.12
+    # via gitpython
+gitpython==3.1.59
+    # via effgen (pyproject.toml)
+google-ai-generativelanguage==0.6.15
+    # via google-generativeai
+google-api-core==2.25.2
+    # via
+    #   effgen (pyproject.toml)
+    #   google-ai-generativelanguage
+    #   google-api-python-client
+    #   google-generativeai
+google-api-python-client==2.198.0
+    # via
+    #   effgen (pyproject.toml)
+    #   google-generativeai
+google-auth==2.56.3
+    # via
+    #   effgen (pyproject.toml)
+    #   google-ai-generativelanguage
+    #   google-api-core
+    #   google-api-python-client
+    #   google-auth-httplib2
+    #   google-genai
+    #   google-generativeai
+google-auth-httplib2==0.4.1
+    # via google-api-python-client
+google-genai==2.18.1
+    # via effgen (pyproject.toml)
+google-generativeai==0.8.6
+    # via effgen (pyproject.toml)
+google-search-results==2.4.2
+    # via effgen (pyproject.toml)
+googleapis-common-protos==1.75.0
+    # via
+    #   effgen (pyproject.toml)
+    #   google-api-core
+    #   grpcio-status
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+gputil==1.4.0
+    # via effgen (pyproject.toml)
+groq==1.6.0
+    # via effgen (pyproject.toml)
+grpcio==1.83.0
+    # via
+    #   chromadb
+    #   google-api-core
+    #   grpcio-status
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   qdrant-client
+    #   tensorboard
+grpcio-status==1.71.2
+    # via
+    #   effgen (pyproject.toml)
+    #   google-api-core
+grpclib==0.4.9
+    # via betterproto-fw
+h11==0.16.0
+    # via
+    #   httpcore
+    #   httpcore2
+    #   uvicorn
+    #   wsproto
+h2==4.4.1
+    # via
+    #   grpclib
+    #   httpx
+hf-xet==1.6.0
+    # via huggingface-hub
+hpack==4.2.0
+    # via h2
+httpcore==1.0.9
+    # via
+    #   httpx
+    #   httpx-ws
+httpcore2==2.10.0
+    # via httpx2
+httplib2==0.32.0
+    # via
+    #   effgen (pyproject.toml)
+    #   google-api-python-client
+    #   google-auth-httplib2
+httptools==0.8.0
+    # via uvicorn
+httpx==0.28.1
+    # via
+    #   effgen (pyproject.toml)
+    #   anthropic
+    #   cerebras-cloud-sdk
+    #   chromadb
+    #   datasets
+    #   ddgs
+    #   fastapi
+    #   fastapi-cloud-cli
+    #   fireworks-ai
+    #   google-genai
+    #   groq
+    #   httpx-ws
+    #   huggingface-hub
+    #   mcp
+    #   model-hosting-container-standards
+    #   qdrant-client
+    #   replicate
+    #   together
+    #   weasel
+httpx-sse==0.4.3
+    # via
+    #   fireworks-ai
+    #   mcp
+httpx-ws==0.9.0
+    # via fireworks-ai
+httpx2==2.10.0
+    # via openai
+huggingface-hub==1.27.0
+    # via
+    #   effgen (pyproject.toml)
+    #   accelerate
+    #   datasets
+    #   faster-whisper
+    #   sentence-transformers
+    #   tokenizers
+    #   transformers
+hvac==2.4.0
+    # via effgen (pyproject.toml)
+hyperframe==6.1.0
+    # via h2
+hypothesis==6.165.5
+    # via effgen (pyproject.toml)
+idna==3.18
+    # via
+    #   anyio
+    #   email-validator
+    #   httpx
+    #   httpx2
+    #   jsonschema
+    #   requests
+    #   yarl
+ijson==3.5.1
+    # via vllm
+importlib-resources==7.1.0
+    # via chromadb
+iniconfig==2.3.0
+    # via pytest
+interegular==0.3.3
+    # via lm-format-enforcer
+ipykernel==7.3.0
+    # via
+    #   effgen (pyproject.toml)
+    #   jupyter-console
+ipython==9.16.1
+    # via
+    #   effgen (pyproject.toml)
+    #   ipykernel
+    #   jupyter-console
+ipython-pygments-lexers==1.1.1
+    # via ipython
+isodate==0.7.2
+    # via azure-keyvault-secrets
+isoduration==20.11.0
+    # via jsonschema
+jedi==0.20.0
+    # via ipython
+jinja2==3.1.6
+    # via
+    #   effgen (pyproject.toml)
+    #   betterproto-fw
+    #   fastapi
+    #   llama-cpp-python
+    #   spacy
+    #   torch
+jiter==0.16.0
+    # via
+    #   anthropic
+    #   openai
+jmespath==1.1.0
+    # via
+    #   boto3
+    #   botocore
+    #   model-hosting-container-standards
+joblib==1.5.3
+    # via
+    #   nltk
+    #   sacremoses
+    #   scikit-learn
+json5==0.15.0
+    # via effgen (pyproject.toml)
+jsonpointer==3.1.1
+    # via jsonschema
+jsonschema==4.26.0
+    # via
+    #   effgen (pyproject.toml)
+    #   chromadb
+    #   cyclonedx-python-lib
+    #   mcp
+    #   mistral-common
+    #   nbformat
+jsonschema-specifications==2025.9.1
+    # via jsonschema
+jupyter-client==8.9.1
+    # via
+    #   effgen (pyproject.toml)
+    #   ipykernel
+    #   jupyter-console
+jupyter-console==6.6.3
+    # via effgen (pyproject.toml)
+jupyter-core==5.9.1
+    # via
+    #   ipykernel
+    #   jupyter-client
+    #   jupyter-console
+    #   nbformat
+kiwisolver==1.5.0
+    # via matplotlib
+kubernetes==36.0.3
+    # via chromadb
+langdetect==1.0.9
+    # via effgen (pyproject.toml)
+lark==1.2.2
+    # via
+    #   rfc3987-syntax
+    #   vllm
+license-expression==30.4.4
+    # via cyclonedx-python-lib
+llama-cpp-python==0.3.34
+    # via effgen (pyproject.toml)
+llguidance==1.3.0
+    # via vllm
+llvmlite==0.47.0
+    # via numba
+lm-format-enforcer==0.11.3
+    # via vllm
+loguru==0.7.3
+    # via
+    #   effgen (pyproject.toml)
+    #   compressed-tensors
+lxml==6.1.1
+    # via
+    #   cyclonedx-python-lib
+    #   ddgs
+    #   duckduckgo-search
+    #   python-docx
+    #   yfinance
+mangum==0.21.0
+    # via effgen (pyproject.toml)
+markdown==3.10.3
+    # via tensorboard
+markdown-it-py==4.2.0
+    # via rich
+markupsafe==3.0.3
+    # via
+    #   jinja2
+    #   werkzeug
+matplotlib==3.11.1
+    # via effgen (pyproject.toml)
+matplotlib-inline==0.2.2
+    # via
+    #   ipykernel
+    #   ipython
+mcp==1.29.0
+    # via
+    #   effgen (pyproject.toml)
+    #   vllm
+mdurl==0.1.2
+    # via markdown-it-py
+minisbd==0.9.5
+    # via argostranslate
+mistral-common==1.11.7
+    # via vllm
+ml-dtypes==0.6.0
+    # via tilelang
+mmh3==5.2.1
+    # via
+    #   chromadb
+    #   fireworks-ai
+model-hosting-container-standards==0.1.16
+    # via vllm
+mpmath==1.3.0
+    # via sympy
+msal==1.37.0
+    # via
+    #   azure-identity
+    #   msal-extensions
+msal-extensions==1.3.1
+    # via azure-identity
+msgpack==1.2.1
+    # via cachecontrol
+msgspec==0.21.1
+    # via vllm
+multidict==6.7.1
+    # via
+    #   aiohttp
+    #   grpclib
+    #   yarl
+multiprocess==0.70.19
+    # via datasets
+multitasking==0.0.13
+    # via yfinance
+murmurhash==1.0.15
+    # via
+    #   preshed
+    #   spacy
+    #   thinc
+narwhals==2.24.0
+    # via
+    #   plotly
+    #   scikit-learn
+nbformat==5.11.0
+    # via effgen (pyproject.toml)
+nest-asyncio==1.6.0
+    # via
+    #   effgen (pyproject.toml)
+    #   fireworks-ai
+nest-asyncio2==1.7.2
+    # via ipykernel
+networkx==3.6.1
+    # via
+    #   stanza
+    #   torch
+ninja==1.13.0
+    # via
+    #   flashinfer-python
+    #   vllm
+nltk==3.10.3
+    # via
+    #   effgen (pyproject.toml)
+    #   rouge-score
+numba==0.65.0
+    # via vllm
+numpy==2.4.6
+    # via
+    #   effgen (pyproject.toml)
+    #   accelerate
+    #   bitsandbytes
+    #   blis
+    #   chromadb
+    #   contourpy
+    #   ctranslate2
+    #   cuda-core
+    #   datasets
+    #   faiss-cpu
+    #   flashinfer-python
+    #   gguf
+    #   llama-cpp-python
+    #   matplotlib
+    #   minisbd
+    #   mistral-common
+    #   ml-dtypes
+    #   numba
+    #   nvidia-cutlass-dsl-libs-base
+    #   onnxruntime
+    #   opencv-python-headless
+    #   pandas
+    #   qdrant-client
+    #   rouge-score
+    #   scikit-learn
+    #   scipy
+    #   sentence-transformers
+    #   spacy
+    #   stanza
+    #   tensorboard
+    #   thinc
+    #   tilelang
+    #   torchvision
+    #   transformers
+    #   vllm
+    #   xgrammar
+    #   yfinance
+nvidia-cublas==13.1.0.3
+    # via
+    #   cuda-toolkit
+    #   nvidia-cudnn-cu13
+    #   nvidia-cusolver
+nvidia-cuda-cupti==13.0.85
+    # via cuda-toolkit
+nvidia-cuda-nvrtc==13.0.88
+    # via cuda-toolkit
+nvidia-cuda-runtime==13.0.96
+    # via cuda-toolkit
+nvidia-cudnn-cu13==9.19.0.56
+    # via torch
+nvidia-cudnn-frontend==1.18.0
+    # via
+    #   flashinfer-python
+    #   vllm
+nvidia-cufft==12.0.0.61
+    # via cuda-toolkit
+nvidia-cufile==1.15.1.6
+    # via cuda-toolkit
+nvidia-curand==10.4.0.35
+    # via cuda-toolkit
+nvidia-cusolver==12.0.4.66
+    # via cuda-toolkit
+nvidia-cusparse==12.6.3.3
+    # via
+    #   cuda-toolkit
+    #   nvidia-cusolver
+nvidia-cusparselt-cu13==0.8.0
+    # via torch
+nvidia-cutlass-dsl==4.5.3
+    # via
+    #   flashinfer-python
+    #   quack-kernels
+    #   vllm
+nvidia-cutlass-dsl-libs-base==4.5.3
+    # via nvidia-cutlass-dsl
+nvidia-ml-py==13.610.43
+    # via
+    #   effgen (pyproject.toml)
+    #   flashinfer-python
+nvidia-nccl-cu13==2.28.9
+    # via torch
+nvidia-nvjitlink==13.0.88
+    # via
+    #   cuda-toolkit
+    #   nvidia-cufft
+    #   nvidia-cusolver
+    #   nvidia-cusparse
+nvidia-nvshmem-cu13==3.4.5
+    # via torch
+nvidia-nvtx==13.0.85
+    # via cuda-toolkit
+oauthlib==3.3.1
+    # via requests-oauthlib
+onnxruntime==1.28.0
+    # via
+    #   chromadb
+    #   faster-whisper
+    #   minisbd
+openai==3.0.0
+    # via
+    #   effgen (pyproject.toml)
+    #   fireworks-ai
+    #   vllm
+openai-harmony==0.0.8
+    # via vllm
+opencv-python-headless==5.0.0.93
+    # via
+    #   effgen (pyproject.toml)
+    #   mistral-common
+    #   vllm
+openpyxl==3.1.5
+    # via effgen (pyproject.toml)
+opentelemetry-api==1.44.0
+    # via
+    #   chromadb
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+    #   vllm
+    #   wandb
+opentelemetry-exporter-otlp==1.44.0
+    # via vllm
+opentelemetry-exporter-otlp-proto-common==1.44.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-grpc==1.44.0
+    # via
+    #   chromadb
+    #   opentelemetry-exporter-otlp
+opentelemetry-exporter-otlp-proto-http==1.44.0
+    # via opentelemetry-exporter-otlp
+opentelemetry-proto==1.44.0
+    # via
+    #   opentelemetry-exporter-otlp-proto-common
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+opentelemetry-sdk==1.44.0
+    # via
+    #   chromadb
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-semantic-conventions-ai
+    #   vllm
+opentelemetry-semantic-conventions==0.65b0
+    # via
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions-ai
+opentelemetry-semantic-conventions-ai==0.5.1
+    # via vllm
+orjson==3.11.9
+    # via chromadb
+outlines-core==0.2.14
+    # via vllm
+overrides==7.7.0
+    # via chromadb
+packageurl-python==0.17.6
+    # via
+    #   cyclonedx-bom
+    #   cyclonedx-python-lib
+packaging==26.3
+    # via
+    #   accelerate
+    #   argostranslate
+    #   bitsandbytes
+    #   build
+    #   cyclonedx-bom
+    #   datasets
+    #   faiss-cpu
+    #   flashinfer-python
+    #   huggingface-hub
+    #   ipykernel
+    #   lm-format-enforcer
+    #   matplotlib
+    #   onnxruntime
+    #   pip-audit
+    #   pip-requirements-parser
+    #   plotly
+    #   pytesseract
+    #   pytest
+    #   replicate
+    #   spacy
+    #   tensorboard
+    #   thinc
+    #   transformers
+    #   wandb
+    #   weasel
+pandas==3.0.5
+    # via
+    #   effgen (pyproject.toml)
+    #   datasets
+    #   yfinance
+parso==0.8.7
+    # via jedi
+partial-json-parser==0.2.1.1.post7
+    # via vllm
+pdfminer-six==20260107
+    # via pdfplumber
+pdfplumber==0.11.10
+    # via effgen (pyproject.toml)
+peewee==4.3.0
+    # via yfinance
+pexpect==4.9.0
+    # via
+    #   effgen (pyproject.toml)
+    #   ipython
+pillow==12.3.0
+    # via
+    #   effgen (pyproject.toml)
+    #   fireworks-ai
+    #   matplotlib
+    #   mistral-common
+    #   pdfplumber
+    #   pytesseract
+    #   qrcode
+    #   reportlab
+    #   staticmap
+    #   tensorboard
+    #   torchvision
+    #   vllm
+pip==26.2.1
+    # via pip-api
+pip-api==0.0.34
+    # via pip-audit
+pip-audit==2.10.1
+    # via effgen (pyproject.toml)
+pip-requirements-parser==32.0.1
+    # via
+    #   cyclonedx-bom
+    #   pip-audit
+platformdirs==4.11.3
+    # via
+    #   jupyter-core
+    #   pip-audit
+    #   wandb
+    #   yfinance
+plotly==6.9.0
+    # via effgen (pyproject.toml)
+pluggy==1.6.0
+    # via
+    #   pytest
+    #   pytest-cov
+portalocker==3.2.0
+    # via qdrant-client
+preshed==3.0.13
+    # via
+    #   spacy
+    #   thinc
+primp==1.3.1
+    # via
+    #   ddgs
+    #   duckduckgo-search
+prometheus-client==0.26.0
+    # via
+    #   prometheus-fastapi-instrumentator
+    #   vllm
+prometheus-fastapi-instrumentator==8.1.0
+    # via vllm
+prompt-toolkit==3.0.53
+    # via
+    #   ipython
+    #   jupyter-console
+propcache==0.5.2
+    # via
+    #   aiohttp
+    #   yarl
+proto-plus==1.28.2
+    # via
+    #   effgen (pyproject.toml)
+    #   google-ai-generativelanguage
+    #   google-api-core
+protobuf==5.29.6
+    # via
+    #   effgen (pyproject.toml)
+    #   google-ai-generativelanguage
+    #   google-api-core
+    #   google-generativeai
+    #   googleapis-common-protos
+    #   grpcio-status
+    #   onnxruntime
+    #   opentelemetry-proto
+    #   proto-plus
+    #   qdrant-client
+    #   stanza
+    #   tensorboard
+    #   vllm
+    #   wandb
+    #   yfinance
+psutil==7.2.2
+    # via
+    #   effgen (pyproject.toml)
+    #   accelerate
+    #   ipykernel
+    #   ipython
+    #   tilelang
+    #   vllm
+ptyprocess==0.7.0
+    # via pexpect
+pure-eval==0.2.3
+    # via stack-data
+py-cpuinfo==9.0.0
+    # via vllm
+py-serializable==2.1.0
+    # via cyclonedx-python-lib
+pyarrow==25.0.1
+    # via datasets
+pyasn1==0.6.4
+    # via
+    #   effgen (pyproject.toml)
+    #   pyasn1-modules
+pyasn1-modules==0.4.2
+    # via google-auth
+pybase64==1.5.0
+    # via
+    #   chromadb
+    #   vllm
+pycountry==26.2.16
+    # via pydantic-extra-types
+pycparser==3.0
+    # via cffi
+pydantic==2.13.4
+    # via
+    #   effgen (pyproject.toml)
+    #   anthropic
+    #   cerebras-cloud-sdk
+    #   chromadb
+    #   compressed-tensors
+    #   fastapi
+    #   fastapi-cloud-cli
+    #   fireworks-ai
+    #   google-genai
+    #   google-generativeai
+    #   groq
+    #   lm-format-enforcer
+    #   mcp
+    #   mistral-common
+    #   model-hosting-container-standards
+    #   openai
+    #   openai-harmony
+    #   pydantic-extra-types
+    #   pydantic-settings
+    #   qdrant-client
+    #   replicate
+    #   spacy
+    #   thinc
+    #   together
+    #   vllm
+    #   wandb
+    #   weasel
+    #   xgrammar
+pydantic-core==2.46.4
+    # via pydantic
+pydantic-extra-types==2.11.1
+    # via
+    #   fastapi
+    #   mistral-common
+pydantic-settings==2.15.0
+    # via
+    #   chromadb
+    #   fastapi
+    #   mcp
+pydub==0.25.1
+    # via effgen (pyproject.toml)
+pygments==2.20.0
+    # via
+    #   ipython
+    #   ipython-pygments-lexers
+    #   jupyter-console
+    #   pytest
+    #   rich
+    #   rich-rst
+pyjwt==2.13.0
+    # via
+    #   mcp
+    #   msal
+pyparsing==3.3.2
+    # via
+    #   httplib2
+    #   matplotlib
+    #   pip-requirements-parser
+pypdf==6.16.0
+    # via effgen (pyproject.toml)
+pypdfium2==5.13.0
+    # via pdfplumber
+pypika==0.51.1
+    # via chromadb
+pyproject-hooks==1.2.0
+    # via build
+pytesseract==0.3.13
+    # via effgen (pyproject.toml)
+pytest==9.1.1
+    # via
+    #   effgen (pyproject.toml)
+    #   pytest-asyncio
+    #   pytest-cov
+    #   pytest-forked
+    #   pytest-timeout
+pytest-asyncio==1.4.0
+    # via effgen (pyproject.toml)
+pytest-cov==7.1.0
+    # via effgen (pyproject.toml)
+pytest-forked==1.7.5
+    # via effgen (pyproject.toml)
+pytest-timeout==2.4.0
+    # via effgen (pyproject.toml)
+python-dateutil==2.9.0.post0
+    # via
+    #   arrow
+    #   betterproto-fw
+    #   botocore
+    #   jupyter-client
+    #   kubernetes
+    #   matplotlib
+    #   pandas
+python-docx==1.2.0
+    # via effgen (pyproject.toml)
+python-dotenv==1.2.2
+    # via
+    #   effgen (pyproject.toml)
+    #   pydantic-settings
+    #   uvicorn
+python-json-logger==4.1.0
+    # via vllm
+python-multipart==0.0.32
+    # via
+    #   fastapi
+    #   mcp
+pytz==2026.3.post1
+    # via yfinance
+pyyaml==6.0.3
+    # via
+    #   effgen (pyproject.toml)
+    #   accelerate
+    #   chromadb
+    #   ctranslate2
+    #   datasets
+    #   gguf
+    #   huggingface-hub
+    #   kubernetes
+    #   lm-format-enforcer
+    #   transformers
+    #   uvicorn
+    #   vllm
+    #   wandb
+pyzbar==0.1.9
+    # via effgen (pyproject.toml)
+pyzmq==27.1.0
+    # via
+    #   ipykernel
+    #   jupyter-client
+    #   jupyter-console
+    #   vllm
+qdrant-client==1.19.0
+    # via effgen (pyproject.toml)
+qrcode==8.2
+    # via effgen (pyproject.toml)
+quack-kernels==0.5.0
+    # via vllm
+referencing==0.37.0
+    # via
+    #   cyclonedx-python-lib
+    #   jsonschema
+    #   jsonschema-specifications
+regex==2026.7.19
+    # via
+    #   nltk
+    #   sacremoses
+    #   tiktoken
+    #   transformers
+    #   vllm
+replicate==1.0.7
+    # via effgen (pyproject.toml)
+reportlab==5.0.0
+    # via effgen (pyproject.toml)
+requests==2.34.2
+    # via
+    #   effgen (pyproject.toml)
+    #   azure-core
+    #   cachecontrol
+    #   datasets
+    #   docker
+    #   flashinfer-python
+    #   gguf
+    #   google-api-core
+    #   google-auth
+    #   google-genai
+    #   google-search-results
+    #   hvac
+    #   kubernetes
+    #   mistral-common
+    #   msal
+    #   opentelemetry-exporter-otlp-proto-http
+    #   pip-audit
+    #   requests-oauthlib
+    #   spacy
+    #   stanza
+    #   staticmap
+    #   tiktoken
+    #   vllm
+    #   wandb
+    #   yfinance
+    #   youtube-transcript-api
+requests-oauthlib==2.0.0
+    # via kubernetes
+rfc3339-validator==0.1.4
+    # via jsonschema
+rfc3986-validator==0.1.1
+    # via jsonschema
+rfc3987-syntax==1.1.0
+    # via jsonschema
+rich==15.0.0
+    # via
+    #   effgen (pyproject.toml)
+    #   chromadb
+    #   cyclopts
+    #   pip-audit
+    #   rich-rst
+    #   rich-toolkit
+    #   together
+    #   typer
+rich-rst==2.1.0
+    # via cyclopts
+rich-toolkit==0.20.3
+    # via
+    #   fastapi-cli
+    #   fastapi-cloud-cli
+rignore==0.8.1
+    # via fastapi-cloud-cli
+rouge-score==0.1.2
+    # via effgen (pyproject.toml)
+rpds-py==2026.6.3
+    # via
+    #   jsonschema
+    #   referencing
+ruff==0.9.10
+    # via betterproto-fw
+s3transfer==0.19.2
+    # via boto3
+sacremoses==0.1.1
+    # via argostranslate
+safetensors==0.8.0
+    # via
+    #   effgen (pyproject.toml)
+    #   accelerate
+    #   transformers
+scikit-learn==1.9.0
+    # via
+    #   effgen (pyproject.toml)
+    #   sentence-transformers
+scipy==1.18.0
+    # via
+    #   scikit-learn
+    #   sentence-transformers
+sentence-transformers==5.7.0
+    # via effgen (pyproject.toml)
+sentencepiece==0.2.2
+    # via
+    #   effgen (pyproject.toml)
+    #   argostranslate
+    #   vllm
+sentry-sdk==2.68.0
+    # via
+    #   fastapi-cloud-cli
+    #   wandb
+setproctitle==1.3.7
+    # via vllm
+setuptools==80.10.2
+    # via
+    #   ctranslate2
+    #   model-hosting-container-standards
+    #   spacy
+    #   tensorboard
+    #   thinc
+    #   torch
+    #   vllm
+shellingham==1.5.4
+    # via typer
+six==1.17.0
+    # via
+    #   kubernetes
+    #   langdetect
+    #   python-dateutil
+    #   rfc3339-validator
+    #   rouge-score
+    #   vllm
+smart-open==8.0.1
+    # via weasel
+smmap==5.0.3
+    # via gitdb
+sniffio==1.3.1
+    # via
+    #   anthropic
+    #   cerebras-cloud-sdk
+    #   google-genai
+    #   groq
+    #   openai
+    #   together
+socksio==1.0.0
+    # via httpx
+sortedcontainers==2.4.0
+    # via
+    #   cyclonedx-python-lib
+    #   hypothesis
+soupsieve==2.9.2
+    # via beautifulsoup4
+spacy==3.8.13
+    # via argostranslate
+spacy-legacy==3.0.12
+    # via spacy
+spacy-loggers==1.0.5
+    # via spacy
+sqlglot==30.17.0
+    # via effgen (pyproject.toml)
+srsly==2.5.3
+    # via
+    #   spacy
+    #   thinc
+    #   weasel
+sse-starlette==3.4.8
+    # via mcp
+stack-data==0.6.3
+    # via ipython
+stanza==1.10.1
+    # via argostranslate
+starlette==1.6.0
+    # via
+    #   effgen (pyproject.toml)
+    #   fastapi
+    #   mcp
+    #   model-hosting-container-standards
+    #   prometheus-fastapi-instrumentator
+    #   sse-starlette
+staticmap==0.5.7
+    # via effgen (pyproject.toml)
+supervisor==4.3.0
+    # via model-hosting-container-standards
+sympy==1.14.0
+    # via torch
+tabulate==0.10.0
+    # via flashinfer-python
+tenacity==9.1.4
+    # via
+    #   chromadb
+    #   google-genai
+tensorboard==2.20.0
+    # via effgen (pyproject.toml)
+tensorboard-data-server==0.7.2
+    # via tensorboard
+thinc==8.3.13
+    # via spacy
+threadpoolctl==3.6.0
+    # via scikit-learn
+tiktoken==0.13.0
+    # via
+    #   effgen (pyproject.toml)
+    #   mistral-common
+    #   vllm
+tilelang==0.1.9
+    # via vllm
+together==2.31.0
+    # via effgen (pyproject.toml)
+tokenizers==0.22.2
+    # via
+    #   chromadb
+    #   faster-whisper
+    #   sentence-transformers
+    #   transformers
+    #   vllm
+tomli==2.4.1
+    # via pip-audit
+tomli-w==1.2.0
+    # via pip-audit
+torch==2.11.0
+    # via
+    #   effgen (pyproject.toml)
+    #   accelerate
+    #   bitsandbytes
+    #   compressed-tensors
+    #   flashinfer-python
+    #   quack-kernels
+    #   sentence-transformers
+    #   stanza
+    #   tilelang
+    #   torch-c-dlpack-ext
+    #   torchvision
+    #   vllm
+    #   xgrammar
+torch-c-dlpack-ext==0.1.5
+    # via quack-kernels
+torchaudio==2.11.0
+    # via vllm
+torchvision==0.26.0
+    # via vllm
+tornado==6.5.8
+    # via
+    #   ipykernel
+    #   jupyter-client
+tqdm==4.70.0
+    # via
+    #   effgen (pyproject.toml)
+    #   chromadb
+    #   datasets
+    #   faster-whisper
+    #   flashinfer-python
+    #   gguf
+    #   google-generativeai
+    #   huggingface-hub
+    #   nltk
+    #   openai
+    #   sacremoses
+    #   sentence-transformers
+    #   spacy
+    #   stanza
+    #   tilelang
+    #   together
+    #   transformers
+    #   vllm
+traitlets==5.16.1
+    # via
+    #   ipykernel
+    #   ipython
+    #   jupyter-client
+    #   jupyter-console
+    #   jupyter-core
+    #   matplotlib-inline
+    #   nbformat
+transformers==5.15.0
+    # via
+    #   effgen (pyproject.toml)
+    #   compressed-tensors
+    #   sentence-transformers
+    #   vllm
+    #   xgrammar
+triton==3.6.0
+    # via
+    #   torch
+    #   xgrammar
+truststore==0.10.4
+    # via
+    #   httpcore2
+    #   httpx2
+typer==0.27.1
+    # via
+    #   chromadb
+    #   fastapi-cli
+    #   fastapi-cloud-cli
+    #   fastsafetensors
+    #   spacy
+    #   transformers
+    #   weasel
+types-pyyaml==6.0.12.20260724
+    # via together
+types-tqdm==4.70.0.20260805
+    # via together
+typing-extensions==4.16.0
+    # via
+    #   anthropic
+    #   apache-tvm-ffi
+    #   azure-core
+    #   azure-identity
+    #   azure-keyvault-secrets
+    #   beautifulsoup4
+    #   betterproto-fw
+    #   cerebras-cloud-sdk
+    #   chromadb
+    #   cuda-tile
+    #   fastapi
+    #   fireworks-ai
+    #   google-genai
+    #   google-generativeai
+    #   groq
+    #   grpcio
+    #   huggingface-hub
+    #   jupyter-client
+    #   llama-cpp-python
+    #   mangum
+    #   mcp
+    #   mistral-common
+    #   nvidia-cutlass-dsl-libs-base
+    #   openai
+    #   opentelemetry-api
+    #   opentelemetry-exporter-otlp-proto-grpc
+    #   opentelemetry-exporter-otlp-proto-http
+    #   opentelemetry-sdk
+    #   opentelemetry-semantic-conventions
+    #   pydantic
+    #   pydantic-core
+    #   pydantic-extra-types
+    #   python-docx
+    #   replicate
+    #   rich-toolkit
+    #   sentence-transformers
+    #   tilelang
+    #   together
+    #   torch
+    #   typing-inspection
+    #   vllm
+    #   wandb
+    #   xgrammar
+typing-inspection==0.4.4
+    # via
+    #   fastapi
+    #   mcp
+    #   pydantic
+    #   pydantic-settings
+tzdata==2026.3
+    # via arrow
+uri-template==1.3.0
+    # via jsonschema
+uritemplate==4.2.0
+    # via google-api-python-client
+urllib3==2.7.0
+    # via
+    #   botocore
+    #   docker
+    #   kubernetes
+    #   qdrant-client
+    #   requests
+    #   sentry-sdk
+uvicorn==0.52.3
+    # via
+    #   effgen (pyproject.toml)
+    #   chromadb
+    #   fastapi
+    #   fastapi-cli
+    #   fastapi-cloud-cli
+    #   mcp
+uvloop==0.22.1
+    # via uvicorn
+vllm==0.20.2
+    # via effgen (pyproject.toml)
+wandb==0.28.2
+    # via effgen (pyproject.toml)
+wasabi==1.1.3
+    # via
+    #   spacy
+    #   thinc
+    #   weasel
+watchfiles==1.2.0
+    # via
+    #   uvicorn
+    #   vllm
+wcwidth==0.8.2
+    # via prompt-toolkit
+weasel==1.0.0
+    # via spacy
+webcolors==25.10.0
+    # via jsonschema
+websocket-client==1.9.0
+    # via kubernetes
+websockets==16.1.1
+    # via
+    #   google-genai
+    #   uvicorn
+    #   yfinance
+werkzeug==3.1.8
+    # via tensorboard
+wrapt==2.3.0
+    # via smart-open
+wsproto==1.3.2
+    # via httpx-ws
+xgrammar==0.2.3
+    # via vllm
+xxhash==4.0.0
+    # via datasets
+yarl==1.24.5
+    # via aiohttp
+yfinance==1.6.0
+    # via effgen (pyproject.toml)
+youtube-transcript-api==1.2.4
+    # via effgen (pyproject.toml)
+yt-dlp==2026.7.4
+    # via effgen (pyproject.toml)
+z3-solver==4.15.4.0
+    # via tilelang

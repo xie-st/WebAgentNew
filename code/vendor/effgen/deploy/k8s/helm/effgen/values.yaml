@@ -1,0 +1,229 @@
+# effGen Helm chart default values
+# Override with: helm install effgen . -f my-values.yaml
+
+# --------------------------------------------------------------------------
+# Image
+# --------------------------------------------------------------------------
+image:
+  repository: effgen
+  tag: "1.3.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# --------------------------------------------------------------------------
+# Deployment
+# --------------------------------------------------------------------------
+replicaCount: 2
+
+# Rolling update strategy (zero-downtime)
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+# --------------------------------------------------------------------------
+# Service Account
+# --------------------------------------------------------------------------
+serviceAccount:
+  create: true
+  automountServiceAccountToken: false
+  annotations: {}
+  name: ""
+
+# --------------------------------------------------------------------------
+# Pod configuration
+# --------------------------------------------------------------------------
+podAnnotations:
+  # Prometheus scraping
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# --------------------------------------------------------------------------
+# Resources
+# --------------------------------------------------------------------------
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+# --------------------------------------------------------------------------
+# Service
+# --------------------------------------------------------------------------
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+# --------------------------------------------------------------------------
+# Ingress
+# --------------------------------------------------------------------------
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: effgen.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: effgen-tls
+  #    hosts:
+  #      - effgen.example.com
+
+# --------------------------------------------------------------------------
+# Environment — effGen server config
+# --------------------------------------------------------------------------
+env:
+  # Set EFFGEN_DEV_MODE=1 for local dev (disables auth with loud warning)
+  EFFGEN_DEV_MODE: "0"
+  EFFGEN_PORT: "8080"
+  EFFGEN_HOST: "0.0.0.0"
+  EFFGEN_SANDBOX_BACKEND: "subprocess"
+  # /metrics is auth-gated by default; the pod annotations below advertise a
+  # Prometheus scrape on the same port, so metrics are opened here and the
+  # NetworkPolicy (same-namespace + monitoring-namespace ingress on 8080) is
+  # the actual access control. Unset this (or set "0") to keep /metrics
+  # behind the API key and scrape it with an authenticated ServiceMonitor
+  # instead.
+  EFFGEN_PUBLIC_METRICS: "1"
+  # EFFGEN_OIDC_ISSUER: ""
+  # EFFGEN_OIDC_CLIENT_ID: ""
+
+# Additional env from existing Secrets or ConfigMaps
+envFrom: []
+# - secretRef:
+#     name: effgen-oidc-creds
+
+# --------------------------------------------------------------------------
+# Secrets (stored in a Kubernetes Secret resource)
+# --------------------------------------------------------------------------
+# Keys here are base64-encoded automatically by Helm.
+# Provide actual values or reference external secrets via envFrom.
+secrets:
+  # CEREBRAS_API_KEY: ""
+  # OPENAI_API_KEY: ""
+  # EFFGEN_OIDC_CLIENT_SECRET: ""
+
+# --------------------------------------------------------------------------
+# ConfigMap (non-sensitive config)
+# --------------------------------------------------------------------------
+configMap:
+  enabled: false
+  data: {}
+  # EFFGEN_RBAC_POLICY: |
+  #   {"roles": [...]}
+
+# --------------------------------------------------------------------------
+# HPA — Horizontal Pod Autoscaler
+# --------------------------------------------------------------------------
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  # Custom metric: scale on model call latency
+  customMetrics:
+    - type: Pods
+      pods:
+        metric:
+          name: effgen_model_call_latency_seconds
+        target:
+          type: AverageValue
+          # Scale up when avg latency exceeds 2s
+          averageValue: "2"
+
+# --------------------------------------------------------------------------
+# PDB — Pod Disruption Budget
+# --------------------------------------------------------------------------
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# --------------------------------------------------------------------------
+# NetworkPolicy
+# --------------------------------------------------------------------------
+networkPolicy:
+  enabled: true
+  # Allow ingress from same namespace + monitoring namespace
+  ingressNamespaceSelector:
+    matchLabels: {}
+  # Allow egress to DNS + external HTTPS (LLM provider APIs)
+  egressEnabled: true
+
+# --------------------------------------------------------------------------
+# Volumes (for audit log persistence, etc.)
+# --------------------------------------------------------------------------
+persistence:
+  auditLog:
+    enabled: false
+    storageClass: ""
+    size: 1Gi
+
+# --------------------------------------------------------------------------
+# Probes
+# --------------------------------------------------------------------------
+livenessProbe:
+  httpGet:
+    path: /livez
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# --------------------------------------------------------------------------
+# Affinity / tolerations / topology
+# --------------------------------------------------------------------------
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: effgen
+
+# --------------------------------------------------------------------------
+# Misc
+# --------------------------------------------------------------------------
+nameOverride: ""
+fullnameOverride: ""

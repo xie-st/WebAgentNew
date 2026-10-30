@@ -1,0 +1,47 @@
+{
+  "schema_version": "webagent.protocol.v1",
+  "run_id": "run-a",
+  "page_id": "page-1",
+  "observation_id": "obs-2",
+  "url": "http://fixture.local/results",
+  "ax_text": "Search results. One result is shown.",
+  "elements": {
+    "1": {
+      "page_id": "page-1",
+      "observation_id": "obs-2",
+      "number": "1",
+      "role": "link",
+      "name": "Sample result",
+      "localization": {"cdp_backend_node_id": 77, "selector": "a.result"}
+    },
+    "2": {
+      "page_id": "page-1",
+      "observation_id": "obs-2",
+      "number": "2",
+      "role": "button",
+      "name": "Next page",
+      "localization": {"cdp_backend_node_id": 78, "selector": "button.next"}
+    }
+  },
+  "previous_action_id": "act-1",
+  "feedback": {
+    "status": "observed",
+    "action_id": "act-1",
+    "observation_id": "obs-2",
+    "message": "clicked search",
+    "error_type": null,
+    "page_changed": true
+  },
+  "artifacts": {
+    "screenshot": null,
+    "html": null,
+    "dom": null
+  },
+  "capabilities": {
+    "ax_text": true,
+    "screenshot": false,
+    "html": false,
+    "dom": false,
+    "actions": ["click", "type", "press", "scroll", "goto", "go_back", "go_forward"]
+  }
+}

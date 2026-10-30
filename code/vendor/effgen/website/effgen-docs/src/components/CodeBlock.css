@@ -1,0 +1,564 @@
+/* ============================================
+   CODE BLOCK — Enhanced with animated border and glow
+   ============================================ */
+.code-block {
+  background: #080e0b;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 1.5rem 0;
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.02);
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+/* Animated gradient top border — multi-color sweep */
+.code-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.4), rgba(0, 229, 255, 0.3), rgba(167, 139, 250, 0.2), transparent);
+  background-size: 300% 100%;
+  animation: code-border-shimmer 10s linear infinite;
+  opacity: 0.5;
+  z-index: 2;
+}
+
+@keyframes code-border-shimmer {
+  0% { background-position: 300% 0; }
+  100% { background-position: -300% 0; }
+}
+
+.code-block:hover {
+  box-shadow: var(--shadow-lg), 0 0 25px rgba(0, 255, 136, 0.08);
+  border-color: rgba(0, 255, 136, 0.15);
+}
+
+.code-block:hover::before {
+  opacity: 0.9;
+}
+
+[data-theme="light"] .code-block {
+  background: #f5f5f5;
+  border-color: #e2e2e2;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .code-block:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: #d0d0d0;
+}
+
+[data-theme="light"] .code-block::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 137, 74, 0.15), transparent);
+  opacity: 0.3;
+}
+
+/* ============================================
+   CODE HEADER — Enhanced with glass morphism
+   ============================================ */
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Narrow enough and a long filename would push the copy button off the edge
+     of the block, where `overflow: hidden` would cut it in half. It wraps to a
+     second line instead. */
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.03), var(--bg-tertiary));
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+/* Subtle bottom glow line */
+.code-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+}
+
+[data-theme="light"] .code-header {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="light"] .code-header::after {
+  display: none;
+}
+
+.code-header-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 0.75rem;
+}
+
+/* Language badge with enhanced glow */
+.language-badge {
+  background: var(--accent-gradient);
+  color: #000;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.25);
+  transition: all 0.3s ease;
+}
+
+.code-block:hover .language-badge {
+  box-shadow: 0 0 18px rgba(0, 255, 136, 0.35);
+}
+
+[data-theme="light"] .language-badge {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filename {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-family: 'JetBrains Mono', monospace;
+  opacity: 0.7;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ============================================
+   COPY BUTTON — Animated hover with checkmark
+   ============================================ */
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sweep effect on hover */
+.copy-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.08), transparent);
+  transition: left 0.4s ease;
+}
+
+.copy-button:hover::before {
+  left: 100%;
+}
+
+.copy-button:hover {
+  background: rgba(0, 255, 136, 0.06);
+  color: var(--accent-primary);
+  border-color: rgba(0, 255, 136, 0.35);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.12);
+}
+
+[data-theme="light"] .copy-button:hover {
+  background: var(--bg-elevated);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  box-shadow: none;
+}
+
+[data-theme="light"] .copy-button::before {
+  display: none;
+}
+
+.copy-button.copied {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--success);
+  color: var(--success);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.18);
+  animation: copy-flash 0.3s ease;
+}
+
+@keyframes copy-flash {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* ============================================
+   MULTI-TAB — one task, several ways to do it
+   ============================================ */
+.code-tabs {
+  margin: 1.5rem 0;
+}
+
+.code-tablist {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-bottom: -1px;
+}
+
+.code-tab {
+  padding: 0.45rem 0.9rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  color: var(--text-tertiary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.code-tab:hover {
+  color: var(--accent-primary);
+}
+
+.code-tab.active {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--accent-primary);
+}
+
+.code-tabs .code-block {
+  margin-top: 0;
+  border-top-left-radius: 0;
+}
+
+/* ============================================
+   CODE CONTENT
+   ============================================ */
+/* One scroll container, and one only. A wide line scrolls inside this box; the
+   page itself never moves sideways because of it. `tabIndex` on the element is
+   what gives a keyboard a way to reach that scroll. */
+.code-content {
+  overflow-x: auto;
+  padding: 1.25rem 0;
+}
+
+.code-content:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+/* Custom scrollbar for code blocks */
+.code-content::-webkit-scrollbar {
+  height: 6px;
+}
+
+.code-content::-webkit-scrollbar-track {
+  background: rgba(0, 255, 136, 0.02);
+}
+
+.code-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.15);
+  border-radius: 3px;
+}
+
+.code-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 136, 0.3);
+}
+
+/* `width: max-content` with `min-width: 100%` is what makes every line as wide
+   as the widest one, so a marked line's band runs the full width of the block
+   however far it is scrolled. */
+.code-block pre.code-lines {
+  min-width: 100%;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  overflow: visible;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.code-block .code-lines code {
+  display: block;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  text-shadow: none;
+}
+
+.code-block .code-lines code:hover {
+  border: none;
+  box-shadow: none;
+}
+
+.code-line {
+  display: flex;
+  width: 100%;
+}
+
+/* Line numbers with green tint. Sticky, so the gutter stays put while the code
+   scrolls under it rather than sliding out of the frame. */
+.code-line-number {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  flex: 0 0 48px;
+  padding: 0 1rem;
+  text-align: right;
+  color: var(--text-muted);
+  user-select: none;
+  background-color: #080e0b;
+  background-image: linear-gradient(rgba(0, 255, 136, 0.02), rgba(0, 255, 136, 0.02));
+  border-right: 1px solid rgba(0, 255, 136, 0.06);
+}
+
+.code-line-text {
+  padding: 0 1.5rem;
+  white-space: pre;
+  flex: 1 1 auto;
+}
+
+/* ============================================
+   LINE HIGHLIGHTING
+   ============================================ */
+.code-line.marked {
+  background: rgba(0, 255, 136, 0.07);
+  box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+
+.code-line.marked .code-line-number {
+  color: var(--accent-primary);
+  background-image: linear-gradient(rgba(0, 255, 136, 0.09), rgba(0, 255, 136, 0.09));
+}
+
+/* ============================================
+   FRAGMENT — a block that carries on from the one above
+   ============================================ */
+.code-block.continues {
+  margin-top: -0.75rem;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.code-block.continues::before {
+  display: none;
+}
+
+.code-continues {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.35rem;
+  border: 1px dashed var(--border-hover);
+  border-radius: 6px;
+  color: var(--text-tertiary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.code-caption {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* ============================================
+   SYNTAX COLOURS
+   ============================================ */
+/* The order of these rules is the whole design. Every one of them has the same
+   specificity, so the last one that matches wins — which is how a token that
+   carries two classes gets the more specific of the two. `syn-keyword syn-
+   shell-builtin` reads as a builtin, `syn-builtin syn-keyword` reads as a
+   keyword, `syn-class syn-boolean` reads as a boolean. Moving a rule up or down
+   this list changes what those tokens look like.
+   See shared/syntaxHighlight.ts for why a token carries more than one class. */
+.code-block .syn-comment {
+  color: #64806e;
+  font-style: italic;
+}
+
+.code-block .syn-punct,
+.code-block .syn-decorator {
+  color: #7a8a82;
+}
+
+.code-block .syn-operator {
+  color: #79c0ff;
+}
+
+.code-block .syn-number,
+.code-block .syn-property {
+  color: #00e5ff;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.18);
+}
+
+.code-block .syn-string {
+  color: #7ee787;
+  text-shadow: 0 0 10px rgba(126, 231, 135, 0.12);
+}
+
+.code-block .syn-builtin {
+  color: #7ee787;
+  text-shadow: 0 0 10px rgba(126, 231, 135, 0.12);
+}
+
+/* A capitalised word and a call are only names being *used*; the two places a
+   name is introduced — `def name`, `class Name` — are picked out below. */
+.code-block .syn-function,
+.code-block .syn-class {
+  color: inherit;
+  text-shadow: none;
+}
+
+.code-block .syn-keyword {
+  color: #ff7b72;
+  text-shadow: 0 0 12px rgba(255, 123, 114, 0.15);
+}
+
+.code-block .syn-boolean {
+  color: #00e5ff;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.18);
+}
+
+.code-block .syn-shell-builtin,
+.code-block .syn-def,
+.code-block .syn-command {
+  color: #d2a8ff;
+  text-shadow: 0 0 10px rgba(210, 168, 255, 0.12);
+}
+
+.code-block .syn-variable,
+.code-block .syn-flag,
+.code-block .syn-assign {
+  color: #ffa657;
+  text-shadow: 0 0 8px rgba(255, 166, 87, 0.1);
+}
+
+/* A mapping key in YAML is the one place the two syntaxes disagree about which
+   colour a key takes; this keeps it where it has always been. */
+.code-block .language-yaml .syn-property,
+.code-block[data-language='yaml'] .syn-property {
+  color: #ff7b72;
+}
+
+/* ============================================
+   LIGHT THEME ADJUSTMENTS
+   ============================================ */
+[data-theme="light"] .code-block {
+  background: #f5f5f5;
+  border-color: #e2e2e2;
+}
+
+[data-theme="light"] .code-block pre.code-lines {
+  color: #24292f;
+}
+
+[data-theme="light"] .code-line-number {
+  background-color: #f5f5f5;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.03));
+  border-right-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .code-line.marked {
+  background: rgba(0, 137, 74, 0.08);
+  box-shadow: inset 3px 0 0 var(--accent-primary);
+}
+
+[data-theme="light"] .code-line.marked .code-line-number {
+  background-image: linear-gradient(rgba(0, 137, 74, 0.1), rgba(0, 137, 74, 0.1));
+}
+
+[data-theme="light"] .code-block .syn-comment {
+  color: #6a717c;
+}
+
+[data-theme="light"] .code-block .syn-punct,
+[data-theme="light"] .code-block .syn-decorator {
+  color: #57606a;
+}
+
+[data-theme="light"] .code-block .syn-operator {
+  color: #0550ae;
+}
+
+[data-theme="light"] .code-block .syn-number,
+[data-theme="light"] .code-block .syn-property {
+  color: #cf222e;
+  text-shadow: none;
+}
+
+[data-theme="light"] .code-block .syn-string,
+[data-theme="light"] .code-block .syn-builtin {
+  color: #116329;
+  text-shadow: none;
+}
+
+[data-theme="light"] .code-block .syn-keyword {
+  color: #cf222e;
+  text-shadow: none;
+}
+
+[data-theme="light"] .code-block .syn-boolean {
+  color: #cf222e;
+  text-shadow: none;
+}
+
+[data-theme="light"] .code-block .syn-shell-builtin,
+[data-theme="light"] .code-block .syn-def,
+[data-theme="light"] .code-block .syn-command {
+  color: #8250df;
+  text-shadow: none;
+}
+
+[data-theme="light"] .code-block .syn-variable,
+[data-theme="light"] .code-block .syn-flag,
+[data-theme="light"] .code-block .syn-assign {
+  color: #953800;
+  text-shadow: none;
+}
+
+[data-theme="light"] .code-block .language-yaml .syn-property,
+[data-theme="light"] .code-block[data-language='yaml'] .syn-property {
+  color: #cf222e;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .code-lines {
+    font-size: 0.85rem;
+  }
+
+  .code-line-number {
+    flex-basis: 40px;
+    padding: 0 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .code-line-text {
+    padding: 0 1rem;
+  }
+}

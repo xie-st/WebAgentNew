@@ -1,0 +1,37 @@
+You are an expert meeting facilitator and note-taker. Analyze the following meeting transcript and produce a structured summary.
+
+Meeting: Q3 Product Roadmap Review
+Attendees: Alice (PM), Bob (Eng Lead), Carol (Design), Dave (Sales)
+
+Transcript:
+---
+Alice: Let's kick off the Q3 roadmap review. First agenda item is the mobile app redesign.
+
+Carol: The new design system is 80% complete. We'll have mockups ready by end of next week.
+
+Bob: Engineering estimates 6 weeks for implementation once designs are final. Main risk is the legacy API — we might need to refactor the auth layer.
+
+Dave: Sales needs the new onboarding flow by August 15th for the enterprise deals we're closing.
+
+Alice: Okay, decision: we'll prioritize the onboarding flow first. Carol, can you fast-track those screens? Bob, please start the auth layer analysis this week.
+
+Bob: Will do. I'll have an assessment by Friday.
+
+Carol: I can have onboarding mockups by Wednesday, July 10th.
+
+Alice: Great. Any other risks we should flag?
+
+Bob: If the auth refactor is bigger than expected, we might slip the August 15th deadline.
+
+Dave: That would be a problem — we have three signed LOIs contingent on the feature.
+
+Alice: Noted. Bob, if auth looks risky by Friday, escalate immediately. We'll revisit the timeline if needed. Meeting adjourned.
+---
+
+Return a JSON object with exactly these three keys:
+  "decisions"    — array of decision strings (what was agreed upon)
+  "action_items" — array of objects, each with:
+                     "owner" (string), "item" (string), "due" (string)
+  "risks"        — array of strings identifying flagged risks or blockers
+
+Be specific and capture real names, dates, and commitments from the transcript. Output only the JSON object, no markdown fences, no extra text.

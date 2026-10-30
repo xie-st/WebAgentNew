@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "effgen-plugin-__PLUGIN_NAME__"
+version = "0.1.0"
+description = "An effGen tool plugin"
+requires-python = ">=3.11"
+dependencies = ["effgen"]
+
+[project.entry-points."effgen.plugins"]
+__PLUGIN_NAME__ = "__PLUGIN_NAME__.plugin:__PLUGIN_CLASS__Plugin"
+
+[tool.setuptools]
+packages = ["__PLUGIN_NAME__"]
+
+[tool.ruff.lint.isort]
+# Treat this plugin's own package as first-party so the import block sorts
+# cleanly (third-party effGen first, then your package) regardless of name.
+known-first-party = ["__PLUGIN_NAME__"]

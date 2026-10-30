@@ -1,0 +1,62 @@
+Workspace: /data/wang/gks/effgen-demo/textkit
+Repo: textkit · branch main · 2 change(s) · 5 file(s)
+Project instructions: /data/wang/gks/effgen-demo/textkit/AGENTS.md
+Reviewing uncommitted changes, 15 line(s)
+Read-only review: no file is written and no command runs.
+2026-08-20 12:39:52,875 - effgen.models.openai_adapter - WARNING - Model 'gpt-5-nano' returned no visible text: it spent the whole output budget on internal reasoning and hit a max_tokens cap of 4096 (finish_reason='length'). It produced 4096 reasoning tokens and no answer. Raise max_tokens — e.g. agent.run(task, max_tokens=8192) — or use a model that answers without an extended reasoning chain.
+[1;32m╭─[0m[1;32m──────────────────────────────────────[0m[1;32m [0m[1;32mReview[0m[1;32m [0m[1;32m──────────────────────────────────────[0m[1;32m─╮[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m [1m • [0mtextkit/[1minit[0m.py (line containing the new import and the updated [1mall[0m): The change  [1;32m│[0m
+[1;32m│[0m [1m   [0madds a public export by importing title_case from .case and updates [1mall[0m to        [1;32m│[0m
+[1;32m│[0m [1m   [0minclude "title_case" alongside "wrap_words". This aligns with the project         [1;32m│[0m
+[1;32m│[0m [1m   [0mguidance that public helpers are re-exported from [1minit[0m.py. However, exact line    [1;32m│[0m
+[1;32m│[0m [1m   [0mnumbers aren’t visible in the excerpt provided, so I can’t cite a precise line    [1;32m│[0m
+[1;32m│[0m [1m   [0mnumber. [1]                                                                       [1;32m│[0m
+[1;32m│[0m [1m • [0mtextkit/case.py (title_case implementation): The file defines title_case(text:    [1;32m│[0m
+[1;32m│[0m [1m   [0mstr) and enforces the string type with a TypeError for non-strings, in line with  [1;32m│[0m
+[1;32m│[0m [1m   [0mthe stated API contract. The implementation uses a regex to capitalize each       [1;32m│[0m
+[1;32m│[0m [1m   [0mnon-whitespace sequence, preserving whitespace, which matches the described       [1;32m│[0m
+[1;32m│[0m [1m   [0mbehavior in the docstring. This appears correct and self-consistent with the      [1;32m│[0m
+[1;32m│[0m [1m   [0mintended public API. [2]                                                          [1;32m│[0m
+[1;32m│[0m [1m • [0mAdditional observations:                                                          [1;32m│[0m
+[1;32m│[0m [1m • [0mCircular import risk: The new import in [1minit[0m.py (from .case import title_case)    [1;32m│[0m
+[1;32m│[0m [1m   [0mdoes not appear to create a circular import, since case.py only imports the re    [1;32m│[0m
+[1;32m│[0m [1m   [0mmodule and does not rely on textkit.[1minit[0m at runtime.                              [1;32m│[0m
+[1;32m│[0m [1m • [0mBehavior details: title_case capitalizes the first character of each              [1;32m│[0m
+[1;32m│[0m [1m   [0mnon-whitespace segment and lowercases the rest. This is a reasonable              [1;32m│[0m
+[1;32m│[0m [1m   [0minterpretation of “title case” for many cases, but note that hyphenated words or  [1;32m│[0m
+[1;32m│[0m [1m   [0mwords with internal punctuation will be treated as a single segment (e.g.,        [1;32m│[0m
+[1;32m│[0m [1m   [0m"this-is" -> "This-is", not "This-Is"). This is consistent with the current       [1;32m│[0m
+[1;32m│[0m [1m   [0mimplementation, but it’s worth documenting or adjusting if a different behavior   [1;32m│[0m
+[1;32m│[0m [1m   [0mis desired.                                                                       [1;32m│[0m
+[1;32m│[0m [1m • [0mTest coverage: The repository listing shows tests/test_wrap.py, but there’s no    [1;32m│[0m
+[1;32m│[0m [1m   [0mvisible test for title_case in the provided excerpts. Adding tests for title_case [1;32m│[0m
+[1;32m│[0m [1m   [0mwould help verify edge cases (spaces, multiple spaces, empty strings,             [1;32m│[0m
+[1;32m│[0m [1m   [0msingle-character words, digits, punctuation, etc.).                               [1;32m│[0m
+[1;32m│[0m [1m • [0mTyping in case.py: The annotation cap_word(m: re.Match) -> str uses re.Match.     [1;32m│[0m
+[1;32m│[0m [1m   [0mThis is generally fine in Python 3.11+ for runtime annotations, but if future     [1;32m│[0m
+[1;32m│[0m [1m   [0mcompatibility or mypy checks are a concern, one might consider from typing import [1;32m│[0m
+[1;32m│[0m [1m   [0mMatch and use Match[str] for clarity.                                             [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m What I would change (described, not implemented):                                    [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m [1m • [0mAdd a dedicated test suite for title_case, e.g., tests/test_title_case.py, to     [1;32m│[0m
+[1;32m│[0m [1m   [0mcover:                                                                            [1;32m│[0m
+[1;32m│[0m [1m • [0mBasic cases: "hello world" -> "Hello World"                                       [1;32m│[0m
+[1;32m│[0m [1m • [0mAlready-title-cased input: "Hello" remains "Hello"                                [1;32m│[0m
+[1;32m│[0m [1m • [0mMixed case with punctuation/spaces: "foo BAR baz" -> "Foo Bar Baz"                [1;32m│[0m
+[1;32m│[0m [1m • [0mEmpty string and string with only spaces                                          [1;32m│[0m
+[1;32m│[0m [1m • [0mHyphenated words: "this-is a test" vs the chosen convention                       [1;32m│[0m
+[1;32m│[0m [1m • [0mIf desired behavior for hyphenated words or internal punctuation should differ,   [1;32m│[0m
+[1;32m│[0m [1m   [0madjust title_case (textkit/case.py) accordingly and add tests for those cases.    [1;32m│[0m
+[1;32m│[0m [1m • [0mOptionally add a short docstring note in textkit/[1minit[0m.py explaining that          [1;32m│[0m
+[1;32m│[0m [1m   [0mtitle_case is re-exported for public API completeness.                            [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m Reasoning references to the changed parts:                                           [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m [1m • [0mThe new import and [1mall[0m update are visible in the provided [1minit[0m.py excerpt. [1]    [1;32m│[0m
+[1;32m│[0m [1m • [0mThe title_case function and its type-checking, docstring, and implementation      [1;32m│[0m
+[1;32m│[0m [1m   [0mdetails are visible in the provided case.py excerpt. [2]                          [1;32m│[0m
+[1;32m╰──────────────────────────────────────────────────────────────────────────────────────╯[0m
+[32m✓[0m Done in 108.5s · 2 tools · 19,916 tokens · $0.0062
+Tool calling: hybrid — provider tool API first, falling back to the text

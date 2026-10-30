@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Result detail</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body data-page="detail">
+  <header>
+    <h1 id="detail-heading">Result detail</h1>
+    <p id="detail-summary" class="muted"></p>
+  </header>
+  <main>
+    <p id="detail-body"></p>
+    <h2>Draft</h2>
+    <label for="draft">Draft text</label>
+    <textarea id="draft" name="draft"></textarea>
+    <p>
+      <button id="preview-button" type="button">Preview draft</button>
+    </p>
+    <div id="preview" class="preview" role="status" aria-live="polite"></div>
+    <nav class="pager">
+      <a id="back-results" href="results.html">Back to results</a>
+      <a href="index.html">New search</a>
+    </nav>
+  </main>
+  <footer>Offline fixture for WebAgentNew B1. This page has no submit control.</footer>
+  <script src="site.js"></script>
+</body>
+</html>

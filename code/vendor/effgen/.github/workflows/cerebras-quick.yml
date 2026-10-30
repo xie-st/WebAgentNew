@@ -1,0 +1,97 @@
+name: Provider Quick Check
+
+# Push-time check that the hosted-provider adapters still talk to real APIs.
+# One job per provider, through scripts/ci_provider_smoke.py: plain generation,
+# streaming, a calculator call through an Agent, and a reasoning question.
+#
+# A provider that refuses to serve — no credit (402), a bad or absent key
+# (401/403), a model id the account cannot see (404) — says nothing about
+# effGen: the job prints NOT MEASURED with a warning and passes. Only a call the
+# provider accepted and effGen got wrong fails the job. Transient pressure
+# (429/503/timeouts) is retried with backoff.
+#
+# groq/openai/gpt-oss-20b is the free-tier model that answers today (Groq has
+# retired its Llama ids upstream, 404 model_not_found as of 2026-09-02); the
+# Cerebras account lists gpt-oss-120b and answers 402 while it has no credit.
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "effgen/models/cerebras_adapter.py"
+      - "effgen/models/cerebras_models.py"
+      - "effgen/models/groq_adapter.py"
+      - "effgen/models/groq_models.py"
+      - "effgen/models/_rate_limit.py"
+      - "effgen/models/_cost.py"
+      - "effgen/core/agent.py"
+      - "effgen/tools/builtin/calculator.py"
+      - "scripts/ci_provider_smoke.py"
+      - "pyproject.toml"
+      - ".github/workflows/cerebras-quick.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "effgen/models/cerebras_adapter.py"
+      - "effgen/models/cerebras_models.py"
+      - "effgen/models/groq_adapter.py"
+      - "effgen/models/groq_models.py"
+      - "effgen/models/_rate_limit.py"
+      - "effgen/models/_cost.py"
+      - "effgen/core/agent.py"
+      - "effgen/tools/builtin/calculator.py"
+      - "scripts/ci_provider_smoke.py"
+      - "pyproject.toml"
+      - ".github/workflows/cerebras-quick.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: provider-quick-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  quick-check:
+    name: Quick Check (${{ matrix.provider }} ${{ matrix.model }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - provider: groq
+            model: openai/gpt-oss-20b
+            extra: groq
+          - provider: cerebras
+            model: gpt-oss-120b
+            extra: cerebras
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-provider-quick-${{ matrix.provider }}-${{ hashFiles('pyproject.toml') }}
+          restore-keys: ${{ runner.os }}-pip-provider-quick-${{ matrix.provider }}-
+
+      - name: Install effgen with the provider extra
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[${{ matrix.extra }}]" -q
+
+      - name: Generation, streaming, tool-calling and reasoning smoke
+        env:
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          python scripts/ci_provider_smoke.py \
+            --provider "${{ matrix.provider }}" --model "${{ matrix.model }}"

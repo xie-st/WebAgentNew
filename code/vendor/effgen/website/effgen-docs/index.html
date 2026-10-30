@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- The icons are rendered from the site's own mark by scripts/gen_icons.py,
+         so the tab looks the same on both halves of the site. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+
+    <!-- Every route sets its own title, description, canonical address and card
+         as it renders — src/hooks/useDocumentMeta.ts, called from DocPage. What
+         is written here is what a crawler that does not run the app sees, and
+         what the app starts from before the first route resolves. -->
+    <title>effGen documentation</title>
+    <meta
+      name="description"
+      content="Documentation for effGen 1.3.0: agents on small language models, tools, retrieval, memory, guardrails, evaluation, the command line and the OpenAI-compatible server."
+    />
+    <link rel="canonical" href="https://effgen.org/docs" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="effGen" />
+    <meta property="og:title" content="effGen documentation" />
+    <meta
+      property="og:description"
+      content="Every behaviour, flag and parameter, with code you can copy and run."
+    />
+    <meta property="og:url" content="https://effgen.org/docs" />
+    <meta property="og:image" content="https://effgen.org/og/docs.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Documentation — effGen" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="effGen documentation" />
+    <meta
+      name="twitter:description"
+      content="Every behaviour, flag and parameter, with code you can copy and run."
+    />
+    <meta name="twitter:image" content="https://effgen.org/og/docs.png" />
+
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#020c08" />
+
+    <script>
+      // Settle the theme before the first paint, so the page does not flash the
+      // light ground on its way to the dark one.
+      if (!localStorage.getItem('effgen-docs-theme')) {
+        localStorage.setItem('effgen-docs-theme', 'dark');
+      }
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('effgen-docs-theme') || 'dark');
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

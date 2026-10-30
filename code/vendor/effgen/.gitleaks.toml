@@ -1,0 +1,238 @@
+# .gitleaks.toml — effGen-tuned secret scanning rules
+# Docs: https://github.com/gitleaks/gitleaks/tree/master/config
+#
+# NOTE: We do NOT extend the default gitleaks ruleset (useDefault=false)
+# to avoid the default allowlist stopwords (e.g. "abcdefghijklmnopqrstuvwxyz")
+# interfering with our detection rules. All rules are explicitly declared here.
+
+title = "effGen Secret Scan Config"
+
+# ---------------------------------------------------------------------------
+# Generic / universal rules (subset of gitleaks defaults, tuned for effGen)
+# ---------------------------------------------------------------------------
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API key assignment"
+regex = '''(?i)(?:api[_\-]?key|api[_\-]?token|secret[_\-]?key)['\"\s]*[:=]['\"\s]*([A-Za-z0-9_\-]{20,})'''
+tags = ["generic", "api-key"]
+entropy = 3.5
+
+[[rules]]
+id = "generic-password-assignment"
+description = "Generic password assignment"
+regex = '''(?i)(?:password|passwd|pwd)['\"\s]*[:=]['\"\s]*([A-Za-z0-9!@#$%^&*_\-+=]{8,})'''
+tags = ["generic", "password"]
+entropy = 3.0
+
+# ---------------------------------------------------------------------------
+# effGen provider-specific rules
+# ---------------------------------------------------------------------------
+
+[[rules]]
+id = "effgen-cerebras-api-key"
+description = "Cerebras Cloud API Key"
+regex = '''(?i)(cerebras[_\-]?(?:api[_\-]?)?key|csk[_\-]?secret)['\"\s]*[:=]['\"\s]*([A-Za-z0-9_\-]{32,})'''
+tags = ["cerebras", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-groq-api-key"
+description = "Groq API Key"
+regex = '''gsk_[a-zA-Z0-9]{40,}'''
+tags = ["groq", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-openai-api-key"
+description = "OpenAI API Key (project key)"
+regex = '''sk-proj-[A-Za-z0-9_\-]{20,}'''
+tags = ["openai", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-openai-service-account-key"
+description = "OpenAI API Key (service-account key)"
+regex = '''sk-svcacct-[A-Za-z0-9_\-]{20,}'''
+tags = ["openai", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-openai-legacy-key"
+description = "OpenAI Legacy API Key"
+regex = '''sk-[A-Za-z0-9]{48}'''
+tags = ["openai", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-anthropic-api-key"
+description = "Anthropic Claude API Key"
+regex = '''sk-ant-api[0-9]{2}-[A-Za-z0-9_\-]{40,}'''
+tags = ["anthropic", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-gemini-api-key"
+description = "Google Gemini/AI Studio API Key"
+regex = '''AIza[0-9A-Za-z_\-]{35}'''
+tags = ["google", "gemini", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-huggingface-token"
+description = "HuggingFace API Token"
+regex = '''hf_[A-Za-z0-9]{30,}'''
+tags = ["huggingface", "api-token", "effgen"]
+
+[[rules]]
+id = "effgen-cohere-api-key"
+description = "Cohere API Key"
+regex = '''(?i)(cohere[_\-]?api[_\-]?key)['\"\s]*[:=]['\"\s]*([A-Za-z0-9_\-]{40,})'''
+tags = ["cohere", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-mistral-api-key"
+description = "Mistral API Key"
+regex = '''(?i)(mistral[_\-]?api[_\-]?key)['\"\s]*[:=]['\"\s]*([A-Za-z0-9_\-]{32,})'''
+tags = ["mistral", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-together-api-key"
+description = "Together AI API Key"
+regex = '''(?i)(together[_\-]?api[_\-]?key)['\"\s]*[:=]['\"\s]*([A-Za-z0-9_\-]{40,})'''
+tags = ["together", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-replicate-api-key"
+description = "Replicate API Token"
+regex = '''r8_[A-Za-z0-9]{37}'''
+tags = ["replicate", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-fireworks-api-key"
+description = "Fireworks AI API Key"
+regex = '''(?i)(fireworks[_\-]?api[_\-]?key)['\"\s]*[:=]['\"\s]*([A-Za-z0-9_\-]{32,})'''
+tags = ["fireworks", "api-key", "effgen"]
+
+[[rules]]
+id = "effgen-generic-provider-key"
+description = "Generic provider API key in effGen config"
+regex = '''(?i)(effgen[_\-]?api[_\-]?key|provider[_\-]?key|model[_\-]?key)['\"\s]*[:=]['\"\s]*([A-Za-z0-9_\-]{20,})'''
+tags = ["generic", "api-key", "effgen"]
+
+# ---------------------------------------------------------------------------
+# AWS / Cloud credentials (important for deployment configs)
+# ---------------------------------------------------------------------------
+
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["aws", "credentials"]
+
+[[rules]]
+id = "aws-secret-access-key"
+description = "AWS Secret Access Key"
+regex = '''(?i)aws[_\-]?secret[_\-]?access[_\-]?key['\"\s]*[:=]['\"\s]*([A-Za-z0-9/+=]{40})'''
+tags = ["aws", "credentials"]
+
+# ---------------------------------------------------------------------------
+# Allowlist — test fixtures, docs, config templates
+# ---------------------------------------------------------------------------
+
+[allowlist]
+description = "Allow test fixtures with obviously fake/placeholder keys and gitignored files"
+
+# Regex patterns that identify non-secret strings
+regexes = [
+    # Explicit fake patterns
+    '''sk-test-[A-Za-z0-9]+''',
+    '''FAKE[_\-]?KEY''',
+    '''fake[_\-]?api[_\-]?key''',
+    '''test[_\-]?secret[_\-]?key''',
+    '''placeholder[_\-]?key''',
+    '''dummy[_\-]?token''',
+    '''your[_\-]?api[_\-]?key[_\-]?here''',
+    '''<YOUR_API_KEY>''',
+    '''<api_key>''',
+    # "your-<provider>-<key|token>" placeholders in setup instructions. The
+    # generic rule needs 20 characters, so most of these are too short to reach
+    # it and only the longest provider names ever matched — which made the
+    # detection depend on how a provider is spelled. Matched as a family so a
+    # newly documented provider cannot reintroduce it.
+    '''your[_\-][a-z0-9]+[_\-](?:key|token|secret)''',
+    # Key-shaped strings whose body is a visibly synthetic run — a sequential
+    # alphabet or a repeated-character block. The site's redaction and error
+    # pages have to print something key-shaped to show what the redactor turns
+    # it into, so their placeholders are written to be unmistakable. Matched as
+    # a family, the way the "your-<provider>-<key>" placeholders above are, so a
+    # newly written example cannot reintroduce the failure.
+    '''(?:abcdefghij|0123456789abcdef|AAAABBBBCCCC)[A-Za-z0-9]*''',
+    # Standard test fixture patterns
+    '''sk-ant-api03-FAKE''',
+    '''AIzaFAKE''',
+    '''hf_FAKETOKEN''',
+    '''gsk_FAKE''',
+]
+
+# File paths to exclude (gitignored secrets files, docs, test fixtures, templates)
+# NOTE: paths are treated as regex patterns by gitleaks.
+# Use anchored patterns like (^|\/)\.env$ to avoid unintended substring matches
+# (e.g., plain ".env" would match "secrets.env" too).
+paths = [
+    # Gitignored secrets files (never committed) — exact file names
+    '''(^|\/)\.env$''',
+    '''(^|\/)\.env\.local$''',
+    '''(^|\/)\.env\.development$''',
+    '''(^|\/)\.envrc$''',
+    # Test fixtures — fake keys are planted intentionally for scanner tests
+    '''(^|\/)tests\/''',
+    # Compiled bytecode and tool caches (local build artifacts, never committed —
+    # but the working-tree `dir` scan sees them, e.g. pytest stores test node ids
+    # like "...api_key=ABCDEFG12345..." under .pytest_cache).
+    '''__pycache__\/''',
+    '''\.pyc$''',
+    '''(^|\/)\.pytest_cache\/''',
+    '''(^|\/)\.ruff_cache\/''',
+    '''(^|\/)\.mypy_cache\/''',
+    # Internal planning scaffolding: gitignored, never committed and never
+    # packaged, but the working-tree `dir` scan sees it. Its transcripts record
+    # redaction runs whose inputs are deliberately key-shaped test strings.
+    '''(^|\/)build_plan\/''',
+    # Compiled VSCode extension output (gitignored; produced by `npm run compile`).
+    '''tools\/vscode-effgen\/out\/''',
+    # Vendored third-party dependencies (never our secrets; some were committed
+    # to git history before being .gitignore'd, so the history scan must skip them).
+    '''(^|\/)node_modules\/''',
+    '''(^|\/)site-packages\/''',
+    '''(^|\/)vendor\/''',
+    '''(^|\/)\.venv\/''',
+    # Type-definition and minified bundle files
+    '''\.d\.ts$''',
+    '''\.min\.js$''',
+    # Docs and templates
+    '''(^|\/)docs\/''',
+    '''(^|\/)\.gitleaks\.toml$''',
+    '''(^|\/)\.env\.example$''',
+    '''(^|\/)\.env\.template$''',
+    # Install/setup scripts with placeholder comments
+    '''(^|\/)scripts\/''',
+    '''(^|\/)install\.sh$''',
+    # Dependency lockfiles
+    '''(^|\/)requirements[-\w]*\.txt$''',
+    '''(^|\/)requirements-lock\.txt$''',
+]
+
+# Stopwords: if the matched secret VALUE contains any of these, skip
+stopwords = [
+    "FAKE",
+    "fake",
+    "example",
+    "placeholder",
+    "dummy",
+    "mock_",
+    "_mock",
+    "template",
+    "sample_key",
+    "REDACTED",
+    "YOUR_KEY_HERE",
+    "your_key",
+    "your_api",
+    "your-anthropic",
+    "your-openai",
+    "your-groq",
+    "here",
+]

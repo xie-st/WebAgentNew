@@ -1,0 +1,144 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ============================================
+   SCROLL PROGRESS — Enhanced with glow trail
+   ============================================ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: 3px;
+  z-index: 200;
+  background: transparent;
+  pointer-events: none;
+}
+
+.scroll-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88, #00c96e, #00e5ff);
+  box-shadow:
+    0 0 10px rgba(0, 255, 136, 0.5),
+    0 0 20px rgba(0, 255, 136, 0.2),
+    0 0 40px rgba(0, 255, 136, 0.1);
+  transition: width 0.1s ease-out;
+  border-radius: 0 2px 2px 0;
+  position: relative;
+}
+
+/* Glowing dot at the end of progress bar */
+.scroll-progress-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: #00ff88;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.8), 0 0 16px rgba(0, 255, 136, 0.4);
+}
+
+[data-theme="light"] .scroll-progress-bar {
+  background: linear-gradient(90deg, #00894a, #006638, #007a99);
+  box-shadow: none;
+}
+
+[data-theme="light"] .scroll-progress-bar::after {
+  box-shadow: none;
+  background: #00894a;
+}
+
+/* ============================================
+   MAIN CONTENT — Enhanced spacing & transitions
+   ============================================ */
+.main-content {
+  margin-left: var(--sidebar-width);
+  margin-top: var(--header-height);
+  flex: 1;
+  padding: 2.5rem;
+  min-height: calc(100vh - var(--header-height));
+  animation: page-fade-in 0.5s ease-out;
+  position: relative;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Subtle noise texture overlay for depth */
+.main-content::before {
+  content: '';
+  position: fixed;
+  top: var(--header-height);
+  left: var(--sidebar-width);
+  right: 0;
+  bottom: 0;
+  opacity: 0.012;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="light"] .main-content::before {
+  opacity: 0.015;
+}
+
+/* For doc pages, use 80% width */
+.main-content > .doc-page {
+  max-width: 80%;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Wide enough for the on-page outline to sit beside the text. The page takes
+   the full column and `DocPage` splits it, which leaves the text roughly the
+   width it had at this size and puts the outline in what used to be margin.
+   Below this width nothing changes: the outline is not drawn and the page is
+   the 80% column it has always been. */
+@media (min-width: 1400px) {
+  .main-content > .doc-page {
+    max-width: 100%;
+  }
+}
+
+/* ============================================
+   MOBILE STYLES
+   ============================================ */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .scroll-progress {
+    left: 0;
+  }
+
+  .main-content::before {
+    left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 1rem;
+  }
+}

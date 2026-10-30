@@ -1,0 +1,18 @@
+{{- if .Values.persistence.auditLog.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "effgen.fullname" . }}-audit-log
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "effgen.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.persistence.auditLog.storageClass }}
+  storageClassName: {{ .Values.persistence.auditLog.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.auditLog.size }}
+{{- end }}

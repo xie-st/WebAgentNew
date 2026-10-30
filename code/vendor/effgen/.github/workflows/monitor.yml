@@ -1,0 +1,256 @@
+name: Monitor
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 6 AM UTC daily (offset from nightly to avoid congestion)
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  # ------------------------------------------------------------------ #
+  # 1. Import health — all public symbols must import cleanly           #
+  # ------------------------------------------------------------------ #
+  import-health:
+    name: Import Health
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - name: Install
+        run: pip install -e ".[dev]" -q
+      - name: Smoke-import all public symbols
+        id: import_check
+        run: |
+          python - <<'PY'
+          import effgen, sys
+          failed = []
+          for name in effgen.__all__:
+              try:
+                  obj = getattr(effgen, name)
+                  assert obj is not None
+              except Exception as e:
+                  failed.append(f"{name}: {e}")
+          if failed:
+              print("IMPORT FAILURES:")
+              for f in failed: print(f" - {f}")
+              sys.exit(1)
+          print(f"OK: {len(effgen.__all__)} public symbols imported cleanly")
+          PY
+
+  # ------------------------------------------------------------------ #
+  # 2. Full unit test suite with coverage gate                          #
+  # ------------------------------------------------------------------ #
+  unit-tests:
+    name: Unit Tests + Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - name: Install
+        run: pip install -e ".[dev]" -q
+      - name: Run unit tests
+        id: unit
+        run: |
+          pytest tests/unit/ tests/benchmarks/ \
+            --cov=effgen --cov-report=json:coverage.json \
+            -m "not gpu and not api and not docker" \
+            --tb=short -q
+      - name: Coverage gate (≥25%)
+        run: |
+          python - <<'PY'
+          import json, sys
+          # Threshold reflects measured unit+benchmark coverage. As new builtin
+          # tools land (OCR, audio, image, document parsing in v0.2.6) the
+          # effgen/ codebase has grown faster than the unit-test surface, so
+          # the percentage moves down even when test counts rise.
+          THRESHOLD = 25.0
+          data = json.load(open("coverage.json"))
+          pct = data["totals"]["percent_covered"]
+          print(f"Coverage: {pct:.2f}% (threshold: {THRESHOLD:.1f}%)")
+          if pct < THRESHOLD:
+              print(f"FAIL: coverage {pct:.2f}% < {THRESHOLD:.1f}% threshold")
+              sys.exit(1)
+          PY
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-monitor
+          path: coverage.json
+
+  # ------------------------------------------------------------------ #
+  # 3. Eval regression (math suite — deterministic heuristic agent)     #
+  # ------------------------------------------------------------------ #
+  eval-regression:
+    name: Eval Regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - name: Install
+        run: pip install -e ".[dev,groq]" -q
+      - name: Run math eval with Groq openai/gpt-oss-20b
+        id: eval
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          # Migrated off the Cerebras free tier (issues #41 / #42): the
+          # llama3.1-8b RPM cap was tightened upstream and the eval collapsed
+          # to ~0.4 accuracy with empty 429 responses. Groq's
+          # openai/gpt-oss-20b scores >=0.85 on the free tier, but that tier
+          # meters tokens per minute, so the script paces the cases and does
+          # not score a case the provider refused.
+          python scripts/ci_eval_regression.py --version ci-monitor
+      - name: Upload regression report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-report
+          path: |
+            regression-report.md
+            eval-summary.json
+            eval-status.txt
+      - name: Open issue on regression or crash
+        if: failure()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const status = fs.existsSync("eval-status.txt")
+              ? fs.readFileSync("eval-status.txt", "utf8").trim()
+              : "crashed";
+            const body = fs.existsSync("regression-report.md")
+              ? fs.readFileSync("regression-report.md", "utf8")
+              : "Eval failed but no report file produced.";
+            // Distinguish a real metric regression from an infrastructure
+            // crash (rate-limit, network, auth, etc.). The latter should not
+            // be reported as a "regression" — it is a test infra failure.
+            let title;
+            let labels;
+            if (status === "regression") {
+              const date = new Date().toISOString().slice(0,10);
+              title = `Eval regression detected (${date})`;
+              labels = ["regression", "automated"];
+            } else {
+              const date = new Date().toISOString().slice(0,10);
+              title = `Eval test failed: infrastructure error (${date})`;
+              labels = ["ci-failure", "automated"];
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels,
+            });
+
+  # ------------------------------------------------------------------ #
+  # 4. Dependency security audit — open issue on new CVEs               #
+  # ------------------------------------------------------------------ #
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - name: Install audit tools
+        run: pip install pip-audit safety -q
+      - name: Run pip-audit
+        id: audit
+        run: |
+          pip install -r requirements.txt -q
+          pip-audit --format markdown -o audit-report.md || echo "CVEs found — see report"
+          cat audit-report.md || true
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit
+          path: audit-report.md
+      - name: Open issue on new CVEs
+        if: failure()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const body = fs.existsSync("audit-report.md")
+              ? fs.readFileSync("audit-report.md", "utf8")
+              : "pip-audit found vulnerabilities — see workflow logs.";
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Security CVEs detected (${new Date().toISOString().slice(0,10)})`,
+              body,
+              labels: ["security", "automated"],
+            });
+
+  # ------------------------------------------------------------------ #
+  # 5. Ruff lint gate — zero errors                                     #
+  # ------------------------------------------------------------------ #
+  lint-gate:
+    name: Lint Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - name: Install ruff
+        run: pip install ruff -q
+      - name: Ruff check
+        id: lint
+        run: ruff check effgen/
+      - name: Open issue on lint failure
+        if: failure()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Lint failure detected (${new Date().toISOString().slice(0,10)})`,
+              body: "Ruff lint check failed on main. See workflow run for details.",
+              labels: ["lint", "automated"],
+            });
+
+  # ------------------------------------------------------------------ #
+  # 6. Integration smoke — verify no runtime import errors              #
+  # ------------------------------------------------------------------ #
+  integration-smoke:
+    name: Integration Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - name: Install
+        run: pip install -e ".[dev]" -q
+      - name: Run non-API integration tests
+        run: |
+          pytest tests/integration/ \
+            -m "not gpu and not api and not docker" \
+            --tb=short -q
+      - name: Open issue on failure
+        if: failure()
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Integration smoke failure (${new Date().toISOString().slice(0,10)})`,
+              body: "Non-API integration tests failed on nightly monitor run. See workflow for details.",
+              labels: ["bug", "automated"],
+            });

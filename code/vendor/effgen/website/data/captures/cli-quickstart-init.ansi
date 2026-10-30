@@ -1,0 +1,23 @@
+
+[1;36meffGen project[0m
+Directory: /data/wang/gks/effgen-demo/newproject
+
+  wrote    effgen.yaml   model, prompt and per-run caps
+  wrote    .env.example  key names, no values
+  wrote    example.py    a runnable agent script
+  wrote    .gitignore    keeps .env out of git
+
+Model:      cerebras:gpt-oss-120b
+            cerebras key detected
+            change it on the 'model:' line of effgen.yaml
+
+Spend cap:  $1.00 a day across all runs (already configured)
+            'effgen cost set-budget N' changes it
+            'effgen cost clear-budget' removes it
+
+[1;36mNext three commands[0m
+  1. cp .env.example .env  # then paste one key into it
+  2. effgen doctor  # confirm effGen sees it
+  3. effgen run "What is 25 * 17?" -c effgen.yaml
+
+💡 Tip: effgen code --plan proposes the change and its diffs without writing anything.

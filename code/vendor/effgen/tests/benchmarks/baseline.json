@@ -1,0 +1,10 @@
+{
+  "agent_init_no_tools_ms": 0.02,
+  "agent_init_with_tools_ms": 0.03,
+  "calculator_latency_ms": 0.072,
+  "e2e_simple_query_ms": 0.05,
+  "e2e_tool_query_ms": 0.52,
+  "timestamp": "2026-03-06T01:43:16.278878Z",
+  "python_version": "3.9.12",
+  "note": "Baseline captured for effGen v0.1.1"
+}

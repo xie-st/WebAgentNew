@@ -1,0 +1,41 @@
+# Controls what goes into the source distribution (sdist). The wheel contents
+# are governed separately by [tool.setuptools.packages.find] + package-data in
+# pyproject.toml, so these rules only shape the source tarball.
+
+# Ship the metadata users actually need from a source checkout.
+include LICENSE
+include README.md
+include README_PYPI.md
+include pyproject.toml
+include setup.py
+include requirements.txt
+include requirements-dev.txt
+include requirements-lock.txt
+include requirements-all-lock.txt
+include requirements-all-py314-lock.txt
+recursive-include docs *.md
+
+# Plugin scaffold templates (shipped as package data).
+recursive-include effgen/cli/_templates *.tmpl
+
+# The starter bench suite `effgen bench init` writes (shipped as package data).
+recursive-include effgen/bench/examples *.yaml
+
+# Keep heavy / internal repo material out of the published tarball.
+prune build_plan
+prune node_modules
+prune tools
+prune .github
+# The marketing site and its documentation app are published to GitHub Pages
+# from this repository; they are not part of the Python source distribution.
+prune website
+
+# Never ship build/test/cache artifacts or local secrets.
+global-exclude *.py[cod]
+global-exclude __pycache__
+global-exclude *.so
+global-exclude .coverage .coverage.*
+global-exclude *.log
+exclude .env
+exclude .env.*
+recursive-exclude * .DS_Store

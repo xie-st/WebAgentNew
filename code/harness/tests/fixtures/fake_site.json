@@ -1,0 +1,31 @@
+{
+  "pages": [
+    {
+      "url": "http://fixture.local/",
+      "title": "Search home",
+      "ax_text": "Search page. Enter a query and press the search button.",
+      "elements": [
+        {"role": "textbox", "name": "Search query"},
+        {"role": "button", "name": "Search", "href": "http://fixture.local/results"}
+      ]
+    },
+    {
+      "url": "http://fixture.local/results",
+      "title": "Search results",
+      "ax_text": "Results for the submitted query.",
+      "elements": [
+        {"role": "link", "name": "Sample result", "href": "http://fixture.local/detail"},
+        {"role": "button", "name": "Next page"}
+      ]
+    },
+    {
+      "url": "http://fixture.local/detail",
+      "title": "Result detail",
+      "ax_text": "Detail page with a draft note area.",
+      "elements": [
+        {"role": "textbox", "name": "Draft note"},
+        {"role": "button", "name": "Save draft"}
+      ]
+    }
+  ]
+}

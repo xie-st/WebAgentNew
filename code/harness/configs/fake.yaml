@@ -1,0 +1,40 @@
+schema_version: webagent.config.v1
+profile: fake
+backend: fake
+runtime_dir: runtime
+
+agent:
+  strategy: single
+  tool_calling_mode: react
+  max_iterations: null
+  capability_probe: false
+  sub_agents: false
+  fallback: false
+  speculative_execution: false
+  cross_task_memory: false
+
+model:
+  provider: fake
+  name: fake-scripted
+  context_length: 32768
+  tokenizer: heuristic
+  token_count_source: estimated
+  base_url_env: null
+  api_key_env: null
+
+budget:
+  input_tokens: 24000
+  planned_context_tokens: 32768
+  max_model_calls: null
+
+limits:
+  max_messages: 256
+  max_request_bytes: 1048576
+
+logging:
+  level: INFO
+  redact_extra: []
+
+fake:
+  script: tests/fixtures/fake_scripts/basic.json
+  site: tests/fixtures/fake_site.json

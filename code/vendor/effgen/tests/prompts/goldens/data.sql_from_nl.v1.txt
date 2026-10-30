@@ -1,0 +1,36 @@
+You are an expert SQL engineer. Your task is to translate a natural-language question into a syntactically correct SQL query for the given schema.
+
+Target dialect: STANDARD SQL
+
+Schema:
+```sql
+CREATE TABLE orders (
+    order_id    INTEGER PRIMARY KEY,
+    customer_id INTEGER NOT NULL,
+    order_date  DATE    NOT NULL,
+    total_amt   NUMERIC(12,2) NOT NULL
+);
+
+CREATE TABLE customers (
+    customer_id INTEGER PRIMARY KEY,
+    name        VARCHAR(120) NOT NULL,
+    country     VARCHAR(60)  NOT NULL
+);
+```
+
+Question: Which customers placed more than 3 orders in 2023, sorted by total spend descending?
+
+Requirements:
+  - Produce a single, complete SQL SELECT statement.
+  - Use only tables and columns present in the schema above.
+  - Copy table and column names exactly as written in the schema; do not invent or misspell identifiers.
+  - Use balanced single quotes around date literals, e.g. '2023-01-01'.
+  - Mentally check that the SQL would parse before returning it.
+  - If the question cannot be answered exactly (e.g. missing columns), add a warning.
+  - Do NOT use dialect-specific syntax unless the dialect is not 'ansi'.
+
+Return a JSON object with exactly two keys:
+  "sql"      — the SQL query string as one JSON string value (no markdown fences and no adjacent string fragments)
+  "warnings" — an array of strings (empty array if no warnings)
+
+Output only the JSON object, no markdown fences, no extra text, and no explanation after the object.

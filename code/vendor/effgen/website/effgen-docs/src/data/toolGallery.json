@@ -1,0 +1,336 @@
+{
+ "_comment": "Every gallery snippet, and what it printed when it was run against effGen 1.0.0. Each `code` block is the file that was executed, byte for byte; each `output` is that run's stdout. Regenerate by re-running the snippets and rewriting this file — never edit an output by hand.",
+ "run_at": "2026-08-23",
+ "version": "1.0.0",
+ "items": [
+  {
+   "name": "agentic_search",
+   "code": "import asyncio\nfrom effgen.tools.builtin.agentic_search import AgenticSearch\n\nopen(\"/tmp/effgen-kb.txt\", \"w\").write(\n    \"The context window of gpt-5-nano is 400000 tokens.\\n\"\n    \"The default temperature is 0.7.\\n\"\n)\n\nresult = asyncio.run(AgenticSearch(data_path=\"/tmp/effgen-kb.txt\").execute(\n    query=\"context window\", context_lines=0\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output)",
+   "output": "{'results': [{'content': '>>> The context window of gpt-5-nano is 400000 tokens. <<<\\nThe default temperature is 0.7.', 'match_line': 'The context window of gpt-5-nano is 400000 tokens.', 'file': 'effgen-kb.txt', 'file_path': '/tmp/effgen-kb.txt', 'line_number': 1, 'score': 1.0, 'context_before': [], 'context_after': ['The default temperature is 0.7.'], 'rank': 1}], 'total_matches': 1, 'query_terms': ['context', 'window'], 'search_mode': 'keywords', 'data_path': '/tmp/effgen-kb.txt', 'backend': 'ripgrep', 'summary': 'The context window of gpt-5-nano is 400000 tokens.'}"
+  },
+  {
+   "name": "anthropic_bash",
+   "native": "anthropic"
+  },
+  {
+   "name": "anthropic_computer",
+   "native": "anthropic"
+  },
+  {
+   "name": "anthropic_text_editor",
+   "native": "anthropic"
+  },
+  {
+   "name": "arxiv",
+   "code": "import asyncio\nfrom effgen.tools.builtin.arxiv import ArXivTool\n\nresult = asyncio.run(ArXivTool().execute(\n    operation=\"search\", query=\"attention is all you need\", max_results=3\n))\nif not result.success:\n    raise SystemExit(result.error)\nfor paper in result.output[\"results\"]:\n    print(paper[\"arxiv_id\"], paper[\"title\"])",
+   "output": "2105.02723v1 Do You Even Need Attention? A Stack of Feed-Forward Layers Does Surprisingly Well on ImageNet\n2512.19700v1 \"All You Need\" is Not All You Need for a Paper Title: On the Origins of a Scientific Meme\n1806.11202v1 Quit When You Can: Efficient Evaluation of Ensembles with Ordering Optimization"
+  },
+  {
+   "name": "audio_transcribe",
+   "code": "import asyncio\nfrom effgen.tools.builtin.audio_transcribe import AudioTranscribeTool\n\nresult = asyncio.run(AudioTranscribeTool().execute(\n    operation=\"transcribe\", audio_path=\"/tmp/clip.mp3\", model_size=\"base\"\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"text\"])",
+   "error": "",
+   "note": "Runs, and returns an empty transcript for the short test clip used here. Point it at speech and `output[\"text\"]` carries the transcription."
+  },
+  {
+   "name": "bash",
+   "code": "import asyncio\nfrom effgen.tools.builtin.bash_tool import BashTool\n\nresult = asyncio.run(BashTool().execute(command=\"echo hello from a tool\"))\nprint(result.success, result.output[\"stdout\"].strip())",
+   "output": "True hello from a tool"
+  },
+  {
+   "name": "calculator",
+   "code": "import asyncio\nfrom effgen.tools.builtin.calculator import Calculator\n\nresult = asyncio.run(Calculator().execute(expression=\"2 ** 10 + sqrt(144)\"))\nprint(result.success, result.output[\"result\"])",
+   "output": "True 1036.0"
+  },
+  {
+   "name": "code_execution",
+   "native": "gemini"
+  },
+  {
+   "name": "code_executor",
+   "code": "import asyncio\nfrom effgen.tools.builtin.code_executor import CodeExecutor\n\nresult = asyncio.run(CodeExecutor().execute(language=\"python\", code=\"print('hello')\"))\nprint(result.output[\"stdout\"])",
+   "output": "hello"
+  },
+  {
+   "name": "crypto_price",
+   "code": "import asyncio\nfrom effgen.tools.builtin.finance import CryptoTool\n\nresult = asyncio.run(CryptoTool().execute(coin=\"bitcoin\", vs_currency=\"usd\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"price\"])",
+   "output": "77342.0"
+  },
+  {
+   "name": "currency_converter",
+   "code": "import asyncio\nfrom effgen.tools.builtin.finance import CurrencyConverterTool\n\nresult = asyncio.run(CurrencyConverterTool().execute(\n    amount=100, from_currency=\"USD\", to_currency=\"EUR\"\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"converted\"])",
+   "output": "85.48"
+  },
+  {
+   "name": "dataframe",
+   "code": "import asyncio\nfrom effgen.tools.builtin.data_analysis import DataFrameTool\n\nopen(\"/tmp/effgen-scores.csv\", \"w\").write(\"name,score\\nada,91\\ngrace,97\\n\")\n\nresult = asyncio.run(DataFrameTool().execute(operation=\"head\", file_path=\"/tmp/effgen-scores.csv\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"columns\"])\nprint(result.output[\"data\"])",
+   "output": "['name', 'score']\n[{'name': 'ada', 'score': 91}, {'name': 'grace', 'score': 97}]"
+  },
+  {
+   "name": "datetime",
+   "code": "import asyncio\nfrom effgen.tools.builtin.datetime_tool import DateTimeTool\n\nresult = asyncio.run(DateTimeTool().execute(operation=\"now\", timezone=\"US/Eastern\"))\nprint(result.output[\"datetime\"])",
+   "output": "2026-08-23 18:29:47"
+  },
+  {
+   "name": "discord_webhook",
+   "code": "import asyncio\nfrom effgen.tools.builtin.discord_webhook import DiscordWebhookTool\n\nresult = asyncio.run(DiscordWebhookTool().execute(\n    operation=\"post\", content=\"Build passed\", username=\"effGen\"\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"data\"][\"ok\"])",
+   "error": "Tool execution failed: DiscordWebhookTool requires credentials that are not configured: DISCORD_WEBHOOK_URL.\n\nSet DISCORD_WEBHOOK_URL or pass webhook_url per call.\n\nSet DISCORD_WEBHOOK_URL in the environment or in the project .env file, then re-run.",
+   "note": "Needs `DISCORD_WEBHOOK_URL`. Without it the call is refused before anything is sent, and the error names the variable."
+  },
+  {
+   "name": "docker",
+   "code": "import asyncio\nfrom effgen.tools.builtin.devops import DockerTool\n\nresult = asyncio.run(DockerTool().execute(operation=\"ps\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"stdout\"])",
+   "error": "",
+   "note": "Runs. The output is whatever `docker ps` prints, which is an empty table on a host with no running containers."
+  },
+  {
+   "name": "docx",
+   "code": "import asyncio\nfrom effgen.tools.builtin.docx import DOCXTool\n\nresult = asyncio.run(DOCXTool().execute(operation=\"text\", path=\"/tmp/effgen-demo.docx\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"text\"])",
+   "output": "Quarterly report\nRevenue rose to 4.2M."
+  },
+  {
+   "name": "email_draft",
+   "code": "import asyncio\nfrom effgen.tools.builtin.communication import EmailDraftTool\n\nresult = asyncio.run(EmailDraftTool().execute(\n    to=[\"alice@example.com\"],\n    subject=\"Meeting tomorrow\",\n    body=\"Hi Alice, can we meet at 10am?\",\n))\nprint(result.output[\"draft\"])",
+   "output": "To: alice@example.com\nSubject: Meeting tomorrow\n\nHi Alice, can we meet at 10am?"
+  },
+  {
+   "name": "email_imap",
+   "code": "import asyncio\nfrom effgen.tools.builtin.email_imap import EmailIMAPTool\n\nresult = asyncio.run(EmailIMAPTool().execute(operation=\"fetch_recent\", folder=\"INBOX\", n=5))\nif not result.success:\n    raise SystemExit(result.error)\nfor message in result.output[\"data\"][\"messages\"]:\n    print(message[\"subject\"], message[\"from\"])",
+   "error": "Tool execution failed: EmailIMAPTool requires credentials that are not configured: IMAP_HOST, IMAP_USER, IMAP_PASSWORD.\n\nSet IMAP_HOST, IMAP_USER, IMAP_PASSWORD, and optionally IMAP_PORT.\n\nSet IMAP_HOST, IMAP_USER, IMAP_PASSWORD in the environment or in the project .env file, then re-run.",
+   "note": "Needs `IMAP_HOST`, `IMAP_USER` and `IMAP_PASSWORD`. Without them the call is refused before a connection is opened."
+  },
+  {
+   "name": "email_smtp",
+   "code": "import asyncio\nfrom effgen.tools.builtin.email_smtp import EmailSMTPTool\n\nresult = asyncio.run(EmailSMTPTool().execute(\n    operation=\"send\",\n    to=\"alice@example.com\",\n    subject=\"Hello from effGen\",\n    body=\"This message was sent by an agent.\",\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"accepted\"])",
+   "error": "Tool execution failed: EmailSMTPTool requires credentials that are not configured: SMTP_HOST, SMTP_USER, SMTP_PASSWORD.\n\nSet SMTP_HOST, SMTP_USER, SMTP_PASSWORD, and optionally SMTP_PORT/SMTP_FROM.\n\nSet SMTP_HOST, SMTP_USER, SMTP_PASSWORD in the environment or in the project .env file, then re-run.",
+   "note": "Needs `SMTP_HOST`, `SMTP_USER` and `SMTP_PASSWORD`. Without them the call is refused before a connection is opened."
+  },
+  {
+   "name": "excel",
+   "code": "import asyncio\nfrom effgen.tools.builtin.excel import ExcelTool\n\ntool = ExcelTool()\nsheets = asyncio.run(tool.execute(operation=\"sheets\", path=\"/tmp/effgen-demo.xlsx\"))\nif not sheets.success:\n    raise SystemExit(sheets.error)\nprint(sheets.output[\"sheets\"])\n\nrows = asyncio.run(tool.execute(\n    operation=\"read_sheet\", path=\"/tmp/effgen-demo.xlsx\", sheet_name=\"Sheet1\"\n))\nprint(rows.output[\"rows\"][:3])",
+   "output": "['Sheet1']\n[['name', 'score'], ['ada', 91], ['grace', 97]]"
+  },
+  {
+   "name": "file_operations",
+   "code": "import asyncio\nfrom effgen.tools.builtin.file_ops import FileOperations\n\nfiles = FileOperations(allowed_directories=[\"/tmp\"])\nasyncio.run(files.execute(operation=\"write\", path=\"/tmp/effgen-demo.txt\", content=\"two lines\\nof text\\n\"))\nresult = asyncio.run(files.execute(operation=\"read\", path=\"/tmp/effgen-demo.txt\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"data\"])",
+   "output": "two lines\nof text"
+  },
+  {
+   "name": "geocode",
+   "code": "import asyncio\nfrom effgen.tools.builtin.geocode import GeocodeTool\n\nresult = asyncio.run(GeocodeTool().execute(\n    operation=\"geocode\", address=\"1600 Amphitheatre Pkwy, Mountain View, CA\"\n))\nif not result.success:\n    raise SystemExit(result.error)\ndata = result.output[\"data\"]\nprint(data[\"lat\"], data[\"lon\"])",
+   "output": "37.4224858 -122.0855846"
+  },
+  {
+   "name": "git",
+   "code": "import asyncio\nfrom effgen.tools.builtin.devops import GitTool\n\nresult = asyncio.run(GitTool().execute(operation=\"log\", cwd=\".\", n=3))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"stdout\"])",
+   "output": "ad32586 (HEAD -> main, origin/main, origin/HEAD) docs: wire the eighteen written pages into the route table\n5e5e8d3 docs: add the generation controls and structured output page\ne241907 docs: add the tool calling page"
+  },
+  {
+   "name": "github",
+   "code": "import asyncio\nfrom effgen.tools.builtin.knowledge import GitHubTool\n\nresult = asyncio.run(GitHubTool().execute(query=\"effGen\", kind=\"repositories\", max_results=3))\nif not result.success:\n    raise SystemExit(result.error)\nfor repo in result.output[\"results\"]:\n    print(repo[\"full_name\"], repo[\"stars\"])",
+   "output": "ctrl-gaurav/effGen 191\neffgenlyapin29081983/effgenlyapin29081983 0\neffgen4/effgen4.github.io 0"
+  },
+  {
+   "name": "google_search",
+   "native": "gemini"
+  },
+  {
+   "name": "hackernews",
+   "code": "import asyncio\nfrom effgen.tools.builtin.hackernews import HackerNewsTool\n\nresult = asyncio.run(HackerNewsTool().execute(operation=\"top_stories\", n=3))\nif not result.success:\n    raise SystemExit(result.error)\nfor story in result.output[\"data\"][\"stories\"]:\n    print(story[\"title\"][:70])",
+   "output": "I spent $266 and four AI models to own my tablet. GLM-5.3 finished it \nGLM-5.3 (open-weight) beat Anthropic/OpenAI models – for 1/5 the cost\nHow Complex Systems Fail (1998)"
+  },
+  {
+   "name": "http",
+   "code": "import asyncio\nfrom effgen.tools.builtin.devops import HTTPTool\n\nresult = asyncio.run(HTTPTool().execute(method=\"GET\", url=\"https://httpbin.org/get\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"status\"])",
+   "output": "200"
+  },
+  {
+   "name": "image_caption",
+   "code": "import asyncio\nfrom effgen.tools.builtin.image_caption import ImageCaptionTool\n\nresult = asyncio.run(ImageCaptionTool().execute(operation=\"caption\", image_path=\"/tmp/chart.png\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"caption\"])",
+   "output": "A simple bar chart displays four columns of increasing height."
+  },
+  {
+   "name": "image_info",
+   "code": "import asyncio\nfrom effgen.tools.builtin.image_info import ImageInfoTool\n\nresult = asyncio.run(ImageInfoTool().execute(operation=\"info\", image_path=\"/tmp/qr.png\"))\nif not result.success:\n    raise SystemExit(result.error)\ndata = result.output[\"data\"]\nprint(data[\"width\"], data[\"height\"], data[\"format\"], data[\"mode\"])",
+   "output": "330 330 PNG RGB"
+  },
+  {
+   "name": "json_tool",
+   "code": "import asyncio\nfrom effgen.tools.builtin.json_tool import JSONTool\n\nresult = asyncio.run(JSONTool().execute(\n    operation=\"query\", data='{\"a\": [1, 2, 3]}', query=\"$.a[*]\"\n))\nprint(result.output[\"result\"])",
+   "output": "[1, 2, 3]"
+  },
+  {
+   "name": "language_detect",
+   "code": "import asyncio\nfrom effgen.tools.builtin.language_detect import LanguageDetectTool\n\nresult = asyncio.run(LanguageDetectTool().execute(operation=\"detect\", text=\"Bonjour le monde\"))\nprint(result.output[\"language\"], result.output[\"confidence\"])",
+   "output": "fr 1.0"
+  },
+  {
+   "name": "maps",
+   "code": "import asyncio\nfrom effgen.tools.builtin.maps import MapsTool\n\nresult = asyncio.run(MapsTool().execute(\n    operation=\"render\", lat=37.42, lon=-122.08, zoom=13, dest=\"/tmp/map.png\"\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"data\"][\"file\"])",
+   "output": "/tmp/map.png"
+  },
+  {
+   "name": "multimodal_describe",
+   "code": "import asyncio\nfrom effgen.tools.builtin.multimodal_describe import MultimodalDescribeTool\n\nresult = asyncio.run(MultimodalDescribeTool().execute(\n    file_path=\"/tmp/chart.png\", prompt=\"What does this chart show?\"\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"description\"])",
+   "output": "This image is a simple bar chart showing a **positive trend** or **growth**.\n\nBecause there are no labels, axes, or numbers, it cannot be interpreted as specific data. However, visually, it represents four distinct categories or time periods where the value increases steadily from left to right."
+  },
+  {
+   "name": "news",
+   "code": "import asyncio\nfrom effgen.tools.builtin.news import NewsTool\n\nresult = asyncio.run(NewsTool().execute(operation=\"top_headlines\", max_results=3))\nif not result.success:\n    raise SystemExit(result.error)\nfor article in result.output[\"articles\"]:\n    print(article[\"source\"], \"-\", article[\"title\"][:70])",
+   "output": "BBC World News - Zelensky should be asked what he knew about government corruption, sac\nBBC World News - Trump says Canada wants 'benefits' of being US state after trade talks\nBBC World News - Guinea rubbish landfill collapse kills 30"
+  },
+  {
+   "name": "notification",
+   "code": "import asyncio\nfrom effgen.tools.builtin.communication import NotificationTool\n\nresult = asyncio.run(NotificationTool().execute(\n    message=\"Nightly evaluation finished\", title=\"effGen\", level=\"info\"\n))\nprint(result.success, result.output)",
+   "output": "True {'title': 'effGen', 'message': 'Nightly evaluation finished', 'shown': False, 'reason': 'plyer not installed (pip install plyer)'}"
+  },
+  {
+   "name": "ocr",
+   "code": "import asyncio\nfrom effgen.tools.builtin.ocr import OCRTool\n\nresult = asyncio.run(OCRTool().execute(\n    operation=\"extract\", image_path=\"/tmp/scan.png\", lang=\"eng\"\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"text\"])",
+   "output": "Invoice 4817 Total 236.00 USD"
+  },
+  {
+   "name": "openai_code_interpreter",
+   "native": "openai"
+  },
+  {
+   "name": "openai_file_search",
+   "native": "openai"
+  },
+  {
+   "name": "openai_web_search",
+   "native": "openai"
+  },
+  {
+   "name": "pdf",
+   "code": "import asyncio\nfrom effgen.tools.builtin.pdf import PDFTool\n\nresult = asyncio.run(PDFTool().execute(operation=\"text\", path=\"/tmp/effgen-demo.pdf\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"text\"][:200])",
+   "output": "Quarterly report\nRevenue rose to 4.2M."
+  },
+  {
+   "name": "plot",
+   "code": "import asyncio\nfrom effgen.tools.builtin.data_analysis import PlotTool\n\nresult = asyncio.run(PlotTool().execute(\n    chart_type=\"line\", x=[1, 2, 3, 4], y=[1, 4, 9, 16], title=\"Squares\"\n))\nprint(result.success, result.output[\"file_path\"])",
+   "output": "True /tmp/effgen_plot_o30gqlej.png"
+  },
+  {
+   "name": "pubmed",
+   "code": "import asyncio\nfrom effgen.tools.builtin.pubmed import PubMedTool\n\nresult = asyncio.run(PubMedTool().execute(\n    operation=\"search\", query=\"CRISPR gene editing\", max_results=3\n))\nif not result.success:\n    raise SystemExit(result.error)\nfor article in result.output[\"results\"]:\n    print(article[\"pmid\"], article[\"title\"][:70])",
+   "output": "42632040 Neoantigen in cancer immunotherapy: mechanism, therapeutic strategies \n42629331 Long-term in vivo CRISPR/Cas9 gene editing in liver triggers host immu\n42628215 Evaluation of germline transmission of electroporation-mediated double"
+  },
+  {
+   "name": "python_repl",
+   "code": "import asyncio\nfrom effgen.tools.builtin.python_repl import PythonREPL\n\nrepl = PythonREPL()\nasyncio.run(repl.execute(code=\"x = [i**2 for i in range(5)]\"))\nresult = asyncio.run(repl.execute(code=\"print(sum(x))\"))\nprint(result.output[\"stdout\"])",
+   "output": "30"
+  },
+  {
+   "name": "qr_generate",
+   "code": "import asyncio\nfrom effgen.tools.builtin.qr_generate import QRGenerateTool\n\nresult = asyncio.run(QRGenerateTool().execute(\n    operation=\"generate\", data=\"https://effgen.org\", output_path=\"/tmp/qr.png\"\n))\nprint(result.output[\"saved_path\"])",
+   "output": "/tmp/qr.png"
+  },
+  {
+   "name": "qr_read",
+   "code": "import asyncio\nfrom effgen.tools.builtin.qr_read import QRReadTool\n\nresult = asyncio.run(QRReadTool().execute(operation=\"read\", image_path=\"/tmp/qr.png\"))\nif not result.success:\n    raise SystemExit(result.error)\nfor code in result.output[\"codes\"]:\n    print(code[\"data\"])",
+   "output": "https://effgen.org"
+  },
+  {
+   "name": "reddit",
+   "code": "import asyncio\nfrom effgen.tools.builtin.reddit import RedditTool\n\nresult = asyncio.run(RedditTool().execute(\n    operation=\"subreddit_top\", subreddit=\"python\", time_filter=\"day\", n=3\n))\nif not result.success:\n    raise SystemExit(result.error)\nfor post in result.output[\"data\"][\"posts\"]:\n    print(post[\"title\"][:70])",
+   "error": "Reddit blocked this request (HTTP 403). Reddit rejects unauthenticated API traffic from some networks and redirects it to a login page; retry from another network or use an authenticated Reddit client.",
+   "note": "Reddit rejects unauthenticated API traffic from data-centre networks with HTTP 403, which is what this host gets. From a residential network the same call returns posts."
+  },
+  {
+   "name": "retrieval",
+   "code": "import asyncio\nfrom effgen.tools.builtin.retrieval import Retrieval\n\nprint(Retrieval().metadata.description)\nprint([p.name for p in Retrieval().metadata.parameters])",
+   "output": "Search a knowledge base using semantic similarity. Returns the most relevant documents/passages for a given query. Use this tool when you need to find information from the indexed knowledge base.\n['query', 'top_k', 'score_threshold', 'diversity', 'filter_metadata']"
+  },
+  {
+   "name": "rss_feed",
+   "code": "import asyncio\nfrom effgen.tools.builtin.rss import RSSFeedTool\n\nresult = asyncio.run(RSSFeedTool().execute(\n    operation=\"latest\", url=\"https://feeds.bbci.co.uk/news/rss.xml\", n=3\n))\nif not result.success:\n    raise SystemExit(result.error)\nfor entry in result.output[\"entries\"]:\n    print(entry[\"title\"])",
+   "output": "Police aborted pursuit about 10 seconds before fatal crash, watchdog says\nCrossCountry cancels 'almost all' UK services after power cut\nTrump says Canada wants 'benefits' of being US state after trade talks collapse"
+  },
+  {
+   "name": "semantic_scholar",
+   "code": "import asyncio\nfrom effgen.tools.builtin.semantic_scholar import SemanticScholarTool\n\nresult = asyncio.run(SemanticScholarTool().execute(\n    operation=\"search\", query=\"large language models survey\", max_results=3\n))\nif not result.success:\n    raise SystemExit(result.error)\nfor paper in result.output[\"results\"]:\n    print(paper[\"paperId\"], paper[\"title\"][:70])",
+   "output": "f43b8a87a96f8abc2467b90538b643a6061416e9 Software Testing With Large Language Models: Survey, Landscape, and Vi"
+  },
+  {
+   "name": "slack_draft",
+   "code": "import asyncio\nfrom effgen.tools.builtin.communication import SlackDraftTool\n\nresult = asyncio.run(SlackDraftTool().execute(channel=\"#general\", text=\"Deployment complete!\"))\nprint(result.output[\"draft\"])",
+   "output": "[#general]: Deployment complete!"
+  },
+  {
+   "name": "slack_webhook",
+   "code": "import asyncio\nfrom effgen.tools.builtin.slack_webhook import SlackWebhookTool\n\nresult = asyncio.run(SlackWebhookTool().execute(operation=\"post\", text=\"Deployment complete\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"data\"][\"ok\"])",
+   "error": "Tool execution failed: SlackWebhookTool requires credentials that are not configured: SLACK_WEBHOOK_URL.\n\nSet SLACK_WEBHOOK_URL or pass webhook_url per call.\n\nSet SLACK_WEBHOOK_URL in the environment or in the project .env file, then re-run.",
+   "note": "Needs `SLACK_WEBHOOK_URL`. Without it the call is refused before anything is sent, and the error names the variable."
+  },
+  {
+   "name": "stackoverflow",
+   "code": "import asyncio\nfrom effgen.tools.builtin.knowledge import StackOverflowTool\n\nresult = asyncio.run(StackOverflowTool().execute(query=\"python async await\", max_results=3))\nif not result.success:\n    raise SystemExit(result.error)\nfor question in result.output[\"results\"]:\n    print(question[\"title\"][:70])",
+   "output": "Simplest async/await example possible in Python\n&quot;Fire and forget&quot; python async/await\nAre the async/await keywords in python 3.5 inspired by async/await in "
+  },
+  {
+   "name": "stats",
+   "code": "import asyncio\nfrom effgen.tools.builtin.data_analysis import StatsTool\n\nresult = asyncio.run(StatsTool().execute(operation=\"mean\", data=[1, 2, 3, 4, 5]))\nprint(result.output[\"result\"])",
+   "output": "3.0"
+  },
+  {
+   "name": "stock_price",
+   "code": "import asyncio\nfrom effgen.tools.builtin.finance import StockPriceTool\n\nresult = asyncio.run(StockPriceTool().execute(symbol=\"AAPL\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"price\"], result.output[\"currency\"])",
+   "output": "309.35 USD"
+  },
+  {
+   "name": "system_info",
+   "code": "import asyncio\nfrom effgen.tools.builtin.devops import SystemInfoTool\n\nresult = asyncio.run(SystemInfoTool().execute(kind=\"cpu\"))\nprint(result.output[\"cpu\"][\"percent\"])",
+   "output": "18.0"
+  },
+  {
+   "name": "text_processing",
+   "code": "import asyncio\nfrom effgen.tools.builtin.text_processing import TextProcessingTool\n\nresult = asyncio.run(TextProcessingTool().execute(operation=\"word_count\", text=\"Hello world!\"))\nprint(result.output[\"word_count\"])",
+   "output": "2"
+  },
+  {
+   "name": "translate",
+   "code": "import asyncio\nfrom effgen.tools.builtin.translate import TranslateTool\n\nresult = asyncio.run(TranslateTool().execute(\n    operation=\"translate\", text=\"Hello, world!\", source=\"en\", target=\"fr\"\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"translated_text\"])",
+   "output": "Bonjour, monde !"
+  },
+  {
+   "name": "url_context",
+   "native": "gemini"
+  },
+  {
+   "name": "url_fetch",
+   "code": "import asyncio\nfrom effgen.tools.builtin.url_fetch import URLFetchTool\n\nresult = asyncio.run(URLFetchTool().execute(url=\"https://example.com\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"title\"])\nprint(result.output[\"text\"][:120])",
+   "output": "Example Domain\nExample Domain\nExample Domain\nThis domain is for use in documentation examples without needing permission. Avoid use in "
+  },
+  {
+   "name": "weather",
+   "code": "import asyncio\nfrom effgen.tools.builtin.weather import WeatherTool\n\nresult = asyncio.run(WeatherTool().execute(operation=\"current\", lat=37.42, lon=-122.08))\nif not result.success:\n    raise SystemExit(result.error)\ndata = result.output[\"data\"]\nprint(data[\"temperature\"], data[\"conditions\"])",
+   "output": "21.1 Overcast"
+  },
+  {
+   "name": "web_search",
+   "code": "import asyncio\nfrom effgen.tools.builtin.web_search import WebSearch\n\nresult = asyncio.run(WebSearch().execute(query=\"effGen agent framework\", num_results=3))\nif not result.success:\n    raise SystemExit(result.error)\nfor hit in result.output:\n    print(hit[\"title\"], \"-\", hit[\"url\"])",
+   "output": "effGen - Production AI Agent Framework for SLMs - https://effgen.org/examples/multi-agent\nGitHub - jay-junghoo/effgen: effGen: Enabling Small Language Models... - https://github.com/jay-junghoo/effgen\nEffGen: Enabling Small Language Models as Capable Autonomous... - https://arxiv.org/pdf/2602.00887"
+  },
+  {
+   "name": "wikipedia",
+   "code": "import asyncio\nfrom effgen.tools.builtin.wikipedia_tool import WikipediaTool\n\nresult = asyncio.run(WikipediaTool().execute(\n    operation=\"summary\", query=\"transformer neural network\", sentences=2\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"title\"])\nprint(result.output[\"summary\"][:200])",
+   "output": "Transformer (deep learning)\nIn deep learning, the transformer is a family of artificial neural network architectures based on the multi-head attention mechanism, in which input data such as text, images, or audio, is  converted "
+  },
+  {
+   "name": "wolfram_alpha",
+   "code": "import asyncio\nfrom effgen.tools.builtin.knowledge import WolframAlphaTool\n\nresult = asyncio.run(WolframAlphaTool().execute(query=\"integrate x^2 from 0 to 1\"))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"answer\"])",
+   "error": "Tool execution failed: Wolfram Alpha API key missing. Set WOLFRAM_ALPHA_APPID env var.",
+   "note": "Needs `WOLFRAM_ALPHA_APPID`. Without it the call is refused before the request is built."
+  },
+  {
+   "name": "youtube_metadata",
+   "code": "import asyncio\nfrom effgen.tools.builtin.youtube_metadata import YouTubeMetadataTool\n\nresult = asyncio.run(YouTubeMetadataTool().execute(\n    operation=\"metadata\", video_id=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\"\n))\nif not result.success:\n    raise SystemExit(result.error)\ninfo = result.output[\"data\"]\nprint(info[\"title\"], \"|\", info[\"uploader\"])",
+   "output": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster) | Rick Astley"
+  },
+  {
+   "name": "youtube_transcript",
+   "code": "import asyncio\nfrom effgen.tools.builtin.youtube_transcript import YouTubeTranscriptTool\n\nresult = asyncio.run(YouTubeTranscriptTool().execute(\n    operation=\"get_transcript\", video_id=\"dQw4w9WgXcQ\", lang=\"en\"\n))\nif not result.success:\n    raise SystemExit(result.error)\nprint(result.output[\"data\"][\"full_text\"][:120])",
+   "output": "[♪♪♪] ♪ We're no strangers to love ♪ ♪ You know the rules\nand so do I ♪ ♪ A full commitment's\nwhat I'm thinking of ♪ ♪ Y"
+  }
+ ]
+}

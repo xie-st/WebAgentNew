@@ -1,0 +1,7 @@
+Drug interaction query fixture (for testing only):
+
+Drugs: warfarin, aspirin, ibuprofen
+Patient notes: Elderly adult, atrial fibrillation, no known renal impairment.
+
+Context: Warfarin is an anticoagulant; aspirin and ibuprofen are NSAIDs that
+affect platelet function and may increase bleeding risk when combined with warfarin.

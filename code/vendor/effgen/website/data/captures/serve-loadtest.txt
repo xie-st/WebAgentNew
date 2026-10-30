@@ -1,0 +1,19 @@
+Server mode: url=http://127.0.0.1:8214  model=openai:gpt-5-nano
+Starting load test  scenario=fixed  concurrency=4  duration=20.0s
+────────────────────────────────────────────────────
+  Load Test Report — fixed
+────────────────────────────────────────────────────
+  Concurrency   : 4
+  Duration      : 20.0s
+  Total requests: 18865
+  Successful    : 9
+  Failed        : 18856
+  Error rate    : 99.95%
+  Error types   : rate_limited=18856
+  Throughput    : 942.89 req/s
+  Latency p50   : 3.5ms
+  Latency p95   : 4.1ms
+  Latency p99   : 4.4ms
+  Latency mean  : 4.2ms
+  Latency stdev : 37.2ms
+────────────────────────────────────────────────────

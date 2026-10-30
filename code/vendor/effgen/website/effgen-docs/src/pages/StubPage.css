@@ -1,0 +1,45 @@
+/* The placeholder a route shows before its page is written. Built out of the
+   same card the callouts use, in the warning accent, so it reads as an
+   interruption rather than as content. */
+.stub-notice {
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px dashed var(--warning);
+  border-radius: var(--radius-md);
+  padding: 1.5rem 1.75rem;
+  margin: 0 0 2rem;
+  color: var(--text-secondary);
+}
+
+.stub-notice-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  color: var(--warning);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.stub-notice p {
+  margin: 0 0 0.75rem;
+  line-height: 1.75;
+}
+
+.stub-notice p:last-child {
+  margin-bottom: 0;
+}
+
+.stub-source {
+  /* Not inline-flex: the path is long and has to be able to wrap. */
+  overflow-wrap: break-word;
+}
+
+.stub-source svg {
+  vertical-align: -1px;
+  margin-left: 0.3rem;
+}
+
+.stub-source code {
+  font-size: 0.85em;
+}
