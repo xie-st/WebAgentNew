@@ -1,0 +1,55 @@
+{
+  "pdf": "../WebAgent_方案报告.pdf",
+  "compiler": "Local MiKTeX XeLaTeX",
+  "pages": [
+    {
+      "page": 1,
+      "characters": 1208,
+      "size_pt": [
+        595.28,
+        841.89
+      ],
+      "out_of_page_characters": 0
+    },
+    {
+      "page": 2,
+      "characters": 828,
+      "size_pt": [
+        595.28,
+        841.89
+      ],
+      "out_of_page_characters": 0
+    },
+    {
+      "page": 3,
+      "characters": 1079,
+      "size_pt": [
+        595.28,
+        841.89
+      ],
+      "out_of_page_characters": 0
+    },
+    {
+      "page": 4,
+      "characters": 1517,
+      "size_pt": [
+        595.28,
+        841.89
+      ],
+      "out_of_page_characters": 0
+    }
+  ],
+  "page_count": 4,
+  "byte_size": 217007,
+  "sha256": "f1edd529194acc3102bee7c2cd1c5433b06645729350196e73251b067dde3664",
+  "paper_links": 11,
+  "figures": 3,
+  "pseudocode_blocks": 1,
+  "blank_sections": [
+    "第三阶段：实验验证",
+    "实验结果",
+    "最终设计"
+  ],
+  "visual_review": "All final PNG pages inspected; no clipping, overlap, broken glyphs or table overflow.",
+  "text_and_layout_checks": "passed"
+}
