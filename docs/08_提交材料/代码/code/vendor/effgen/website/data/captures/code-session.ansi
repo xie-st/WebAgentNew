@@ -1,0 +1,73 @@
+
+[1;36meffGen v1.0.0 · code[0m
+Model: gemini-3.1-flash-lite
+Workspace: /data/wang/gks/effgen-demo/textkit
+Repo: textkit · branch main · clean tree · 4 file(s)
+Project instructions: /data/wang/gks/effgen-demo/textkit/AGENTS.md
+Permissions: ask — confirm every write and every command
+Describe a change and press Enter.  End a line with \ for multi-line.
+Slash commands (type / for the menu): /help  /plan  /review  /run  /test  /diff  /apply 
+/undo  /context  /add  /model  /git  /exit
+code · gemini-3.1-flash-lite · ask › /help
+[3m                                    Coding commands                                     [0m
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃[36m [0m[36mCommand [0m[36m [0m┃[36m [0m[36mDoes                                                                     [0m[36m [0m┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│[32m [0m[32m/help   [0m[32m [0m│ Show this help (or type just / for the menu)                              │
+│[32m [0m[32m/plan   [0m[32m [0m│ Propose a change without writing it:  /plan add retries to fetch.py       │
+│[32m [0m[32m/review [0m[32m [0m│ Review, read-only, without writing or running anything:  /review          │
+│[32m          [0m│ [uncommitted|staged|<rev>]                                                │
+│[32m [0m[32m/run    [0m[32m [0m│ Run a shell command in the workspace:  /run ls -la                        │
+│[32m [0m[32m/test   [0m[32m [0m│ Run tests in the workspace:  /test [pytest args]                          │
+│[32m [0m[32m/diff   [0m[32m [0m│ Show the edits staged by the last /plan (or the last turn's edits)        │
+│[32m [0m[32m/apply  [0m[32m [0m│ Apply the staged edits:  /apply [n]  (n = one edit by number)             │
+│[32m [0m[32m/reject [0m[32m [0m│ Discard the staged edits:  /reject [n]                                    │
+│[32m [0m[32m/undo   [0m[32m [0m│ Reverse the last applied edit(s):  /undo [n]                              │
+│[32m [0m[32m/context[0m[32m [0m│ Show the files in context and their token/size estimate (/context refresh │
+│[32m          [0m│ re-reads the project layout)                                              │
+│[32m [0m[32m/add    [0m[32m [0m│ Add a workspace file to context:  /add src/app.py                         │
+│[32m [0m[32m/drop   [0m[32m [0m│ Remove a file from context:  /drop src/app.py                             │
+│[32m [0m[32m/mode   [0m[32m [0m│ Show or set the permission mode:  /mode ask|auto-edit|yes|plan            │
+│[32m [0m[32m/model  [0m[32m [0m│ Hot-swap the active model:  /model gpt-5-nano                             │
+│[32m [0m[32m/tools  [0m[32m [0m│ List the coding tools the agent can call                                  │
+│[32m [0m[32m/cost   [0m[32m [0m│ Session token + cost total                                                │
+│[32m [0m[32m/trace  [0m[32m [0m│ Show the last turn's reasoning/tool steps                                 │
+│[32m [0m[32m/git    [0m[32m [0m│ Git for the workspace:  /git [status|diff|log|branch|show|remote] · /git  │
+│[32m          [0m│ staged (pull the staged diff into context) · /git commit [message]        │
+│[32m [0m[32m/reset  [0m[32m [0m│ Clear the conversation memory (keep files-in-context)                     │
+│[32m [0m[32m/clear  [0m[32m [0m│ Reset live context (memory + files) but keep the session on disk          │
+│[32m [0m[32m/compact[0m[32m [0m│ Summarize the conversation so far to extend a long session                │
+│[32m [0m[32m/save   [0m[32m [0m│ Save this coding session to a file:  /save [name]                         │
+│[32m [0m[32m/session[0m[32m [0m│ Show, name or resume the session id:  /session [id]  (the same store as   │
+│[32m          [0m│ `effgen code --session-id`)                                               │
+│[32m [0m[32m/load   [0m[32m [0m│ Load a saved coding session:  /load [name|number]                         │
+│[32m [0m[32m/doctor [0m[32m [0m│ Run a quick environment check                                             │
+│[32m [0m[32m/exit   [0m[32m [0m│ Leave the coding agent (also: /quit, exit, quit)                          │
+└──────────┴───────────────────────────────────────────────────────────────────────────┘
+code · gemini-3.1-flash-lite · ask › /mode
+Permission mode: ask — confirm every write and every command
+Change with:  /mode ask | auto-edit | yes | plan
+code · gemini-3.1-flash-lite · ask › /context
+
+[1;36mFiles in context[0m
+Workspace: /data/wang/gks/effgen-demo/textkit
+Repo: textkit · branch main · clean tree · 4 file(s)
+Project instructions: /data/wang/gks/effgen-demo/textkit/AGENTS.md
+Project layout in the prompt: 4 file(s), 4 line(s) — /context refresh to re-read
+Files pinned with /add: (none) — add one with /add <file>
+code · gemini-3.1-flash-lite · ask › /git
+
+[1;36mGit — status[0m
+## main
+[2m  'staged' pulls the staged diff into the conversation; 'commit' records this session's [0m
+[2medits after confirming.[0m
+code · gemini-3.1-flash-lite · ask › /cost
+
+[1;36mSession cost[0m
+Turns: 0
+Tokens: 0
+Cost: $0.00
+code · gemini-3.1-flash-lite · ask › /exit
+Goodbye!
+
+💡 Tip: effgen code writes and runs code in your workspace, showing each edit as a diff.

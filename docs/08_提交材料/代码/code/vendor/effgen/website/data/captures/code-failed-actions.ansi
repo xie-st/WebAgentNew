@@ -1,0 +1,83 @@
+Workspace: /data/wang/gks/effgen-demo/textkit
+Repo: textkit · branch main · clean tree · 4 file(s)
+Project instructions: /data/wang/gks/effgen-demo/textkit/AGENTS.md
+Permissions: yes — apply writes, runs and shell commands without asking
+2026-08-20 12:50:02,222 - effgen.security.sandbox - WARNING - 
+┌─────────────────────────────────────────────────────────────┐
+│  effGen SANDBOX WARNING                                      │
+│                                                              │
+│  Code execution is using SubprocessSandbox, which provides   │
+│  PARTIAL isolation only.                                     │
+│                                                              │
+│  Limitations:                                                │
+│  • Executed code can READ any host file the calling          │
+│    process's user can read — reads are NOT confined          │
+│  • Writes are confined to the run's working directory only   │
+│    where the kernel allows it; each result reports what was  │
+│    enforced in 'filesystem_confined' / 'writable_root'       │
+│  • Network isolation via unshare (may require privileges)    │
+│  • Memory limit is advisory, not hard-enforced               │
+│                                                              │
+│  To confine reads as well, install Docker and ensure the     │
+│  daemon is running and accessible by the current user.       │
+└─────────────────────────────────────────────────────────────┘
+
+[1;36mnew file textkit/case.py (+12/-0)[0m
+[2m--- a/textkit/case.py[0m
+[2m+++ b/textkit/case.py[0m
+[36m@@ -0,0 +1,12 @@[0m
+[1;32m+"""Title-case each word."""[0m
+[1;32m+[0m
+[1;32m+[0m
+[1;32m+def title_case(text: str) -> str:[0m
+[1;32m+    """Return `text` with each word title-cased.[0m
+[1;32m+[0m
+[1;32m+    Raises TypeError if text is not a string.[0m
+[1;32m+    """[0m
+[1;32m+    if not isinstance(text, str):[0m
+[1;32m+        raise TypeError("text must be a string")[0m
+[1;32m+    # Split on whitespace and capitalize each word (first char uppercase, rest [0m
+[1;32mlowercase)[0m
+[1;32m+    return " ".join(word.capitalize() for word in text.split())[0m
+[1;32m  ✓ Write textkit/case.py (+12/-0)[0m
+[1;31m  ✗ Run bash: # Running pytest after adding files pytest -q — failed: Code exited with [0m
+[1;31mstatus 137: bash: line 2: 142 Killed pytest -q[0m
+2026-08-20 12:51:01,716 - effgen.tools.base_tool - WARNING - Tool 'python_repl': ignoring unknown parameters {'language'}
+[1;31m  ✗ Run python: # Running pytest after adding files pytest -q — failed: NameError: name [0m
+[1;31m'pytest' is not defined Traceback (most recent call last): File [0m
+[1;31m"/data/wang/gks/Development/effgen_dev/…[0m
+[1;36medit textkit/__init__.py (+2/-1)[0m
+[2m--- a/textkit/__init__.py[0m
+[2m+++ b/textkit/__init__.py[0m
+[36m@@ -1,5 +1,6 @@[0m
+ """Small text helpers."""
+ 
+ from .wrap import wrap_words
+[1;32m+from .case import title_case[0m
+ 
+[1;31m-__all__ = ["wrap_words"][0m
+[1;32m+__all__ = ["wrap_words", "title_case"][0m
+[1;32m  ✓ Write textkit/__init__.py (+2/-1)[0m
+[1;32m╭─[0m[1;32m─────────────────────────────────[0m[1;32m [0m[1;32mRecovered answer[0m[1;32m [0m[1;32m─────────────────────────────────[0m[1;32m─╮[0m
+[1;32m│[0m """Small text helpers."""                                                            [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m from .wrap import wrap_words                                                         [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m [1mall[0m = ["wrap_words"] | """Wrap a string onto lines of at most [1;36;40mwidth[0m characters."""   [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m def wrap_words(text: str, width: int = 40) -> list[str]: if not isinstance(text,     [1;32m│[0m
+[1;32m│[0m str): raise TypeError("text must be a string") lines: list[str] = [] line = "" for   [1;32m│[0m
+[1;32m│[0m word in text.split(): if line and len(line) + 1 + len(word) > width:                 [1;32m│[0m
+[1;32m│[0m lines.append(line) line = word else: line = f"{line} {word}".strip() if line:        [1;32m│[0m
+[1;32m│[0m lines.append(line) return lines | /data/wang/gks/effgen-demo/textkit/textkit/case.py [1;32m│[0m
+[1;32m│[0m | from textkit import wrap_words                                                     [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m def test_wraps_at_width(): assert wrap_words("a b c d e", width=3) == ["a b", "c d", [1;32m│[0m
+[1;32m│[0m "e"] | /data/wang/gks/effgen-demo/textkit/textkit/[1minit[0m.py                            [1;32m│[0m
+[1;32m╰──────────────────────────────────────────────────────────────────────────────────────╯[0m
+[32m✓[0m Done in 69.5s · 6 tools · 14,523 tokens · $0.0056
+Tool calling: hybrid — provider tool API first, falling back to the text
+[33m⚠ The model did not write this answer; it is the last tool result, after the model [0m
+[33mrepeated the same call.[0m
+Files written in /data/wang/gks/effgen-demo/textkit: textkit/case.py, 
+textkit/__init__.py

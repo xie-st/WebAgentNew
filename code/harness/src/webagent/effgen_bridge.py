@@ -39,6 +39,7 @@ from effgen.core.agent_interactive import (
     InteractiveToolRequest,
 )
 from effgen.core.agent_response import AgentResponse
+from effgen.core.thread_budget import MIN_CONTEXT_BUDGET_TOKENS
 from effgen.prompts.tool_contract import ToolUsePolicy
 from effgen.tools.base_tool import (
     BaseTool,
@@ -89,6 +90,12 @@ class LoopSettings:
     max_format_corrections: int = 2
     max_iterations: int | None = None
     max_turns_without_progress: int | None = None
+    # The completion-check tool the caller may register for the same loop. When
+    # it is named in ``external_tools`` the loop yields the call instead of
+    # executing it, so the driver can run the finish gate while the generator is
+    # still alive and send the refusal back as the tool's result.
+    finish_tool_name: str = "request_finish"
+    max_finish_rejections: int = 2
 
     def __post_init__(self) -> None:
         if not isinstance(self.external_tools, frozenset):
@@ -97,6 +104,10 @@ class LoopSettings:
             raise BridgeError("at least one external tool is required")
         if self.max_format_corrections < 0:
             raise BridgeError("max_format_corrections must be >= 0")
+        if self.max_finish_rejections < 0:
+            raise BridgeError("max_finish_rejections must be >= 0")
+        if not isinstance(self.finish_tool_name, str) or not self.finish_tool_name.strip():
+            raise BridgeError("finish_tool_name must be a non-empty string")
         if self.max_iterations is not None and self.max_iterations < 1:
             raise BridgeError("max_iterations must be a positive integer or None")
 
@@ -386,6 +397,13 @@ def build_effgen_config(
     ):
         if getattr(agent_settings, disabled):
             raise BridgeError(f"phase 1 requires agent.{disabled} to be false")
+    context_budget = int(app.budget.input_tokens)
+    if context_budget < MIN_CONTEXT_BUDGET_TOKENS:
+        raise BridgeError(
+            f"budget.input_tokens={context_budget} is below EffGen's minimum context "
+            f"budget {MIN_CONTEXT_BUDGET_TOKENS}; the project value is passed through "
+            "unchanged rather than silently raised"
+        )
     return EffGenAgentConfig(
         model=model,
         tools=list(tools),
@@ -401,6 +419,10 @@ def build_effgen_config(
         tool_use=ToolUsePolicy.AUTO,
         max_turns_without_progress=None,
         enable_streaming=False,
+        # The project's per-run prompt budget is the native context budget: a
+        # plain int makes EffGen compact its own conversation at this count
+        # instead of deriving "auto" from the declared window.
+        context_budget=context_budget,
     )
 
 
@@ -471,6 +493,7 @@ class EffGenLoopDriver:
         runtime: HarnessToolRuntime,
         model_name: str | None = None,
         settings: LoopSettings | None = None,
+        completion_gate: Callable[[object], Any] | None = None,
     ) -> None:
         if not isinstance(session, Session):
             raise BridgeError("EffGenLoopDriver needs a webagent Session")
@@ -483,15 +506,30 @@ class EffGenLoopDriver:
         self.runtime = runtime
         self.settings = settings or LoopSettings()
         self.model_name = model_name or getattr(agent, "model_name", None)
+        # Optional phase-2 finish check. It is called only when the generator
+        # produced a completed answer; a refusal turns that answer into an
+        # honest incomplete end instead of closing the run as complete.
+        self.completion_gate = completion_gate
         self._generator: Any = None
         self._pending_request: InteractiveToolRequest | None = None
         self._pending_action: WebAction | None = None
         self._awaiting_environment: WebAction | None = None
         self._corrections: list[dict[str, Any]] = []
+        self._finish_rejections = 0
         self._model_turn = 0
+        # The tool that produced the action currently awaiting the environment's
+        # observation. Kept so a deferred handoff can name the truthful result.
+        self._awaiting_tool: str | None = None
         self._terminal: DriverStep | None = None
         self._closed = False
         self._started = False
+        # Optional G-wave context hooks. Both stay None unless the official entry
+        # installs a protector, so the driver's text and send path are unchanged.
+        # ``context_note_provider`` returns the harness necessary-context block to
+        # append to the prompt this turn; ``final_send_hook`` runs once before
+        # each model call with the exact prompt about to be sent.
+        self.context_note_provider: Callable[[], str] | None = None
+        self.final_send_hook: Callable[[Any], Any] | None = None
 
     # ------------------------------------------------------------------ state
     @property
@@ -518,9 +556,21 @@ class EffGenLoopDriver:
     def corrections(self) -> tuple[Mapping[str, Any], ...]:
         return tuple(self._corrections)
 
+    @property
+    def finish_rejections(self) -> int:
+        """How many request_finish refusals were returned to the same loop."""
+
+        return self._finish_rejections
+
     # ------------------------------------------------------------------- drive
-    def start(self) -> DriverStep:
-        """Open the generator and advance to its first request or answer."""
+    def start(self, *, note: str | None = None) -> DriverStep:
+        """Open the generator and advance to its first request or answer.
+
+        ``note`` is an optional program-side context line appended after the
+        initial observation. The control/recovery wiring uses it for a restarted
+        branch (snapshot loaded, generator stack not restored, unresolved side
+        effects). It never replaces the task text or the observation.
+        """
 
         if self._closed:
             raise BridgeError("driver is closed")
@@ -541,6 +591,9 @@ class EffGenLoopDriver:
             # element number. EffGen's task string is the only pre-loop content,
             # so attach the canonical observation view exactly once.
             task_prompt = task_prompt + "\n\n" + render_observation(session.observation)
+        if note is not None and str(note).strip():
+            task_prompt = task_prompt + "\n\n" + str(note).strip()
+        task_prompt = self._with_context_note(task_prompt)
         self._generator = self.agent.run_interactive(
             task_prompt,
             external_tools=self.settings.external_tools,
@@ -552,21 +605,81 @@ class EffGenLoopDriver:
         )
         return self._pump(None, send=False)
 
-    def take_action(self) -> WebAction:
-        """Consume the proposed action and hand it to the environment once."""
+    def take_action(
+        self,
+        *,
+        before_dispatch: Callable[[WebAction], None] | None = None,
+    ) -> WebAction:
+        """Consume the proposed action and hand it to the environment once.
+
+        ``before_dispatch`` runs after the deadline check and before
+        ``Session.consume``, with the still-proposed action. It is the ledger's
+        pre-dispatch slot: returning normally licenses the dispatch, raising
+        aborts it. The hook must not change the action or execute it; if it
+        raises, the proposal stays unconsumed so the caller can cancel or retry
+        after re-observing.
+        """
 
         if self._pending_action is None or self._pending_request is None:
             raise BridgeError("no page action is waiting for the environment")
         if self._awaiting_environment is not None:
             raise BridgeError("the previous action has not been answered yet")
         self.session.check_deadline("action dispatch")
-        action = self.session.consume(self._pending_action.action_id)
+        action = self._pending_action
+        if before_dispatch is not None:
+            before_dispatch(action)
+        tool = self._pending_request.tool if self._pending_request is not None else action.op.value
+        action = self.session.consume(action.action_id)
         self._awaiting_environment = action
+        self._awaiting_tool = tool
         self._pending_action = None
         return action
 
-    def accept_observation(self, observation: Observation) -> DriverStep:
-        """Ingest the environment's observation and resume the same generator."""
+    def reject_action(self, exc: ActionRejected) -> DriverStep:
+        """Send an action-serialization refusal into the same loop.
+
+        The environment adapter can refuse a proposal before it reaches the
+        platform (for example an empty non-submitting ``type``). That refusal is
+        a format correction, not a terminal task failure: the unconsumed
+        proposal is dropped, the correction text becomes the next model turn's
+        tool result, and the same generator continues. The shared correction
+        allowance still applies; when it is spent the run ends as
+        ``FORMAT_ERROR``.
+        """
+
+        if self._closed:
+            raise BridgeError("driver is closed")
+        if self._pending_action is None or self._pending_request is None:
+            raise BridgeError("no pending page action to reject")
+        if self._awaiting_environment is not None:
+            raise BridgeError("cannot reject an action that is already in flight")
+        request = self._pending_request
+        self.session.drop_proposal("format_rejected")
+        self._pending_action = None
+        self._pending_request = None
+        step = self._record_rejection(request, exc)
+        if step is not None:
+            return step
+        return self._pump(exc.correction, send=True)
+
+    def accept_observation(
+        self,
+        observation: Observation,
+        *,
+        ingest: bool = True,
+        note: str | None = None,
+    ) -> DriverStep:
+        """Ingest the environment's observation and resume the same generator.
+
+        ``ingest=False`` is for a caller that already recorded the observation
+        truthfully (the control/recovery entry records the in-flight result before
+        it decides whether to pause). The caller must then have installed exactly
+        this observation as the session's current one.
+
+        ``note`` is an optional program-side line appended to the tool result the
+        model reads next. It carries a bounded recovery instruction; it never
+        replaces the observation.
+        """
 
         action = self._awaiting_environment
         if action is None:
@@ -577,9 +690,20 @@ class EffGenLoopDriver:
         # is local bookkeeping, not new model or action work. The deadline is
         # checked before the loop is resumed, so a task that has run out of time
         # still owes no further turn.
-        self.session.ingest_observation(observation)
-        tool = self._pending_request.tool if self._pending_request is not None else action.op.value
+        if ingest:
+            self.session.ingest_observation(observation)
+        else:
+            current = self.session.observation
+            if current is None or current.observation_id != observation.observation_id:
+                raise BridgeError(
+                    "accept_observation(ingest=False) needs the entry to install the "
+                    "same observation first"
+                )
+        tool = self._pending_request.tool if self._pending_request is not None else (
+            self._awaiting_tool or action.op.value
+        )
         self._awaiting_environment = None
+        self._awaiting_tool = None
         self._pending_action = None
         self._pending_request = None
         try:
@@ -587,7 +711,91 @@ class EffGenLoopDriver:
         except DeadlineExceeded as exc:
             return self._finish_deadline(exc)
         text = _render_action_result(tool, observation)
+        if note is not None and str(note).strip():
+            text = text + "\n\n" + str(note).strip()
+        text = self._with_context_note(text)
         return self._pump(text, send=True)
+
+    def expand_pending(self, sub_actions: Sequence[WebAction]) -> tuple[WebAction, ...]:
+        """Replace the pending proposal with an ordered sub-action sequence.
+
+        The caller (the official step path) owns the queue; the driver only
+        moves the session from "one proposal" to "the proposal is not dispatched".
+        """
+
+        if self._closed:
+            raise BridgeError("driver is closed")
+        if self._pending_action is None or self._pending_request is None:
+            raise BridgeError("no pending page action to expand")
+        if self._awaiting_environment is not None:
+            raise BridgeError("cannot expand an action that is already in flight")
+        expanded = self.session.expand_proposal(self._pending_action.action_id, sub_actions)
+        self._pending_action = None
+        return expanded
+
+    def dispatch_split(self, action: WebAction) -> WebAction:
+        """Propose and consume one sub-action of an expanded proposal."""
+
+        if self._closed:
+            raise BridgeError("driver is closed")
+        if self._pending_request is None:
+            raise BridgeError("no expanded proposal is open")
+        self.session.propose(action)
+        dispatched = self.session.consume(action.action_id)
+        self._awaiting_environment = None
+        return dispatched
+
+    def accept_split_observation(
+        self,
+        observation: Observation,
+        *,
+        final: bool,
+    ) -> DriverStep | None:
+        """Ingest one sub-action's observation.
+
+        An intermediate observation is local bookkeeping only: it is logged and
+        bound to its sub-action but never sent to the model. The final observation
+        is the result of the model's original tool call, so the same generator is
+        resumed with it.
+        """
+
+        if self._closed:
+            raise BridgeError("driver is closed")
+        if self._pending_request is None:
+            raise BridgeError("no expanded proposal is open")
+        tool = self._pending_request.tool
+        self.session.ingest_observation(observation)
+        self._pending_action = None
+        if not final:
+            return None
+        self._pending_request = None
+        text = _render_action_result(tool, observation)
+        text = self._with_context_note(text)
+        return self._pump(text, send=True)
+
+    def abort_split(
+        self,
+        *,
+        status: DriverStatus,
+        message: str,
+        finish_reason: TerminationReason,
+        claim: str,
+    ) -> DriverStep:
+        """End the task when an expanded action stops part-way through.
+
+        Only the executed prefix is recorded; the original multi-line text is
+        never reported as fully entered.
+        """
+
+        self._pending_action = None
+        self._pending_request = None
+        self._awaiting_environment = None
+        return self._terminate(
+            status,
+            message,
+            finish_reason=finish_reason,
+            claim=claim,
+        )
 
     def resume(self, observation: Observation) -> DriverStep:
         """Resume a paused task from a fresh observation.
@@ -619,7 +827,103 @@ class EffGenLoopDriver:
             "the next step; do not replay the old action blindly.\n"
             + render_observation(observation)
         )
+        text = self._with_context_note(text)
         return self._pump(text, send=True)
+
+    def resume_after_takeover(
+        self,
+        feedback: Observation,
+        fresh: Observation,
+        *,
+        note: str | None = None,
+    ) -> DriverStep:
+        """Resume the same loop after a user handoff, without faking the action.
+
+        The action that was in flight when the user took control really executed,
+        and its feedback observation was recorded truthfully by the entry before
+        the handoff. That result is reported as the tool's result. The page was
+        then re-observed after the explicit resume, so the fresh observation is
+        the current one and the earlier element numbers are invalid.
+
+        ``feedback`` must already be the session's recorded observation for the
+        executed action, and ``fresh`` the session's current observation. No
+        action is replayed and no completion is claimed.
+        """
+
+        if self._closed:
+            raise BridgeError("driver is closed")
+        action = self._awaiting_environment
+        if action is None:
+            raise BridgeError("no executed action is awaiting a handoff resume")
+        session = self.session
+        if session.state is not SessionState.RUNNING:
+            raise BridgeError("resume_after_takeover needs a running session")
+        if session.in_flight_action is not None or session.proposed_action is not None:
+            raise BridgeError("resume_after_takeover cannot run with an open action")
+        if not isinstance(feedback, Observation) or not isinstance(fresh, Observation):
+            raise BridgeError("resume_after_takeover needs two normal observations")
+        current = session.observation
+        if current is None or current.observation_id != fresh.observation_id:
+            raise BridgeError("the fresh observation must be the session's current one")
+        # The request belongs to the executed action whose feedback is reported
+        # here; it is not a live proposal and is closed by this resume.
+        request = self._pending_request
+        tool = (
+            request.tool
+            if request is not None
+            else (self._awaiting_tool or action.op.value)
+        )
+        self._awaiting_environment = None
+        self._awaiting_tool = None
+        self._pending_request = None
+        head = (
+            f"Result of {tool}: the action was executed before the browser was handed "
+            "to the user, and its recorded feedback is below. The user then took "
+            "control (login or verification); the page has since been re-observed, so "
+            "the element numbers and proposals built from the earlier observation are "
+            "no longer valid. Use only the fresh observation below. Do not claim this "
+            "action had a different effect and do not replay it blindly.\n"
+            + _render_action_result(tool, feedback)
+        )
+        text = (
+            head
+            + "\n\nFresh observation after the user resumed:\n"
+            + render_observation(fresh)
+        )
+        if note is not None and str(note).strip():
+            text = text + "\n\n" + str(note).strip()
+        text = self._with_context_note(text)
+        return self._pump(text, send=True)
+
+    def finish_incomplete(
+        self,
+        message: str,
+        *,
+        claim: str,
+        feedback_ingested: bool = False,
+    ) -> DriverStep:
+        """End the run honestly as incomplete without inventing a completed answer.
+
+        ``feedback_ingested`` says the entry already recorded the executed
+        action's feedback, so the driver's deferred-feedback slot is closed and the
+        session can finish. No completion is claimed.
+        """
+
+        if self._closed:
+            raise BridgeError("driver is closed")
+        if self._terminal is not None:
+            return self._terminal
+        if feedback_ingested:
+            self._awaiting_environment = None
+            self._awaiting_tool = None
+            self._pending_action = None
+            self._pending_request = None
+        return self._terminate(
+            DriverStatus.INCOMPLETE,
+            message,
+            finish_reason=TerminationReason.INCOMPLETE,
+            claim=claim,
+        )
 
     def close(self) -> None:
         """Close the generator without inventing a result for an unanswered call."""
@@ -663,10 +967,31 @@ class EffGenLoopDriver:
     def _before_step(self, iteration: int) -> None:
         self.session.check_deadline(f"loop turn {iteration}")
 
+    def _with_context_note(self, text: str) -> str:
+        """Append the harness necessary-context block; a no-op when disabled."""
+
+        provider = self.context_note_provider
+        if provider is None:
+            return text
+        note = str(provider() or "")
+        if not note:
+            return text
+        return text + "\n\n" + note
+
     def _before_model_call(self, prompt: Any) -> None:
         session = self.session
         session.check_deadline("model call")
+        # Close out instead of starting a call the platform would kill at the
+        # deadline; this raises DeadlineMarginReached (a DeadlineExceeded) which
+        # the pump turns into the normal terminal deadline step.
+        session.check_model_call_margin("model call")
         self._model_turn += 1
+        hook = self.final_send_hook
+        if hook is not None:
+            # G-wave: the last check before this exact prompt reaches the model
+            # adapter. It raises rather than letting a protected region be sent
+            # incomplete or an over-budget request go out silently.
+            hook(prompt)
         if getattr(self.agent.model, "records_model_calls", False):
             # The adapter emits one post-request event per HTTP attempt (including
             # retries) with real usage/latency. A pre-call placeholder here would
@@ -747,6 +1072,20 @@ class EffGenLoopDriver:
                 return self._finish_error(
                     ProtocolError("the loop asked for an action with no current observation")
                 )
+            if (
+                request.tool == self.settings.finish_tool_name
+                and self.completion_gate is not None
+            ):
+                # The completion check runs while the generator is suspended at
+                # this call. A refusal is sent back as the tool's result and the
+                # same loop continues; acceptance closes the run as complete.
+                terminal, feedback = self._request_finish_decision()
+                if terminal is not None:
+                    return terminal
+                assert feedback is not None
+                value = feedback
+                send = True
+                continue
             try:
                 guarded = guard_requests(
                     [ToolRequest(request.tool, dict(request.arguments))], observation
@@ -812,6 +1151,155 @@ class EffGenLoopDriver:
             finish_reason=TerminationReason.ERROR,
         )
 
+    def _request_finish_decision(self) -> tuple[DriverStep | None, str | None]:
+        """Run the completion gate for an in-loop ``request_finish`` call.
+
+        ``None`` plus feedback text means the refusal was returned to the same
+        generator. A step means the run ended here (accepted, exhausted or the
+        check itself failed).
+        """
+
+        try:
+            decision = self.completion_gate(None)  # type: ignore[misc]
+        except Exception as exc:  # noqa: BLE001 - never claim completion on a failed check
+            self._emit_completion_event(
+                stage="request_finish",
+                accepted=None,
+                decision=None,
+                attempt=self._finish_rejections + 1,
+                continued=False,
+                error=f"{type(exc).__name__}: {exc}",
+            )
+            return (
+                self._terminate(
+                    DriverStatus.INCOMPLETE,
+                    f"completion check failed: {type(exc).__name__}: {exc}; "
+                    "the run ends incomplete",
+                    finish_reason=TerminationReason.INCOMPLETE,
+                    claim="completion was not confirmed",
+                ),
+                None,
+            )
+        remaining = tuple(str(item) for item in getattr(decision, "remaining_goal_ids", ()))
+        conditions = tuple(
+            str(item) for item in getattr(decision, "remaining_conditions", ())
+        )
+        reason = str(getattr(decision, "reason", "completion refused"))
+        state_status = str(getattr(decision, "state_completion_status", "incomplete"))
+        accepted = bool(getattr(decision, "accepted", False))
+        if accepted:
+            self._emit_completion_event(
+                stage="request_finish",
+                accepted=True,
+                decision=decision,
+                attempt=self._finish_rejections,
+                continued=False,
+            )
+            return (
+                self._terminate(
+                    DriverStatus.COMPLETED,
+                    "completion verified: every declared requirement is verified",
+                    finish_reason=TerminationReason.COMPLETED,
+                    claim="every declared requirement is verified",
+                ),
+                None,
+            )
+
+        self._finish_rejections += 1
+        continued = self._finish_rejections <= self.settings.max_finish_rejections
+        self._emit_completion_event(
+            stage="request_finish",
+            accepted=False,
+            decision=decision,
+            attempt=self._finish_rejections,
+            continued=continued,
+        )
+        message = (
+            "completion refused; the task is not fully verified. "
+            f"Remaining goals: {list(remaining)}. "
+            f"Remaining conditions: {list(conditions)}. {reason}"
+        )
+        if not continued:
+            return (
+                self._terminate(
+                    DriverStatus.INCOMPLETE,
+                    "completion was refused "
+                    f"{self._finish_rejections} times in this loop; ending honestly "
+                    f"as incomplete. {message}",
+                    finish_reason=TerminationReason.INCOMPLETE,
+                    claim=(
+                        "completion was not confirmed after "
+                        f"{self._finish_rejections} refusals; partial progress is "
+                        "not complete"
+                    ),
+                ),
+                None,
+            )
+        feedback = (
+            "Result of request_finish: completion is NOT confirmed. "
+            f"Remaining goals: {list(remaining)}. "
+            f"Remaining conditions: {list(conditions)}. "
+            f"Reason: {reason}. State completion status: {state_status}. "
+            "Continue working in this same loop: use normal web actions to obtain "
+            "the missing page evidence, record the state you were asked to record, "
+            "then call request_finish again. Do not send a final answer that treats "
+            "partial progress as complete."
+        )
+        return None, feedback
+
+    def _emit_completion_event(
+        self,
+        *,
+        stage: str,
+        accepted: bool | None,
+        decision: Any,
+        attempt: int,
+        continued: bool,
+        error: str | None = None,
+    ) -> None:
+        """Record what the finish check decided and whether the loop continued."""
+
+        observation = self.session.observation
+        result: dict[str, Any] = {
+            "stage": stage,
+            "accepted": accepted,
+            "continued": bool(continued),
+            "attempt": int(attempt),
+        }
+        if stage == "request_finish":
+            result["tool"] = self.settings.finish_tool_name
+        if decision is not None:
+            to_dict = getattr(decision, "to_dict", None)
+            if callable(to_dict):
+                try:
+                    result["decision"] = to_dict()
+                except Exception:  # noqa: BLE001 - diagnostics only
+                    pass
+            for name in (
+                "remaining_goal_ids",
+                "remaining_conditions",
+                "reason",
+                "state_completion_status",
+                "objects_remaining",
+            ):
+                value = getattr(decision, name, None)
+                if value is not None:
+                    result[name] = list(value) if isinstance(value, tuple) else value
+        if error is not None:
+            result["error"] = error
+        try:
+            self.session.logger.emit(
+                "verification",
+                page_id=None if observation is None else observation.page_id,
+                url=None if observation is None else observation.url,
+                observation_id=None
+                if observation is None
+                else observation.observation_id,
+                result=result,
+            )
+        except Exception:  # noqa: BLE001 - logging cannot change the decision
+            pass
+
     def _finish_response(self, response: AgentResponse | None) -> DriverStep:
         if not isinstance(response, AgentResponse):
             return self._finish_error(
@@ -819,17 +1307,79 @@ class EffGenLoopDriver:
             )
         success = bool(getattr(response, "success", False))
         output = str(getattr(response, "output", "") or "")
+        metadata = getattr(response, "metadata", None) or {}
+        detail = str(metadata.get("reason") or "") if isinstance(metadata, dict) else ""
         if success and output.strip():
             reason = TerminationReason.COMPLETED
             claim = output.strip()
             message = output
             status = DriverStatus.COMPLETED
+            if self.completion_gate is not None:
+                try:
+                    decision = self.completion_gate(None)
+                except Exception as exc:  # noqa: BLE001 - never claim completion on a failed check
+                    self._emit_completion_event(
+                        stage="finish_gate",
+                        accepted=None,
+                        decision=None,
+                        attempt=0,
+                        continued=False,
+                        error=f"{type(exc).__name__}: {exc}",
+                    )
+                    remaining = (
+                        f"completion check failed: {type(exc).__name__}: {exc}; "
+                        "run ends incomplete"
+                    )
+                    return self._terminate(
+                        DriverStatus.INCOMPLETE,
+                        remaining,
+                        finish_reason=TerminationReason.INCOMPLETE,
+                        claim="completion was not confirmed",
+                    )
+                accepted = bool(getattr(decision, "accepted", False))
+                if not accepted:
+                    self._emit_completion_event(
+                        stage="finish_gate",
+                        accepted=False,
+                        decision=decision,
+                        attempt=0,
+                        continued=False,
+                    )
+                    remaining = getattr(decision, "remaining_goal_ids", ())
+                    conditions = getattr(decision, "remaining_conditions", ())
+                    detail_text = str(getattr(decision, "reason", "completion refused"))
+                    text = (
+                        "Completion refused; the task is not fully verified. "
+                        f"Remaining goals: {list(remaining)}. "
+                        f"Remaining conditions: {list(conditions)}. "
+                        f"{detail_text}"
+                    )
+                    return self._terminate(
+                        DriverStatus.INCOMPLETE,
+                        text,
+                        finish_reason=TerminationReason.INCOMPLETE,
+                        claim="completion was not confirmed; partial progress is not complete",
+                    )
+                self._emit_completion_event(
+                    stage="finish_gate",
+                    accepted=True,
+                    decision=decision,
+                    attempt=0,
+                    continued=False,
+                )
+        elif detail == "generation_failed":
+            # EffGen reports a failed model generation as a normal return, not an
+            # exception. That is an error, not an incomplete answer.
+            error = metadata.get("error") if isinstance(metadata, dict) else None
+            error_message = ""
+            if isinstance(error, dict):
+                error_message = str(error.get("message") or "")
+            reason = TerminationReason.ERROR
+            claim = "the model generation failed"
+            message = error_message or "the model generation failed"
+            status = DriverStatus.ERROR
         else:
             reason = TerminationReason.INCOMPLETE
-            detail = ""
-            metadata = getattr(response, "metadata", None) or {}
-            if isinstance(metadata, dict):
-                detail = str(metadata.get("reason") or "")
             claim = f"run ended without a completed answer ({detail or 'no answer'})"
             message = detail or "the run ended without an answer"
             status = DriverStatus.INCOMPLETE
@@ -913,6 +1463,7 @@ def create_driver(
     settings: LoopSettings | None = None,
     extra_tools: Iterable[BaseTool] = (),
     artifact_loader: Callable[[str], Any] | None = None,
+    completion_gate: Callable[[object], Any] | None = None,
 ) -> EffGenLoopDriver:
     """Build the runtime, the agent and the driver for one task session."""
 
@@ -920,7 +1471,13 @@ def create_driver(
     agent = build_effgen_agent(
         model, runtime=runtime, app_config=app_config, extra_tools=extra_tools
     )
-    return EffGenLoopDriver(session, agent=agent, runtime=runtime, settings=settings)
+    return EffGenLoopDriver(
+        session,
+        agent=agent,
+        runtime=runtime,
+        settings=settings,
+        completion_gate=completion_gate,
+    )
 
 
 class BackendLoopRunner:

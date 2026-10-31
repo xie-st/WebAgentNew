@@ -1,0 +1,26 @@
+apiVersion: v2
+name: effgen
+description: Agentic AI framework for Small Language Models — API server deployment
+type: application
+version: 1.3.0
+appVersion: "1.3.0"
+
+keywords:
+  - ai
+  - agents
+  - llm
+  - mlops
+  - inference
+
+home: https://github.com/ctrl-gaurav/effGen
+icon: https://raw.githubusercontent.com/ctrl-gaurav/effGen/main/assets/header.svg
+sources:
+  - https://github.com/ctrl-gaurav/effGen
+
+maintainers:
+  - name: Gaurav Srivastava
+    email: gks@vt.edu
+
+annotations:
+  category: AI/ML
+  licenses: Apache-2.0

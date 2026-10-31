@@ -1,0 +1,13 @@
+# Torch constraint for CUDA 13.x drivers (driver >= 580).
+# See constraints-cu124.txt for the full rationale. On a CUDA-13 driver the
+# default PyPI torch wheel is already a cu13x build, so this file mainly pins a
+# known-good, reproducible version rather than fixing a mismatch.
+#
+#     pip install "torch>=2.0,<3" --index-url https://download.pytorch.org/whl/cu130
+#     pip install -e ".[local]" -c constraints-cu130.txt
+
+--extra-index-url https://download.pytorch.org/whl/cu130
+
+torch==2.9.0+cu130
+torchvision==0.24.0+cu130
+torchaudio==2.9.0+cu130

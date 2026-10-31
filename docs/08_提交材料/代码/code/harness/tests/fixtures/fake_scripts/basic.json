@@ -1,0 +1,10 @@
+{
+  "model_name": "fake-scripted",
+  "context_length": 32768,
+  "responses": [
+    "Thought: I need the current observation.\nAction: web_observe\nAction Input: {}",
+    "Thought: Search for the task term.\nAction: web_type\nAction Input: {\"target\": \"1\", \"text\": \"sample query\", \"submit\": false}",
+    "Thought: Click the search button.\nAction: web_click\nAction Input: {\"target\": \"2\"}",
+    "Thought: The task is complete.\nAction: finish\nAction Input: {\"message\": \"offline fixture finished\"}"
+  ]
+}

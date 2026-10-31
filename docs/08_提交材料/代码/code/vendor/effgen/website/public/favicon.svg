@@ -1,0 +1,105 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Main gradient -->
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ff88"/>
+      <stop offset="50%" stop-color="#00c96e"/>
+      <stop offset="100%" stop-color="#00e5ff"/>
+    </linearGradient>
+
+    <!-- Glow gradient -->
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ff88"/>
+      <stop offset="100%" stop-color="#69ffb4"/>
+    </linearGradient>
+
+    <!-- Inner glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Outer glow filter -->
+    <filter id="outerGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Radial gradient for center -->
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#ccffe6"/>
+      <stop offset="100%" stop-color="#00ff88"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Outer hexagon - main shape with glow -->
+  <path
+    d="M20 2L35.5 10.5V29.5L20 38L4.5 29.5V10.5L20 2Z"
+    fill="none"
+    stroke="url(#mainGrad)"
+    stroke-width="2"
+    stroke-linejoin="round"
+    filter="url(#outerGlow)"
+  />
+
+  <!-- Inner hexagon - subtle accent -->
+  <path
+    d="M20 7L30 12.5V27.5L20 33L10 27.5V12.5L20 7Z"
+    fill="none"
+    stroke="url(#glowGrad)"
+    stroke-width="0.75"
+    stroke-linejoin="round"
+    opacity="0.5"
+  />
+
+  <!-- Tech lines - connecting edges -->
+  <g stroke="url(#glowGrad)" stroke-width="0.5" opacity="0.4">
+    <line x1="20" y1="2" x2="20" y2="7"/>
+    <line x1="35.5" y1="10.5" x2="30" y2="12.5"/>
+    <line x1="35.5" y1="29.5" x2="30" y2="27.5"/>
+    <line x1="20" y1="38" x2="20" y2="33"/>
+    <line x1="4.5" y1="29.5" x2="10" y2="27.5"/>
+    <line x1="4.5" y1="10.5" x2="10" y2="12.5"/>
+  </g>
+
+  <!-- Center core - glowing orb -->
+  <circle
+    cx="20"
+    cy="20"
+    r="6"
+    fill="url(#centerGlow)"
+    filter="url(#glow)"
+  />
+
+  <!-- Inner core ring -->
+  <circle
+    cx="20"
+    cy="20"
+    r="4"
+    fill="none"
+    stroke="url(#mainGrad)"
+    stroke-width="1"
+    opacity="0.8"
+  />
+
+  <!-- Center dot - bright core -->
+  <circle
+    cx="20"
+    cy="20"
+    r="2"
+    fill="white"
+    opacity="0.9"
+  />
+
+  <!-- Orbital particles -->
+  <circle cx="20" cy="11" r="1.2" fill="url(#glowGrad)" opacity="0.8"/>
+  <circle cx="27.5" cy="15.5" r="1" fill="url(#glowGrad)" opacity="0.6"/>
+  <circle cx="27.5" cy="24.5" r="1" fill="url(#glowGrad)" opacity="0.6"/>
+  <circle cx="20" cy="29" r="1.2" fill="url(#glowGrad)" opacity="0.8"/>
+  <circle cx="12.5" cy="24.5" r="1" fill="url(#glowGrad)" opacity="0.6"/>
+  <circle cx="12.5" cy="15.5" r="1" fill="url(#glowGrad)" opacity="0.6"/>
+</svg>

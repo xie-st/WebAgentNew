@@ -1,0 +1,35 @@
+{
+  "python": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\.venv\\Scripts\\python.exe",
+  "python_version": "3.12.9",
+  "modules": {
+    "webagent": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\harness\\src\\webagent\\__init__.py",
+    "effgen": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\vendor\\effgen\\effgen\\__init__.py",
+    "webagent.official_agent": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\harness\\src\\webagent\\official_agent.py",
+    "third_party_agent": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\official_client\\third_party_agent\\__init__.py",
+    "third_party_agent.outbound": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\official_client\\third_party_agent\\outbound.py",
+    "third_party_agent.model": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\official_client\\third_party_agent\\model.py",
+    "third_party_agent.browser": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\official_client\\third_party_agent\\browser.py"
+  },
+  "configs": {
+    "fake.yaml": {
+      "profile": "fake",
+      "backend": "fake",
+      "model": "fake-scripted",
+      "sha256": "4c063e5789985edd5b3910db851c0c4549c5ac2148358a585b367eefc8629dd1"
+    },
+    "official.yaml": {
+      "profile": "official",
+      "backend": "official",
+      "model": "platform-unified",
+      "sha256": "da86dfcfa12d03cdf84d79da62778188439dd20f683d89d3000944a0a04ef65c"
+    },
+    "real.yaml": {
+      "profile": "real",
+      "backend": "playwright",
+      "model": "qwen3.6-35b-a3b",
+      "sha256": "603a8aad54b939b362aedea1deee06ee382cbfd18881813f3a521ca45eba2bb2"
+    }
+  },
+  "official_network_connection": "not_started",
+  "model_service_call": "not_started"
+}

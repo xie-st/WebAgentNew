@@ -94,9 +94,12 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
     ToolSpec(
         name="web_type",
         description=(
-            "Type text into an element from the current observation. The platform "
-            "may append to existing content; to replace, click/select and clear "
-            "explicitly. There is no hidden clear flag."
+            "Type text into an element from the current observation. Multi-line "
+            "text may be given directly, including line breaks; the execution "
+            "layer splits it into typing and Enter sub-actions, so do not split "
+            "lines yourself. The platform may append to existing content; to "
+            "replace, click/select and clear explicitly. There is no hidden clear "
+            "flag."
         ),
         parameters=_params(
             {
@@ -104,7 +107,13 @@ TOOL_SPECS: tuple[ToolSpec, ...] = (
                     **_STRING,
                     "description": "Element number from the current observation.",
                 },
-                "text": {**_STRING, "description": "Text to enter."},
+                "text": {
+                    **_STRING,
+                    "description": (
+                        "Text to enter; line breaks are allowed and split by the "
+                        "execution layer."
+                    ),
+                },
                 "submit": {
                     **_BOOL,
                     "description": "Press Enter after typing when true; default false.",

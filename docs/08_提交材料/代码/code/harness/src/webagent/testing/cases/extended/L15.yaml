@@ -1,0 +1,85 @@
+# L15: replace a saved field value, verify it and correct an append.
+# This is a P-wave extension case kept in cases/extended/ so the frozen L01-L07
+# base manifest listing is unchanged. The task first establishes a baseline
+# value through the site's normal Save draft action; the external judge then
+# reads only observable site state (save activity and the current draft) plus
+# the explicit screenshot bundle. No Agent-internal state is consulted.
+case_id: L15
+case_version: "1"
+title: Replace a saved field value and correct a leftover append
+task_template: |
+  On the local Harbor Market site, use the product list to find the single
+  product in {l15_category} priced at most ${l15_max_price} with a rating of at
+  least {l15_min_rating} and in stock. Open its detail page.
+  First save exactly "{l15_initial_text}" into its Review draft field as the
+  baseline note. Then replace the entire field value with exactly
+  "{l15_expected_text}" and click Save draft again. Read the visible field back:
+  if any of the baseline note remains, clear it and save again until the field
+  contains exactly the new note. Take a screenshot after the final save. Do not
+  submit anything. Report the product ID and the final field value.
+
+data_generator:
+  name: catalog
+  params:
+    products: 32
+    posts: 20
+    page_size: 8
+    l01_decoys: 2
+    l01_conditions:
+      category: Audio
+      max_price_cents: 7800
+      min_rating: 4.6
+
+public:
+  start_path: /products
+  task_params:
+    l15_category: Audio
+    l15_max_price: 78
+    l15_min_rating: 4.6
+    l15_initial_text: "Baseline profile note: sturdy, quiet, and easy to clean."
+    l15_expected_text: "Corrected profile note: field value fully replaced."
+
+setup:
+  page_size: 8
+  login_overlay: false
+  verification_prompt: false
+  draft_autosave: false
+  locale: en
+
+completion:
+  method: local_judge
+  criteria:
+    - target product is the unique item matching all public conditions
+    - the baseline note was saved through the site's draft save action
+    - the final saved field value exactly equals the requested new note
+    - no baseline text remains before or after the new note
+    - a screenshot was captured after the final save
+    - no comment was submitted
+    - an append can be detected as a concrete gap and corrected in the same run
+
+fault_plan: []
+
+reset:
+  method: rebuild_database
+  scope: run
+  clears: [activity, drafts, faults, auth]
+  preserves: [case_id, case_version, seed]
+
+support:
+  modes: [fake, local]
+  seeds: [101, 202, 303]
+  reserved_seeds: [404, 505]
+  budget_seconds: 600
+
+hidden:
+  judge:
+    object_type: product
+    role: l01_target
+    expected_count: 1
+    checker: field_replacement
+    field_label: Review draft
+    replaced_text: "Baseline profile note: sturdy, quiet, and easy to clean."
+    expected_text: "Corrected profile note: field value fully replaced."
+    min_saves: 1
+    require_screenshot: true
+    max_submissions: 0

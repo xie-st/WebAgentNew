@@ -1,0 +1,67 @@
+{
+  "source_run": "testround-real-xhs-mate90",
+  "mode": "offline_actual_observation_replay",
+  "live_site_or_model_called": false,
+  "baseline": {
+    "status": "error",
+    "message": "ContextBudgetExceededError: unknown invalid request (model='fake-scripted'): the conversation does not fit: this run may send 24000 prompt tokens of a 32768-token context window and the smallest prompt it can build measures 34402 — the question, the instructions the run is framed by and its most recent work cannot b… (368 characters). Request rejected as invalid — check parameters, prompt size, and any JSON schema.",
+    "model_calls": 2,
+    "native_prompt_tokens": [
+      11256,
+      23022
+    ],
+    "project_prompt_tokens": [
+      11256,
+      23022
+    ],
+    "projections": [],
+    "input_budget": 24000,
+    "evidence_root": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\补丁复验\\observation-budget\\baseline-98eaaf65"
+  },
+  "fixed": {
+    "status": "completed",
+    "message": "observation replay reached the third model call",
+    "model_calls": 3,
+    "native_prompt_tokens": [
+      4295,
+      7321,
+      10357
+    ],
+    "project_prompt_tokens": [
+      4295,
+      7321,
+      10357
+    ],
+    "projections": [
+      {
+        "original_tokens": 9959,
+        "view_tokens": 2998,
+        "max_view_tokens": 3000,
+        "shown_elements": 41,
+        "total_elements": 95,
+        "source": "max(effgen_estimate,project_counter)",
+        "original_preserved": true
+      },
+      {
+        "original_tokens": 11735,
+        "view_tokens": 2994,
+        "max_view_tokens": 3000,
+        "shown_elements": 42,
+        "total_elements": 116,
+        "source": "max(effgen_estimate,project_counter)",
+        "original_preserved": true
+      },
+      {
+        "original_tokens": 11339,
+        "view_tokens": 2995,
+        "max_view_tokens": 3000,
+        "shown_elements": 45,
+        "total_elements": 114,
+        "source": "max(effgen_estimate,project_counter)",
+        "original_preserved": true
+      }
+    ],
+    "input_budget": 24000,
+    "evidence_root": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\补丁复验\\observation-budget\\projected-01bbca96"
+  }
+}

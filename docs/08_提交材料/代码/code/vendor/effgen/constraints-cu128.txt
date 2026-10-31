@@ -1,0 +1,11 @@
+# Torch constraint for CUDA 12.8+ drivers (newer datacenter / Blackwell GPUs).
+# See constraints-cu124.txt for the full rationale.
+#
+#     pip install "torch>=2.0,<3" --index-url https://download.pytorch.org/whl/cu128
+#     pip install -e ".[local]" -c constraints-cu128.txt
+
+--extra-index-url https://download.pytorch.org/whl/cu128
+
+torch==2.7.1+cu128
+torchvision==0.22.1+cu128
+torchaudio==2.7.1+cu128

@@ -1,0 +1,8 @@
+Field: educational technology
+
+Methodology excerpt:
+We collected survey responses from 150 undergraduate students at a single university and asked
+them to rate their agreement with 12 Likert-scale items about AI tool adoption. Data were analyzed
+using descriptive statistics and multiple linear regression without adjusting for multiple
+comparisons. The survey was administered online and participation was voluntary. No control group
+was used. The study period was two weeks during the spring semester.

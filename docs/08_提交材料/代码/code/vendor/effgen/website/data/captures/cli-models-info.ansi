@@ -1,0 +1,22 @@
+
+[1;36mModel: openai:gpt-5-mini[0m
+┌───────────────────────────┬─────────────────┐
+│[1m [0m[1mProvider                 [0m[1m [0m│ openai          │
+│[1m [0m[1mDisplay name             [0m[1m [0m│ gpt-5-mini      │
+│[1m [0m[1mFamily                   [0m[1m [0m│ chat            │
+│[1m [0m[1mContext window           [0m[1m [0m│ 1,047,576       │
+│[1m [0m[1mMax output               [0m[1m [0m│ 32,768          │
+│[1m [0m[1mPrice ($/1M in / out)    [0m[1m [0m│ $0.25/$2        │
+│[1m [0m[1mTool calling             [0m[1m [0m│ yes             │
+│[1m [0m[1mCoding                   [0m[1m [0m│ suitable        │
+│[1m [0m[1mVision                   [0m[1m [0m│ yes             │
+│[1m [0m[1mAudio                    [0m[1m [0m│ no              │
+│[1m [0m[1mFree tier                [0m[1m [0m│ no              │
+│[1m [0m[1mRate limits (rpm/tpm/rpd)[0m[1m [0m│ — / — / —       │
+│[1m [0m[1mDeprecated               [0m[1m [0m│ no              │
+│[1m [0m[1mPrice source             [0m[1m [0m│ bundled-catalog │
+│[1m [0m[1mVerified on              [0m[1m [0m│ 2026-06-17      │
+│[1m [0m[1mAuth ready               [0m[1m [0m│ yes             │
+└───────────────────────────┴─────────────────┘
+
+[2mUse: [0m[2;36meffgen run --provider openai -m gpt-5-mini "..."[0m

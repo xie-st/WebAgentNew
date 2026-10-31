@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 660" width="1280" height="660" role="img" aria-label="How an effGen run flows: your code calls the agent loop, which reaches tools and a model served locally, by a provider, or by any OpenAI-compatible server, and returns a result carrying text, tool calls and cost.">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#03060f"/>
+      <stop offset="1" stop-color="#0b1024"/>
+    </linearGradient>
+    <radialGradient id="neb" cx="50%" cy="30%" r="55%">
+      <stop offset="0" stop-color="#6C63FF" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#6C63FF" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#6C63FF" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+            markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8892b8"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="660" fill="url(#bg)"/>
+  <rect width="1280" height="660" fill="url(#grid)"/>
+  <rect width="1280" height="660" fill="url(#neb)"/>
+
+  <text x="56" y="46" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="24" font-weight="700"
+        fill="#E8ECFF">How a run flows</text>
+  <text x="56" y="70" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12.5" fill="#8892b8">one agent · three ways to reach a model</text>
+  
+  <g>
+    <rect x="56" y="96" width="250" height="118" rx="14"
+          fill="#0a0f22" stroke="#4ECDC4" stroke-opacity="0.5" stroke-width="1.4"/>
+    <rect x="56" y="96" width="250" height="3" rx="1.5" fill="#4ECDC4" opacity="0.9"/>
+    <rect x="56" y="96" width="250" height="118" rx="14" fill="none"
+          stroke="#4ECDC4" stroke-opacity="0.35" stroke-width="3">
+      <animate attributeName="stroke-opacity" values="0.05;0.4;0.05"
+               dur="4s" begin="0.0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="76" y="130" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="16.5"
+          font-weight="700" fill="#E8ECFF">Your code</text>
+    <text x="76" y="158" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">create_agent(...)</text><text x="76" y="179" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">agent.run(task)</text><text x="76" y="200" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">run(session=...)</text>
+  </g>
+  <g>
+    <rect x="360" y="60" width="300" height="190" rx="14"
+          fill="#0a0f22" stroke="#6C63FF" stroke-opacity="0.5" stroke-width="1.4"/>
+    <rect x="360" y="60" width="300" height="3" rx="1.5" fill="#6C63FF" opacity="0.9"/>
+    <rect x="360" y="60" width="300" height="190" rx="14" fill="none"
+          stroke="#6C63FF" stroke-opacity="0.35" stroke-width="3">
+      <animate attributeName="stroke-opacity" values="0.05;0.4;0.05"
+               dur="4s" begin="0.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="380" y="94" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="16.5"
+          font-weight="700" fill="#E8ECFF">Agent loop</text>
+    <text x="380" y="122" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">middleware  before/after</text><text x="380" y="143" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">guardrails  PII · injection</text><text x="380" y="164" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">memory      compaction</text><text x="380" y="185" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">tools       ReAct / native</text><text x="380" y="206" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">raise_on_error=True</text>
+  </g>
+  <g>
+    <rect x="360" y="292" width="300" height="118" rx="14"
+          fill="#0a0f22" stroke="#F5A623" stroke-opacity="0.5" stroke-width="1.4"/>
+    <rect x="360" y="292" width="300" height="3" rx="1.5" fill="#F5A623" opacity="0.9"/>
+    <rect x="360" y="292" width="300" height="118" rx="14" fill="none"
+          stroke="#F5A623" stroke-opacity="0.35" stroke-width="3">
+      <animate attributeName="stroke-opacity" values="0.05;0.4;0.05"
+               dur="4s" begin="1.0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="380" y="326" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="16.5"
+          font-weight="700" fill="#E8ECFF">Tools · 66 built in</text>
+    <text x="380" y="354" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">calculator · web · RAG</text><text x="380" y="375" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">code exec (sandboxed)</text><text x="380" y="396" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">@tool your own</text>
+  </g>
+  <g>
+    <rect x="714" y="60" width="300" height="118" rx="14"
+          fill="#0a0f22" stroke="#FF6B6B" stroke-opacity="0.5" stroke-width="1.4"/>
+    <rect x="714" y="60" width="300" height="3" rx="1.5" fill="#FF6B6B" opacity="0.9"/>
+    <rect x="714" y="60" width="300" height="118" rx="14" fill="none"
+          stroke="#FF6B6B" stroke-opacity="0.35" stroke-width="3">
+      <animate attributeName="stroke-opacity" values="0.05;0.4;0.05"
+               dur="4s" begin="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="734" y="94" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="16.5"
+          font-weight="700" fill="#E8ECFF">Cloud providers · 9</text>
+    <text x="734" y="122" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">openai · gemini · groq</text><text x="734" y="143" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">anthropic · cerebras ...</text><text x="734" y="164" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">cost + tokens per call</text>
+  </g>
+  <g>
+    <rect x="714" y="208" width="300" height="118" rx="14"
+          fill="#0a0f22" stroke="#4CAF50" stroke-opacity="0.5" stroke-width="1.4"/>
+    <rect x="714" y="208" width="300" height="3" rx="1.5" fill="#4CAF50" opacity="0.9"/>
+    <rect x="714" y="208" width="300" height="118" rx="14" fill="none"
+          stroke="#4CAF50" stroke-opacity="0.35" stroke-width="3">
+      <animate attributeName="stroke-opacity" values="0.05;0.4;0.05"
+               dur="4s" begin="2.0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="734" y="242" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="16.5"
+          font-weight="700" fill="#E8ECFF">Any OpenAI-protocol server</text>
+    <text x="734" y="270" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">vLLM · SGLang · TGI</text><text x="734" y="291" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">Ollama · LM Studio</text><text x="734" y="312" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">base_url="http://..."</text>
+  </g>
+  <g>
+    <rect x="714" y="356" width="300" height="118" rx="14"
+          fill="#0a0f22" stroke="#6C63FF" stroke-opacity="0.5" stroke-width="1.4"/>
+    <rect x="714" y="356" width="300" height="3" rx="1.5" fill="#6C63FF" opacity="0.9"/>
+    <rect x="714" y="356" width="300" height="118" rx="14" fill="none"
+          stroke="#6C63FF" stroke-opacity="0.35" stroke-width="3">
+      <animate attributeName="stroke-opacity" values="0.05;0.4;0.05"
+               dur="4s" begin="2.5s" repeatCount="indefinite"/>
+    </rect>
+    <text x="734" y="390" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="16.5"
+          font-weight="700" fill="#E8ECFF">Local engines · 4</text>
+    <text x="734" y="418" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">transformers · vllm</text><text x="734" y="439" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">gguf · mlx (Apple)</text><text x="734" y="460" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">weights stay on device</text>
+  </g>
+  <g>
+    <rect x="1050" y="208" width="182" height="140" rx="14"
+          fill="#0a0f22" stroke="#4ECDC4" stroke-opacity="0.5" stroke-width="1.4"/>
+    <rect x="1050" y="208" width="182" height="3" rx="1.5" fill="#4ECDC4" opacity="0.9"/>
+    <rect x="1050" y="208" width="182" height="140" rx="14" fill="none"
+          stroke="#4ECDC4" stroke-opacity="0.35" stroke-width="3">
+      <animate attributeName="stroke-opacity" values="0.05;0.4;0.05"
+               dur="4s" begin="3.0s" repeatCount="indefinite"/>
+    </rect>
+    <text x="1070" y="242" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="16.5"
+          font-weight="700" fill="#E8ECFF">Result</text>
+    <text x="1070" y="270" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">.text</text><text x="1070" y="291" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">.tool_calls</text><text x="1070" y="312" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">.cost_usd</text><text x="1070" y="333" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">.sources</text>
+  </g><path d="M306 155 L356 155" stroke="#4ECDC4" stroke-width="2" fill="none" opacity="0.75" marker-end="url(#ar)" stroke-dasharray="7 7"><animate attributeName="stroke-dashoffset" values="28;0" dur="1.4s" begin="0.0s" repeatCount="indefinite"/></path><path d="M660 120 L710 120" stroke="#FF6B6B" stroke-width="2" fill="none" opacity="0.75" marker-end="url(#ar)" stroke-dasharray="7 7"><animate attributeName="stroke-dashoffset" values="28;0" dur="1.4s" begin="0.2s" repeatCount="indefinite"/></path><path d="M662 175 L710 250" stroke="#4CAF50" stroke-width="2" fill="none" opacity="0.75" marker-end="url(#ar)" stroke-dasharray="7 7"><animate attributeName="stroke-dashoffset" values="28;0" dur="1.4s" begin="0.4s" repeatCount="indefinite"/></path><path d="M662 215 L710 392" stroke="#6C63FF" stroke-width="2" fill="none" opacity="0.75" marker-end="url(#ar)" stroke-dasharray="7 7"><animate attributeName="stroke-dashoffset" values="28;0" dur="1.4s" begin="0.6s" repeatCount="indefinite"/></path><path d="M510 250 L510 288" stroke="#F5A623" stroke-width="2" fill="none" opacity="0.75" marker-end="url(#ar)" stroke-dasharray="7 7"><animate attributeName="stroke-dashoffset" values="28;0" dur="1.4s" begin="0.8s" repeatCount="indefinite"/></path><path d="M1014 267 L1046 267" stroke="#4ECDC4" stroke-width="2" fill="none" opacity="0.75" marker-end="url(#ar)" stroke-dasharray="7 7"><animate attributeName="stroke-dashoffset" values="28;0" dur="1.4s" begin="1.0s" repeatCount="indefinite"/></path>
+
+  <text x="56" y="556" font-family="'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="15" font-weight="700" fill="#E8ECFF">The 1.0.0 additions</text>
+  <g font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13" fill="#8892b8">
+    <text x="56" y="584">base_url= — drive a server you already run, instead of loading a second copy of the weights</text>
+    <text x="56" y="606">tool_calls — the calls a run made, with arguments, results and timings, not just a count</text>
+    <text x="56" y="628">middleware= · session= · compaction= — extend the loop without patching the framework</text>
+  </g>
+</svg>

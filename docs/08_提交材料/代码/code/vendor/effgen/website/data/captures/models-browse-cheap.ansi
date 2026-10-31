@@ -1,0 +1,26 @@
+
+[1;36mModel Catalog[0m
+[3m                                      Models across providers — showing 10 of 55                                      [0m
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━┓
+┃[1;36m [0m[1;36mProvider[0m[1;36m [0m┃[1;36m [0m[1;36mModel ID                             [0m[1;36m [0m┃[1;36m [0m[1;36mContext[0m[1;36m [0m┃[1;36m [0m[1;36mMax Out[0m[1;36m [0m┃[1;36m [0m[1;36m $/1M in[0m[1;36m [0m┃[1;36m [0m[1;36m$/1M out[0m[1;36m [0m┃[1;36m [0m[1;36mTools[0m[1;36m [0m┃[1;36m [0m[1;36mVision[0m[1;36m [0m┃[1;36m [0m[1;36mFree[0m[1;36m [0m┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━┩
+│[35m [0m[35mhf      [0m[35m [0m│[36m [0m[36mCohereLabs/c4ai-command-a-03-2025    [0m[36m [0m│   8,192 │   8,192 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m [0m[35mhf      [0m[35m [0m│[36m [0m[36mCohereLabs/c4ai-command-r-08-2024    [0m[36m [0m│   8,192 │   8,192 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m [0m[35mhf      [0m[35m [0m│[36m [0m[36mCohereLabs/c4ai-command-r7b-12-2024  [0m[36m [0m│   8,192 │   8,192 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m [0m[35mhf      [0m[35m [0m│[36m [0m[36mCohereLabs/c4ai-command-r7b-arabic-02[0m[36m [0m│   8,192 │   8,192 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m          [0m│[36m [0m[36m-2025                                [0m[36m [0m│         │         │[32m          [0m│[32m          [0m│       │        │      │
+│[35m [0m[35mhf      [0m[35m [0m│[36m [0m[36mCohereLabs/command-a-reasoning-08-202[0m[36m [0m│   8,192 │   8,192 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m          [0m│[36m [0m[36m5                                    [0m[36m [0m│         │         │[32m          [0m│[32m          [0m│       │        │      │
+│[35m [0m[35mhf      [0m[35m [0m│[36m [0m[36mCohereLabs/command-a-translate-08-202[0m[36m [0m│   8,192 │   8,192 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m          [0m│[36m [0m[36m5                                    [0m[36m [0m│         │         │[32m          [0m│[32m          [0m│       │        │      │
+│[35m [0m[35mtogether[0m[35m [0m│[36m [0m[36mdeepcogito/cogito-v1-preview-llama-70[0m[36m [0m│ 131,072 │   4,096 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m          [0m│[36m [0m[36mB                                    [0m[36m [0m│         │         │[32m          [0m│[32m          [0m│       │        │      │
+│[35m [0m[35mtogether[0m[35m [0m│[36m [0m[36mdeepcogito/cogito-v1-preview-llama-70[0m[36m [0m│ 131,072 │   4,096 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m          [0m│[36m [0m[36mB-Turbo                              [0m[36m [0m│         │         │[32m          [0m│[32m          [0m│       │        │      │
+│[35m [0m[35mtogether[0m[35m [0m│[36m [0m[36mdeepcogito/cogito-v1-preview-llama-8B[0m[36m [0m│ 131,072 │   4,096 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │        │      │
+│[35m [0m[35mhf      [0m[35m [0m│[36m [0m[36mgoogle/gemma-3-27b-it                [0m[36m [0m│   8,192 │   8,192 │[32m [0m[32munpriced[0m[32m [0m│[32m [0m[32munpriced[0m[32m [0m│   ✓   │   ✓    │      │
+└──────────┴───────────────────────────────────────┴─────────┴─────────┴──────────┴──────────┴───────┴────────┴──────┘
+
+[2mMore: [0m[2;36m--offset 10[0m[2m for the next page.[0m
+
+[2mPricing source: catalog snapshot. Update: [0m[2;36meffgen models refresh[0m[2m  ·  Detail: [0m[2;36meffgen models info <id>[0m

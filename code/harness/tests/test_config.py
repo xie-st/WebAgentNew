@@ -118,3 +118,34 @@ def test_schema_version_is_checked() -> None:
     raw = load_raw("official.yaml")
     raw["schema_version"] = CONFIG_SCHEMA_VERSION
     parse_config(copy.deepcopy(raw))
+
+def test_official_text_mode_and_deadline_margin_are_explicit_configuration() -> None:
+    official = load_config(CONFIGS / "official.yaml")
+    assert official.official.text_mode == "decompose"
+    assert official.budget.deadline_margin_seconds == 0.0
+    assert official.budget_limits().deadline_margin_seconds == 0.0
+    assert official.summary()["official"]["text_mode"] == "decompose"
+    assert official.summary()["budget"]["deadline_margin_seconds"] == 0.0
+
+    raw = load_raw("official.yaml")
+    raw["budget"].pop("deadline_margin_seconds")
+    assert parse_config(raw).budget_limits().deadline_margin_seconds == 0.0
+
+    raw = load_raw("official.yaml")
+    raw["official"]["text_mode"] = "raw"
+    assert parse_config(raw).official.text_mode == "raw"
+
+    raw = load_raw("official.yaml")
+    raw["official"]["text_mode"] = "escaped"
+    with pytest.raises(ConfigError):
+        parse_config(raw)
+
+    raw = load_raw("real.yaml")
+    raw["official"] = {"text_mode": "raw"}
+    with pytest.raises(ConfigError):
+        parse_config(raw)
+
+    raw = load_raw("official.yaml")
+    raw["budget"]["deadline_margin_seconds"] = -1
+    with pytest.raises(ConfigError):
+        parse_config(raw)

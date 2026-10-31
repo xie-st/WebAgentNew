@@ -1,0 +1,137 @@
+# effGen — Alertmanager-compatible alert rules
+#
+# Import into Prometheus Alertmanager:
+#
+#   alerting:
+#     alertmanagers:
+#       - static_configs:
+#           - targets: ["localhost:9093"]
+#
+# Load via Prometheus config:
+#
+#   rule_files:
+#     - "alert_rules.yaml"
+#
+# Validate with:
+#   promtool check rules alert_rules.yaml
+#
+# All rules use labels:
+#   severity: critical | warning | info
+#   team:     effgen
+#
+# Annotations include:
+#   summary:     One-line description
+#   description: Extended description / runbook pointer
+# ---------------------------------------------------------------------------
+
+groups:
+  - name: effgen.error_rate
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(effgen_model_call_latency_seconds_count{outcome!="ok"}[5m]))
+            /
+            sum(rate(effgen_model_call_latency_seconds_count[5m]))
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          team: effgen
+        annotations:
+          summary: "effGen model call error rate exceeded 5%"
+          description: >
+            The fraction of effgen_model_call_latency_seconds observations
+            with outcome != "ok" has been above 5 % for 10 consecutive minutes.
+            Check provider health, API key validity, and circuit-breaker state.
+            Runbook: https://effgen.org/docs/runbooks/high-error-rate
+
+  - name: effgen.latency
+    rules:
+      - alert: HighP95Latency
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (
+              rate(effgen_model_call_latency_seconds_bucket[5m])
+            )
+          ) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: effgen
+        annotations:
+          summary: "effGen p95 model-call latency exceeded 10 s"
+          description: >
+            The 95th-percentile model-call latency has been above 10 seconds
+            for 5 consecutive minutes.  This may indicate a slow provider,
+            network congestion, or oversized payloads.
+            Runbook: https://effgen.org/docs/runbooks/high-latency
+
+  - name: effgen.cost
+    rules:
+      - alert: CostBurnHigh
+        expr: |
+          sum(increase(effgen_tokens_total{kind="output"}[1h])) * 0.002
+          + sum(increase(effgen_tokens_total{kind="input"}[1h]))  * 0.001
+          > 10
+        for: 0m
+        labels:
+          severity: warning
+          team: effgen
+        annotations:
+          summary: "effGen estimated cost burn exceeded $10 / day"
+          description: >
+            Hourly token consumption projects to more than $10 per day
+            (using approximate pricing: $0.001/1k input, $0.002/1k output).
+            Actual pricing varies by provider and model; calibrate thresholds
+            accordingly.
+            Runbook: https://effgen.org/docs/runbooks/cost-burn
+
+  - name: effgen.slo
+    rules:
+      - alert: SLOFastBurn
+        expr: |
+          effgen_slo_burn_rate > 14.4
+        for: 0m
+        labels:
+          severity: critical
+          team: effgen
+        annotations:
+          summary: "effGen SLO error budget burning at >14.4× rate"
+          description: >
+            The SLO error budget is being consumed at more than 14.4 times
+            the allowed rate (fast-burn alert — based on Google SRE Workbook
+            multi-window / multi-burn-rate alerting).  Immediate investigation
+            is required to avoid exhausting the monthly error budget.
+            Runbook: https://effgen.org/docs/runbooks/slo-fast-burn
+
+      - alert: SLOSlowBurn
+        expr: |
+          effgen_slo_burn_rate > 3.0
+        for: 60m
+        labels:
+          severity: warning
+          team: effgen
+        annotations:
+          summary: "effGen SLO error budget burning at >3× rate (slow-burn)"
+          description: >
+            The SLO error budget is being consumed at more than 3 times the
+            allowed rate, sustained for 1 hour (slow-burn alert).
+            Runbook: https://effgen.org/docs/runbooks/slo-slow-burn
+
+  - name: effgen.circuit_breaker
+    rules:
+      - alert: CircuitBreakerOpen
+        expr: |
+          effgen_circuit_breaker_state == 1
+        for: 1m
+        labels:
+          severity: warning
+          team: effgen
+        annotations:
+          summary: "effGen circuit breaker is OPEN for provider {{ $labels.provider }}"
+          description: >
+            The circuit breaker for provider {{ $labels.provider }} has been
+            open (tripping all requests) for more than 1 minute.  Check
+            provider API health and consider manual recovery.
+            Runbook: https://effgen.org/docs/runbooks/circuit-breaker-open

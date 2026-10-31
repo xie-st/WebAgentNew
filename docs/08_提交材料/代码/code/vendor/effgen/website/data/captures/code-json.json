@@ -1,0 +1,43 @@
+{
+  "task": "list the public helpers this package exports",
+  "answer": "\"\"\"Small text helpers.\"\"\"\n\nfrom .wrap import wrap_words\nfrom .case import title_case\n\n__all__ = [\"wrap_words\", \"title_case\"]",
+  "partial_output": "",
+  "success": true,
+  "reason": "loop_detected",
+  "model": "openai:gpt-5-nano",
+  "provider": "openai",
+  "workspace": "/data/wang/gks/effgen-demo/textkit",
+  "permission_mode": "plan",
+  "tool_calling": "hybrid",
+  "answer_source": "loop_detected",
+  "read_only": false,
+  "review": null,
+  "repo": {
+    "root": "/data/wang/gks/effgen-demo/textkit",
+    "branch": "main",
+    "dirty": true,
+    "staged": 0,
+    "unstaged": 1,
+    "untracked": 1
+  },
+  "commit": null,
+  "files_written": [],
+  "diffs": [],
+  "actions": [],
+  "withheld": [],
+  "iterations": 2,
+  "tool_calls": 1,
+  "tokens": 3608,
+  "cost_usd": 0.00040732,
+  "duration_s": 10.896,
+  "error": null,
+  "coding_suitability": {
+    "model_id": "openai:gpt-5-nano",
+    "provider": "openai",
+    "verdict": "suitable",
+    "reason": "the catalog records tool calling for it",
+    "fix": "",
+    "evidence": "catalog",
+    "measured_on": null
+  }
+}

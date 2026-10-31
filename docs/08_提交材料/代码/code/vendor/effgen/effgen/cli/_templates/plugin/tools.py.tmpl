@@ -1,0 +1,35 @@
+"""Custom tools for the __PLUGIN_NAME__ plugin."""
+
+from effgen.tools.base_tool import (
+    BaseTool,
+    ParameterSpec,
+    ParameterType,
+    ToolCategory,
+    ToolMetadata,
+)
+
+
+class ExampleTool(BaseTool):
+    """An example custom tool — replace with your implementation."""
+
+    def __init__(self):
+        super().__init__(
+            metadata=ToolMetadata(
+                name="example_tool",
+                description="An example tool that echoes input.",
+                category=ToolCategory.DATA_PROCESSING,
+                parameters=[
+                    ParameterSpec(
+                        name="text",
+                        type=ParameterType.STRING,
+                        description="Text to echo",
+                        required=True,
+                    ),
+                ],
+                returns={"type": "object", "properties": {"echo": {"type": "string"}}},
+            )
+        )
+
+    async def _execute(self, **kwargs):
+        text = kwargs.get("text", "")
+        return {"echo": text}

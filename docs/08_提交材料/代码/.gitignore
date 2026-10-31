@@ -1,0 +1,19 @@
+# Local credentials and browser artifacts
+**/agent-connection*.json
+**/*.env
+**/.env*
+**/platform-account.local.json
+**/screenshots/
+**/browser-profile/
+
+# A-batch engineering
+code/effGen/
+.venv/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/*.egg-info/
+runtime/
+!**/example.env
+code/webarena-outbound-client.zip

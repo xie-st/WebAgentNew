@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seed Catalog</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body data-page="home">
+  <header>
+    <h1>Seed Catalog</h1>
+    <p class="muted">Local offline fixture. Search, open one result, preview a draft, never submit.</p>
+  </header>
+  <main>
+    <p id="seed-line" class="muted">Fixture seed: local-seed</p>
+    <form id="search-form" class="search" method="get" action="results.html">
+      <div>
+        <label for="query">Search query</label>
+        <input id="query" name="q" type="search" autocomplete="off">
+      </div>
+      <button type="submit">Search</button>
+    </form>
+    <h2>How this fixture works</h2>
+    <p>The result set is generated from a seed in the URL. The only task action is
+      a local page search; no account, network or submission is involved.</p>
+  </main>
+  <footer>Offline fixture for WebAgentNew B1.</footer>
+  <script src="site.js"></script>
+</body>
+</html>

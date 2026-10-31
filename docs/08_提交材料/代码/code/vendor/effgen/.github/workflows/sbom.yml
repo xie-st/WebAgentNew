@@ -1,0 +1,89 @@
+name: SBOM Generation
+
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  sbom:
+    name: Generate CycloneDX SBOM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write   # for OIDC-based artifact attestation if available
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install SBOM tooling
+        # NOTE: we deliberately do NOT `pip install -e ".[all]"` here. The full
+        # extras graph (torch/vllm + the google-* trio + every provider SDK,
+        # under the protobuf>=5.29.5 CVE pin) exceeds pip's resolver depth and
+        # triggers `resolution-too-deep` on the runner. The SBOM is built from
+        # requirements.txt instead, which needs no environment install and is
+        # immune to dependency-resolution blow-ups.
+        run: |
+          pip install --upgrade pip
+          pip install cyclonedx-bom
+
+      - name: Generate CycloneDX SBOM (JSON)
+        run: |
+          cyclonedx-py requirements requirements.txt \
+            --pyproject pyproject.toml \
+            --of json \
+            --sv 1.5 \
+            -o sbom.cdx.json
+          echo "SBOM generated: $(wc -l < sbom.cdx.json) lines"
+
+      - name: Validate SBOM schema
+        run: |
+          python - <<'EOF'
+          import json, sys
+          with open("sbom.cdx.json") as f:
+              sbom = json.load(f)
+          assert sbom.get("bomFormat") == "CycloneDX", "bomFormat must be CycloneDX"
+          assert sbom.get("specVersion") in ("1.4", "1.5", "1.6"), f"Bad specVersion: {sbom.get('specVersion')}"
+          comps = sbom.get("components", [])
+          assert len(comps) > 0, "SBOM has no components"
+          print(f"SBOM valid: {len(comps)} components, format={sbom['bomFormat']} v{sbom['specVersion']}")
+          EOF
+
+      - name: Verify core effGen deps appear in SBOM
+        run: |
+          python - <<'EOF'
+          import json
+          with open("sbom.cdx.json") as f:
+              sbom = json.load(f)
+          names = {c["name"].lower() for c in sbom.get("components", [])}
+          required = ["fastapi", "pydantic", "openai", "requests", "httpx"]
+          missing = [r for r in required if r not in names]
+          if missing:
+              print(f"WARNING: expected deps not in SBOM: {missing}")
+          else:
+              print(f"All required core deps found in SBOM ({len(names)} total)")
+          EOF
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: effgen-sbom-${{ github.sha }}
+          path: sbom.cdx.json
+          retention-days: 90
+
+      - name: Attach SBOM to release (on tag push)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: sbom.cdx.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

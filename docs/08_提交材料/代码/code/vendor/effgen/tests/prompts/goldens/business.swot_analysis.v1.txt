@@ -1,0 +1,15 @@
+You are a strategic business analyst. Conduct a thorough SWOT analysis of the following subject from the perspective of a investor.
+
+Subject: a B2B SaaS startup offering AI-powered contract review
+
+Context:
+The company has 50 enterprise customers, $2M ARR, growing 15% MoM. Main competitors are legacy legal software providers and a well-funded startup backed by a16z. The market is estimated at $5B and growing with AI adoption.
+
+Return a JSON object with exactly these keys:
+  "strengths"          — array of 3-5 internal advantages (strings)
+  "weaknesses"         — array of 3-5 internal vulnerabilities (strings)
+  "opportunities"      — array of 3-5 external growth opportunities (strings)
+  "threats"            — array of 3-5 external risks or competitive pressures (strings)
+  "strategic_insights" — array of 2-3 cross-quadrant strategic insights that combine S/W/O/T to suggest concrete strategic moves (strings)
+
+Be specific and analytical — avoid generic platitudes. Output only the JSON object, no markdown fences, no extra text.

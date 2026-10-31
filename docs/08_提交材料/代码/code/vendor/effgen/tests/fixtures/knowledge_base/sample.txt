@@ -1,0 +1,13 @@
+effGen Framework Overview
+
+effGen is an open-source framework for building agentic AI systems with Small Language Models (SLMs).
+It supports models from 1B to 7B parameters and provides tools, memory, and protocol support.
+
+Key Features:
+- ReAct loop for reasoning and acting
+- Built-in tools: Calculator, WebSearch, CodeExecutor, PythonREPL, FileOps
+- Protocol support: MCP, A2A, ACP
+- Memory: Short-term, Long-term, Vector store
+- Multi-GPU support via vLLM and Transformers
+
+The framework is designed to work without paid APIs by default.

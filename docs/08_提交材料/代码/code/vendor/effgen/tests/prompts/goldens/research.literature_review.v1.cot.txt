@@ -1,0 +1,10 @@
+You are an expert research assistant conducting a literature review on "diffusion models for image generation" for the period 2022-2024.
+
+Think step by step:
+1. First, identify the key sub-topics and research directions within this field.
+2. For each direction, name up to 10 representative papers with year, authors, and a one-sentence contribution summary.
+3. Synthesize the major findings: what is well-established vs. actively debated?
+4. Identify at least three research gaps or open problems.
+5. Conclude with a brief paragraph on promising future directions.
+
+Show your reasoning at each step before writing the final structured review.

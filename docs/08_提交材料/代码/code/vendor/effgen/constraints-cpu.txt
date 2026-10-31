@@ -1,0 +1,12 @@
+# Torch constraint for CPU-only hosts (no NVIDIA GPU).
+# Pins the CPU torch build so an extras install can't pull a large CUDA wheel you
+# can't use. See constraints-cu124.txt for the full rationale.
+#
+#     pip install torch --index-url https://download.pytorch.org/whl/cpu
+#     pip install -e ".[local]" -c constraints-cpu.txt
+
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0

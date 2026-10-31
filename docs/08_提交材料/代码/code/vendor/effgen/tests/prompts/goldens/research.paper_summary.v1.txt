@@ -1,0 +1,14 @@
+Summarize the following academic paper by Vaswani et al.
+
+Title: Attention Is All You Need
+
+Abstract:
+The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train.
+
+Return a JSON object with exactly these four keys (and no others):
+  abstract_summary  — 2–3 sentence plain-language summary
+  key_findings      — list of 3–5 main contributions or results
+  limitations       — list of 2–4 noted limitations or caveats
+  future_work       — list of 2–3 suggested future research directions
+
+Do NOT include any additional keys (e.g. no 'methodology', 'authors', 'conclusion', 'introduction'). Output only the JSON object — no markdown fences, no extra text, no commentary.

@@ -1,0 +1,77 @@
+{"query": "What is 2 + 3?", "expected": "5", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 15 * 7?", "expected": "105", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 144 / 12?", "expected": "12", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 256 - 189?", "expected": "67", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 3^5?", "expected": "243", "tools": ["calculator"], "tags": ["exponents"], "difficulty": "easy"}
+{"query": "What is the square root of 625?", "expected": "25", "tools": ["calculator"], "tags": ["roots"], "difficulty": "easy"}
+{"query": "What is 17 + 28 + 45?", "expected": "90", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 1000 - 367?", "expected": "633", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 99 * 99?", "expected": "9801", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 7! (7 factorial)?", "expected": "5040", "tools": ["calculator"], "tags": ["factorial"], "difficulty": "easy"}
+{"query": "What is 48 + 0?", "expected": "48", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 13 * 0?", "expected": "0", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 81 / 9?", "expected": "9", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "What is 2^10?", "expected": "1024", "tools": ["calculator"], "tags": ["exponents"], "difficulty": "easy"}
+{"query": "What is the cube root of 27?", "expected": "3", "tools": ["calculator"], "tags": ["roots"], "difficulty": "easy"}
+{"query": "Calculate 3/7 as a decimal rounded to 4 places.", "expected": "0.4286", "tools": ["calculator"], "tags": ["fractions"], "difficulty": "medium"}
+{"query": "What is the GCD of 48 and 18?", "expected": "6", "tools": ["calculator"], "tags": ["number_theory"], "difficulty": "medium"}
+{"query": "What is the LCM of 12 and 15?", "expected": "60", "tools": ["calculator"], "tags": ["number_theory"], "difficulty": "medium"}
+{"query": "If a train travels 240 km in 3 hours, what is its speed in km/h?", "expected": "80", "tools": ["calculator"], "tags": ["word_problem"], "difficulty": "medium"}
+{"query": "What is 20% of 450?", "expected": "90", "tools": ["calculator"], "tags": ["percentage"], "difficulty": "medium"}
+{"query": "Convert 5/8 to a percentage.", "expected": "62.5", "tools": ["calculator"], "tags": ["percentage"], "difficulty": "medium"}
+{"query": "What is the sum of the first 10 natural numbers?", "expected": "55", "tools": ["calculator"], "tags": ["series"], "difficulty": "medium"}
+{"query": "Solve for x: 3x + 7 = 22", "expected": "5", "tools": ["calculator"], "tags": ["algebra"], "difficulty": "medium"}
+{"query": "What is the area of a circle with radius 7? Use pi=3.14159.", "expected": "153.94", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "A rectangle has length 12 and width 8. What is its perimeter?", "expected": "40", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "What is the hypotenuse of a right triangle with sides 3 and 4?", "expected": "5", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "Solve: 2x^2 - 8 = 0. What is the positive solution?", "expected": "2", "tools": ["calculator"], "tags": ["algebra"], "difficulty": "medium"}
+{"query": "What is log base 10 of 1000?", "expected": "3", "tools": ["calculator"], "tags": ["logarithm"], "difficulty": "medium"}
+{"query": "What is the compound interest on $1000 at 5% annual rate for 2 years?", "expected": "102.5", "tools": ["calculator"], "tags": ["finance"], "difficulty": "medium"}
+{"query": "What is sin(30 degrees)?", "expected": "0.5", "tools": ["calculator"], "tags": ["trigonometry"], "difficulty": "medium"}
+{"query": "What is cos(60 degrees)?", "expected": "0.5", "tools": ["calculator"], "tags": ["trigonometry"], "difficulty": "medium"}
+{"query": "If f(x) = 3x^2 + 2x - 1, what is f(4)?", "expected": "55", "tools": ["calculator"], "tags": ["algebra"], "difficulty": "medium"}
+{"query": "What is the surface area of a cube with side length 5?", "expected": "150", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "Convert 255 from decimal to binary.", "expected": "11111111", "tools": ["calculator"], "tags": ["number_bases"], "difficulty": "medium"}
+{"query": "What is the remainder when 2023 is divided by 7?", "expected": "0", "tools": ["calculator"], "tags": ["modular"], "difficulty": "easy"}
+{"query": "What is tan(45 degrees)?", "expected": "1", "tools": ["calculator"], "tags": ["trigonometry"], "difficulty": "medium"}
+{"query": "What is the distance between points (1,2) and (4,6)?", "expected": "5", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "How many permutations of 5 items taken 3 at a time?", "expected": "60", "tools": ["calculator"], "tags": ["combinatorics"], "difficulty": "medium"}
+{"query": "How many combinations of 6 items taken 2 at a time?", "expected": "15", "tools": ["calculator"], "tags": ["combinatorics"], "difficulty": "medium"}
+{"query": "What is the mean of 4, 8, 15, 16, 23, 42?", "expected": "18", "tools": ["calculator"], "tags": ["statistics"], "difficulty": "medium"}
+{"query": "What is the median of 3, 7, 9, 12, 15?", "expected": "9", "tools": ["calculator"], "tags": ["statistics"], "difficulty": "medium"}
+{"query": "What is e^1 rounded to 2 decimal places?", "expected": "2.72", "tools": ["calculator"], "tags": ["constants"], "difficulty": "medium"}
+{"query": "What is the nth term of the Fibonacci sequence for n=10?", "expected": "55", "tools": ["calculator"], "tags": ["sequences"], "difficulty": "medium"}
+{"query": "What is 15% of 240?", "expected": "36", "tools": ["calculator"], "tags": ["percentage"], "difficulty": "easy"}
+{"query": "What is the absolute value of -17?", "expected": "17", "tools": ["calculator"], "tags": ["arithmetic"], "difficulty": "easy"}
+{"query": "Round 3.14159 to 2 decimal places.", "expected": "3.14", "tools": ["calculator"], "tags": ["rounding"], "difficulty": "easy"}
+{"query": "What is the derivative of x^3 at x=2?", "expected": "12", "tools": ["calculator"], "tags": ["calculus"], "difficulty": "hard"}
+{"query": "What is the integral of 2x from 0 to 3?", "expected": "9", "tools": ["calculator"], "tags": ["calculus"], "difficulty": "hard"}
+{"query": "Evaluate the limit of (x^2-1)/(x-1) as x approaches 1.", "expected": "2", "tools": ["calculator"], "tags": ["calculus"], "difficulty": "hard"}
+{"query": "What is the sum of the infinite geometric series 1 + 1/2 + 1/4 + 1/8 + ...?", "expected": "2", "tools": ["calculator"], "tags": ["series"], "difficulty": "hard"}
+{"query": "What is the volume of a sphere with radius 3? Use pi=3.14159.", "expected": "113.1", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "hard"}
+{"query": "What is the standard deviation of 2, 4, 4, 4, 5, 5, 7, 9? (population)", "expected": "2", "tools": ["calculator"], "tags": ["statistics"], "difficulty": "hard"}
+{"query": "Solve the system: x + y = 10, x - y = 4. What is x?", "expected": "7", "tools": ["calculator"], "tags": ["algebra"], "difficulty": "hard"}
+{"query": "What is the determinant of the matrix [[1,2],[3,4]]?", "expected": "-2", "tools": ["calculator"], "tags": ["linear_algebra"], "difficulty": "hard"}
+{"query": "Simplify: (3+4i) * (1-2i). What is the real part?", "expected": "11", "tools": ["calculator"], "tags": ["complex"], "difficulty": "hard"}
+{"query": "Evaluate: sum of k^2 for k=1 to 5.", "expected": "55", "tools": ["calculator"], "tags": ["series"], "difficulty": "hard"}
+{"query": "A car depreciates 15% per year. If it costs $20000 now, what is its value after 3 years? Round to nearest dollar.", "expected": "12282", "tools": ["calculator"], "tags": ["finance"], "difficulty": "hard"}
+{"query": "How many squares are on a standard 8x8 chessboard? Count all sizes.", "expected": "204", "tools": ["calculator"], "tags": ["combinatorics"], "difficulty": "hard"}
+{"query": "A number when divided by 3 gives remainder 1, when divided by 5 gives remainder 2, when divided by 7 gives remainder 3. What is the smallest such positive number?", "expected": "52", "tools": ["calculator"], "tags": ["number_theory"], "difficulty": "hard"}
+{"query": "What is the Taylor series approximation of sin(0.1) using 3 terms?", "expected": "0.0998", "tools": ["calculator"], "tags": ["calculus"], "difficulty": "hard"}
+{"query": "If a circle has circumference 31.4159, what is its radius?", "expected": "5", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "What is 10C4 (10 choose 4)?", "expected": "210", "tools": ["calculator"], "tags": ["combinatorics"], "difficulty": "medium"}
+{"query": "Convert 72 degrees Fahrenheit to Celsius.", "expected": "22.2", "tools": ["calculator"], "tags": ["conversion"], "difficulty": "medium"}
+{"query": "What is the sum of the angles in a pentagon?", "expected": "540", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "A 12% sales tax is added to a $85 item. What is the total price?", "expected": "95.2", "tools": ["calculator"], "tags": ["percentage"], "difficulty": "medium"}
+{"query": "Find the missing number in an arithmetic sequence: 3, 7, 11, ?, 19", "expected": "15", "tools": ["calculator"], "tags": ["sequences"], "difficulty": "medium"}
+{"query": "What is the area of a trapezoid with parallel sides 5 and 9 and height 4?", "expected": "28", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "Calculate the slope of the line passing through points (2,3) and (8,15).", "expected": "2", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "medium"}
+{"query": "What is the sum of 1/1 + 1/2 + 1/3 + 1/4 + 1/5? Round to 2 decimal places.", "expected": "2.28", "tools": ["calculator"], "tags": ["series"], "difficulty": "medium"}
+{"query": "What is the eigenvalue sum (trace) of matrix [[3,1],[1,3]]?", "expected": "6", "tools": ["calculator"], "tags": ["linear_algebra"], "difficulty": "hard"}
+{"query": "Calculate the probability of rolling at least one 6 with two dice.", "expected": "0.306", "tools": ["calculator"], "tags": ["probability"], "difficulty": "hard"}
+{"query": "What is the second derivative of f(x)=x^4 evaluated at x=1?", "expected": "12", "tools": ["calculator"], "tags": ["calculus"], "difficulty": "hard"}
+{"query": "Solve: ln(x) = 2. What is x rounded to 2 decimal places?", "expected": "7.39", "tools": ["calculator"], "tags": ["logarithm"], "difficulty": "hard"}
+{"query": "A cone has radius 3 and height 4. What is its volume? Use pi=3.14159.", "expected": "37.7", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "hard"}
+{"query": "What is the binomial coefficient C(12,5)?", "expected": "792", "tools": ["calculator"], "tags": ["combinatorics"], "difficulty": "hard"}
+{"query": "A population of 1000 bacteria doubles every 3 hours. How many after 12 hours?", "expected": "16000", "tools": ["calculator"], "tags": ["exponential"], "difficulty": "hard"}
+{"query": "What is the dot product of vectors [1,2,3] and [4,5,6]?", "expected": "32", "tools": ["calculator"], "tags": ["linear_algebra"], "difficulty": "hard"}

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WebAgent 演示</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>WebAgent 演示</h1>
+      <p class="tagline">输入任务，查看真实浏览器执行与结果</p>
+    </div>
+    <div class="top-status">
+      <span id="mode-badge" class="pill pill-mode">模式加载中</span>
+      <span id="state-badge" class="pill pill-state" data-state="idle">待运行</span>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+  <aside class="panel panel-form">
+    <h2>任务与操作</h2>
+    <form id="start-form" novalidate>
+      <div class="field">
+        <label for="task">任务描述</label>
+        <textarea id="task" rows="5" spellcheck="false"
+          placeholder="例如：在本地目录站点中搜索 quantum，打开第一条结果，在草稿框输入文字并预览，不提交。"></textarea>
+      </div>
+      <div class="field">
+        <label for="url">起始网址</label>
+        <input id="url" type="text" spellcheck="false" placeholder="http://127.0.0.1:8787/fixture/index.html?seed=alpha-17">
+      </div>
+      <div class="field field-inline">
+        <label for="seconds">最长运行秒数</label>
+        <input id="seconds" type="number" min="1" step="1" value="600" inputmode="numeric">
+      </div>
+      <fieldset class="mode-field">
+        <legend>运行模式</legend>
+        <label class="mode-option"><input type="radio" name="mode" value="real" checked> 真实模型</label>
+        <label class="mode-option"><input type="radio" name="mode" value="offline"> 离线脚本演示</label>
+        <p class="mode-note" id="mode-note"></p>
+      </fieldset>
+      <div class="btn-row">
+        <button type="button" id="btn-preset">填入本地预设</button>
+        <button type="submit" id="btn-start" class="primary">开始运行</button>
+      </div>
+      <div class="btn-row control-row">
+        <button type="button" id="btn-pause" disabled>暂停</button>
+        <button type="button" id="btn-resume" disabled>继续</button>
+        <button type="button" id="btn-cancel" disabled>取消</button>
+      </div>
+      <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+    </form>
+    <details class="advanced">
+      <summary>高级配置</summary>
+      <dl class="kv">
+        <dt>配置文件</dt><dd id="cfg-path">—</dd>
+        <dt>实际模型名</dt><dd id="cfg-model">—</dd>
+      </dl>
+      <button type="button" id="btn-force" class="danger" disabled>强制结束本次任务</button>
+      <p class="advanced-note">仅在任务无响应时使用；强制结束会终止本面板启动的执行进程，保留已有证据并记为中断。</p>
+    </details>
+  </aside>
+
+  <section class="workspace">
+    <div class="status-strip card">
+      <dl class="strip">
+        <div><dt>run_id</dt><dd id="st-runid">暂无</dd></div>
+        <div><dt>运行模式</dt><dd id="st-mode">暂无</dd></div>
+        <div><dt>开始时间</dt><dd id="st-start">暂无</dd></div>
+        <div><dt>已用时间</dt><dd id="st-elapsed">暂无</dd></div>
+        <div><dt>执行状态</dt><dd id="st-state">暂无</dd></div>
+        <div><dt>当前页面</dt><dd id="st-url">暂无</dd></div>
+        <div><dt>最近动作</dt><dd id="st-action">暂无</dd></div>
+      </dl>
+    </div>
+
+    <div class="work-grid">
+      <section class="card shot-card" aria-label="真实页面截图">
+        <h2>真实页面截图</h2>
+        <div class="shot-frame" id="shot-frame">
+          <img id="shot-img" alt="最新真实页面截图" hidden>
+          <p id="shot-empty" class="empty">运行后显示真实页面截图</p>
+        </div>
+        <p class="shot-caption" id="shot-caption"></p>
+      </section>
+
+      <section class="card result-card" aria-label="回答与结果">
+        <h2>回答与结果</h2>
+        <p class="result-state" id="result-state">输入任务并点击“开始运行”后，这里展示最终回答与结束情况。</p>
+        <div class="answer-block">
+          <div class="answer-head">
+            <h3>最终回答</h3>
+            <button type="button" id="btn-copy" disabled>复制回答</button>
+          </div>
+          <pre id="answer" class="answer">暂无</pre>
+        </div>
+        <dl class="kv result-meta">
+          <dt>终止原因</dt><dd id="res-term">暂无</dd>
+          <dt>本地核验</dt><dd id="res-verify">未提供本地核验结果</dd>
+        </dl>
+      </section>
+    </div>
+
+    <section class="card log-card" aria-label="事件日志">
+      <h2>事件日志</h2>
+      <ol id="log" class="log"></ol>
+      <p class="log-empty" id="log-empty">开始运行后，这里按时间显示动作、页面反馈、暂停与结束事件。</p>
+      <details class="console">
+        <summary>完整控制台日志（已脱敏）</summary>
+        <pre id="stdout" class="console-pre"></pre>
+        <pre id="stderr" class="console-pre stderr"></pre>
+      </details>
+    </section>
+
+    <section class="card evidence-card" aria-label="运行记录与证据">
+      <h2>运行记录与证据</h2>
+      <p class="rundir">运行目录：<code id="run-dir">暂无</code></p>
+      <div class="dl-row" id="downloads"></div>
+      <h3>本次截图列表</h3>
+      <ul id="shot-list" class="shot-list"></ul>
+      <p class="history" id="history-line"></p>
+    </section>
+  </section>
+</main>
+
+<dialog id="lightbox">
+  <div class="lightbox-inner">
+    <img id="lightbox-img" alt="截图放大查看">
+    <p id="lightbox-caption" class="shot-caption"></p>
+    <form method="dialog"><button class="primary">关闭</button></form>
+  </div>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

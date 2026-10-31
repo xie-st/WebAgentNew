@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0-heuristic",
+  "timestamp": "2026-04-24T10:13:39.649340+00:00",
+  "summary": {
+    "suite": "math",
+    "total": 77,
+    "passed": 16,
+    "accuracy": 0.2077922077922078,
+    "avg_latency": 0.0,
+    "total_tokens": 0,
+    "avg_tool_accuracy": 0.0,
+    "by_difficulty": {
+      "easy": {
+        "total": 19,
+        "passed": 15,
+        "accuracy": 0.7894736842105263
+      },
+      "medium": {
+        "total": 36,
+        "passed": 1,
+        "accuracy": 0.027777777777777776
+      },
+      "hard": {
+        "total": 22,
+        "passed": 0,
+        "accuracy": 0.0
+      }
+    },
+    "metadata": {
+      "scoring": "contains",
+      "pass_threshold": 0.5,
+      "num_cases": 77
+    }
+  }
+}

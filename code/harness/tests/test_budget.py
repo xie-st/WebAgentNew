@@ -130,3 +130,53 @@ def test_deadline_and_model_call_checks(clock: FakeClock) -> None:
     limited.begin_model_call()
     with pytest.raises(BudgetExceeded):
         limited.begin_model_call()
+
+def test_request_gate_names_the_limit_and_the_mandatory_case(make_observation) -> None:
+    from webagent.budget import (
+        MandatoryContentOverflow,
+        build_prompt_messages,
+        enforce_request_limits,
+    )
+
+    observation = make_observation()
+    limits = BudgetLimits(input_tokens=10_000, planned_context_tokens=16_000, max_messages=1)
+    mandatory = build_prompt_messages(task="task", observation=observation)
+    with pytest.raises(MandatoryContentOverflow) as excinfo:
+        enforce_request_limits(mandatory, limits, mandatory=mandatory)
+    assert excinfo.value.limit_name == "max_messages"
+    assert excinfo.value.scope == "mandatory"
+
+    byte_limits = BudgetLimits(
+        input_tokens=10_000, planned_context_tokens=16_000, max_request_bytes=80
+    )
+    with pytest.raises(RequestLimitExceeded) as excinfo:
+        enforce_request_limits(mandatory, byte_limits)
+    assert excinfo.value.limit_name == "max_request_bytes"
+
+    wide = BudgetLimits(input_tokens=10_000, planned_context_tokens=16_000)
+    measurement = enforce_request_limits(mandatory, wide, mandatory=mandatory)
+    assert measurement.message_count == len(mandatory)
+    assert measurement.request_bytes > 0
+    assert measurement.mandatory_request_bytes == measurement.request_bytes
+
+
+def test_deadline_margin_refuses_only_new_model_calls(clock: FakeClock) -> None:
+    from webagent.budget import DeadlineMarginReached
+
+    deadline = Deadline(clock.now() + 40, clock=clock)
+    budget = Budget(
+        BudgetLimits(deadline_margin_seconds=30.0), deadline=deadline, clock=clock
+    )
+    budget.require_model_call_margin("model call")
+    # Accounting itself is unaffected; the gate is a startup decision.
+    assert budget.begin_model_call() == 1
+    clock.advance(15)  # 25 s left, inside the margin
+    with pytest.raises(DeadlineMarginReached) as excinfo:
+        budget.require_model_call_margin("model call")
+    assert excinfo.value.margin_seconds == 30.0
+    assert excinfo.value.remaining_seconds == pytest.approx(25.0)
+    budget.begin_model_call()  # accounting still succeeds
+
+    no_margin = Budget(deadline=deadline, clock=clock)
+    assert no_margin.limits.deadline_margin_seconds == 0
+    no_margin.require_model_call_margin("model call")

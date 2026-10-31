@@ -1,0 +1,395 @@
+{
+  "status": "passed",
+  "base_url": "http://127.0.0.1:31218",
+  "mode": "offline_script",
+  "browser": "actual Chromium, headless",
+  "run_id": "demo-20261031-094414-f9cc",
+  "outcome": "completed",
+  "answer": "Local chain completed: searched, opened detail, filled the draft, previewed it, and captured the screenshot without submitting.",
+  "screenshots": [
+    {
+      "file": "obs-0-ffa303c3c252-ea0c0776.png",
+      "url": "http://127.0.0.1:31218/fixture/index.html?seed=alpha-17",
+      "observation_id": "obs-0",
+      "time": "01:44:18"
+    },
+    {
+      "file": "obs-1-277b3b63cf32-415e2835.png",
+      "url": "http://127.0.0.1:31218/fixture/index.html?seed=alpha-17",
+      "observation_id": "obs-1",
+      "time": "01:44:18"
+    },
+    {
+      "file": "obs-2-d7328b0174b6-84158e52.png",
+      "url": "http://127.0.0.1:31218/fixture/results.html?seed=alpha-17&q=quantum&page=1",
+      "observation_id": "obs-2",
+      "time": "01:44:19"
+    },
+    {
+      "file": "obs-3-43f9a764226e-e62a5bb6.png",
+      "url": "http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1",
+      "observation_id": "obs-3",
+      "time": "01:44:20"
+    },
+    {
+      "file": "obs-4-94889b97ca30-659d3600.png",
+      "url": "http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1",
+      "observation_id": "obs-4",
+      "time": "01:44:20"
+    },
+    {
+      "file": "obs-5-7be92ace24fa-0c1c54e0.png",
+      "url": "http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1",
+      "observation_id": "obs-5",
+      "time": "01:44:21"
+    }
+  ],
+  "state": {
+    "server": {
+      "port": 31218,
+      "fixture_url": "http://127.0.0.1:31218/fixture/index.html?seed=alpha-17",
+      "runtime_dir": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\迁移验证\\demo"
+    },
+    "mode": {
+      "available": false,
+      "reason": "缺少模型环境变量：WEBAGENT_MODEL_BASE_URL、WEBAGENT_MODEL_API_KEY。未设置前只能使用离线脚本演示模式。",
+      "model_name": "qwen3.6-35b-a3b",
+      "config_path": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\harness\\configs\\real.yaml",
+      "base_url_env": "WEBAGENT_MODEL_BASE_URL",
+      "api_key_env": "WEBAGENT_MODEL_API_KEY"
+    },
+    "preset": {
+      "task": "在本地目录站点中搜索 quantum，打开第一条结果，在草稿输入框中输入 Draft for quantum note，点击 Preview draft 预览，确认预览显示该文字后保存一张截图。不要提交任何内容。",
+      "start_url": "http://127.0.0.1:31218/fixture/index.html?seed=alpha-17"
+    },
+    "run": {
+      "run_id": "demo-20261031-094414-f9cc",
+      "mode": "offline",
+      "state": "ended",
+      "state_label": "已结束",
+      "outcome": "completed",
+      "outcome_label": "完成",
+      "task": "在本地目录站点中搜索 quantum，打开第一条结果，在草稿输入框中输入 Draft for quantum note，点击 Preview draft 预览，确认预览显示该文字后保存一张截图。不要提交任何内容。",
+      "start_url": "http://127.0.0.1:31218/fixture/index.html?seed=alpha-17",
+      "max_seconds": 180.0,
+      "started_at": 1793411054.4520922,
+      "ended_at": 1793411062.6284099,
+      "elapsed_s": 8.2,
+      "pid": 47536,
+      "exit_code": 0,
+      "forced": false,
+      "current_url": "http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1",
+      "last_action": "click {\"target\": \"2\"}",
+      "model_name": "qwen3.6-35b-a3b",
+      "answer": "Local chain completed: searched, opened detail, filled the draft, previewed it, and captured the screenshot without submitting.",
+      "termination": "completed",
+      "termination_label": "完成",
+      "unfinished": null,
+      "verification_text": "未提供本地核验结果",
+      "run_dir": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\迁移验证\\demo\\runs\\demo-20261031-094414-f9cc",
+      "demo_dir": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\迁移验证\\demo\\demo\\demo-20261031-094414-f9cc",
+      "events": [
+        {
+          "time": "01:44:17",
+          "elapsed_s": 0.0,
+          "kind": "run_start",
+          "text": "运行开始"
+        },
+        {
+          "time": "01:44:17",
+          "elapsed_s": 0.0,
+          "kind": "task_start",
+          "text": "任务开始"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.2,
+          "kind": "observation",
+          "text": "观察页面：http://127.0.0.1:31218/fixture/index.html?seed=alpha-17"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.2,
+          "kind": "artifact_saved",
+          "text": "已保存截图：obs-0-ffa303c3c252-ea0c0776.png"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.2,
+          "kind": "model_call",
+          "text": "模型调用 #1"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.2,
+          "kind": "proposed",
+          "text": "模型提议 type {\"target\": \"1\", \"text\": \"quantum\", \"submit\": false}"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.2,
+          "kind": "dispatched",
+          "text": "执行动作 type null"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.8,
+          "kind": "feedback",
+          "text": "页面反馈：observed"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.8,
+          "kind": "observation",
+          "text": "观察页面：http://127.0.0.1:31218/fixture/index.html?seed=alpha-17"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.8,
+          "kind": "artifact_saved",
+          "text": "已保存截图：obs-1-277b3b63cf32-415e2835.png"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.8,
+          "kind": "model_call",
+          "text": "模型调用 #2"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.8,
+          "kind": "proposed",
+          "text": "模型提议 click {\"target\": \"2\"}"
+        },
+        {
+          "time": "01:44:18",
+          "elapsed_s": 1.8,
+          "kind": "dispatched",
+          "text": "执行动作 click null"
+        },
+        {
+          "time": "01:44:19",
+          "elapsed_s": 2.4,
+          "kind": "feedback",
+          "text": "页面反馈：observed"
+        },
+        {
+          "time": "01:44:19",
+          "elapsed_s": 2.4,
+          "kind": "observation",
+          "text": "观察页面：http://127.0.0.1:31218/fixture/results.html?seed=alpha-17&q=quantum&page=1"
+        },
+        {
+          "time": "01:44:19",
+          "elapsed_s": 2.4,
+          "kind": "artifact_saved",
+          "text": "已保存截图：obs-2-d7328b0174b6-84158e52.png"
+        },
+        {
+          "time": "01:44:19",
+          "elapsed_s": 2.4,
+          "kind": "model_call",
+          "text": "模型调用 #3"
+        },
+        {
+          "time": "01:44:19",
+          "elapsed_s": 2.4,
+          "kind": "proposed",
+          "text": "模型提议 click {\"target\": \"1\"}"
+        },
+        {
+          "time": "01:44:19",
+          "elapsed_s": 2.4,
+          "kind": "dispatched",
+          "text": "执行动作 click null"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.0,
+          "kind": "feedback",
+          "text": "页面反馈：observed"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.0,
+          "kind": "observation",
+          "text": "观察页面：http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.0,
+          "kind": "artifact_saved",
+          "text": "已保存截图：obs-3-43f9a764226e-e62a5bb6.png"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.0,
+          "kind": "model_call",
+          "text": "模型调用 #4"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.0,
+          "kind": "proposed",
+          "text": "模型提议 type {\"target\": \"1\", \"text\": \"Draft for quantum note\", \"submit\": false}"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.0,
+          "kind": "dispatched",
+          "text": "执行动作 type null"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.6,
+          "kind": "feedback",
+          "text": "页面反馈：observed"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.6,
+          "kind": "observation",
+          "text": "观察页面：http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.6,
+          "kind": "artifact_saved",
+          "text": "已保存截图：obs-4-94889b97ca30-659d3600.png"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.6,
+          "kind": "model_call",
+          "text": "模型调用 #5"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.6,
+          "kind": "proposed",
+          "text": "模型提议 click {\"target\": \"2\"}"
+        },
+        {
+          "time": "01:44:20",
+          "elapsed_s": 3.6,
+          "kind": "dispatched",
+          "text": "执行动作 click null"
+        },
+        {
+          "time": "01:44:21",
+          "elapsed_s": 4.2,
+          "kind": "feedback",
+          "text": "页面反馈：observed"
+        },
+        {
+          "time": "01:44:21",
+          "elapsed_s": 4.2,
+          "kind": "observation",
+          "text": "观察页面：http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1"
+        },
+        {
+          "time": "01:44:21",
+          "elapsed_s": 4.2,
+          "kind": "artifact_saved",
+          "text": "已保存截图：obs-5-7be92ace24fa-0c1c54e0.png"
+        },
+        {
+          "time": "01:44:21",
+          "elapsed_s": 4.2,
+          "kind": "model_call",
+          "text": "模型调用 #6"
+        },
+        {
+          "time": "01:44:21",
+          "elapsed_s": 4.2,
+          "kind": "agent_claim",
+          "text": "Agent 返回结论：Local chain completed: searched, opened detail, filled the draft, previewed it, and captured the screenshot without submitting."
+        },
+        {
+          "time": "01:44:21",
+          "elapsed_s": 4.5,
+          "kind": "run_end",
+          "text": "运行结束：完成"
+        }
+      ],
+      "screenshots": [
+        {
+          "file": "obs-0-ffa303c3c252-ea0c0776.png",
+          "url": "http://127.0.0.1:31218/fixture/index.html?seed=alpha-17",
+          "observation_id": "obs-0",
+          "time": "01:44:18"
+        },
+        {
+          "file": "obs-1-277b3b63cf32-415e2835.png",
+          "url": "http://127.0.0.1:31218/fixture/index.html?seed=alpha-17",
+          "observation_id": "obs-1",
+          "time": "01:44:18"
+        },
+        {
+          "file": "obs-2-d7328b0174b6-84158e52.png",
+          "url": "http://127.0.0.1:31218/fixture/results.html?seed=alpha-17&q=quantum&page=1",
+          "observation_id": "obs-2",
+          "time": "01:44:19"
+        },
+        {
+          "file": "obs-3-43f9a764226e-e62a5bb6.png",
+          "url": "http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1",
+          "observation_id": "obs-3",
+          "time": "01:44:20"
+        },
+        {
+          "file": "obs-4-94889b97ca30-659d3600.png",
+          "url": "http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1",
+          "observation_id": "obs-4",
+          "time": "01:44:20"
+        },
+        {
+          "file": "obs-5-7be92ace24fa-0c1c54e0.png",
+          "url": "http://127.0.0.1:31218/fixture/detail.html?seed=alpha-17&q=quantum&id=1",
+          "observation_id": "obs-5",
+          "time": "01:44:21"
+        }
+      ],
+      "stdout_tail": [
+        "model: scripted offline model (D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\code\\harness\\tests\\fixtures\\fake_scripts\\local_chain.json)",
+        "backend: playwright (headless)",
+        "run: demo-20261031-094414-f9cc",
+        "control file: D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\迁移验证\\demo\\runs\\demo-20261031-094414-f9cc\\control.jsonl",
+        "commands: append 'pause', 'resume' or 'cancel' on its own line",
+        "loop: action",
+        "action: type {\"target\": \"1\", \"text\": \"quantum\", \"submit\": false}",
+        "feedback: observed typed into element 1 without clearing",
+        "loop: action",
+        "action: click {\"target\": \"2\"}",
+        "feedback: observed clicked element 2 (button 'Search')",
+        "loop: action",
+        "action: click {\"target\": \"1\"}",
+        "feedback: observed clicked element 1 (link 'quantum field note 1: lantern 861')",
+        "loop: action",
+        "action: type {\"target\": \"1\", \"text\": \"Draft for quantum note\", \"submit\": false}",
+        "feedback: observed typed into element 1 without clearing",
+        "loop: action",
+        "action: click {\"target\": \"2\"}",
+        "feedback: observed clicked element 2 (button 'Preview draft')",
+        "loop: completed (Local chain completed: searched, opened detail, filled the draft, previewed it, and captured the screenshot without submitting.)",
+        "loop: completed (Local chain completed: searched, opened detail, filled the draft, previewed it, and captured the screenshot without submitting.)",
+        "result: D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\迁移验证\\demo\\runs\\demo-20261031-094414-f9cc\\result.json",
+        "events: D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\迁移验证\\demo\\runs\\demo-20261031-094414-f9cc\\events.jsonl",
+        "screenshots: 6 in D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码\\runtime\\迁移验证\\demo\\runs\\demo-20261031-094414-f9cc\\screenshots"
+      ],
+      "stderr_tail": [],
+      "files": [
+        "events.jsonl",
+        "meta.json",
+        "result.json",
+        "stderr.log",
+        "stdout.log",
+        "task.json"
+      ]
+    },
+    "history": [
+      "demo-20261031-094414-f9cc"
+    ]
+  },
+  "root": "D:\\Dwen\\Alpha26fall\\WebAgentNew\\docs\\08_提交材料\\代码"
+}

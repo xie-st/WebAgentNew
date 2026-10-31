@@ -1,0 +1,204 @@
+/* ============================================
+   PAGE NAVBAR — Enhanced with animated tabs
+   ============================================ */
+.page-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: var(--header-height);
+  background: var(--bg-primary);
+  z-index: 50;
+  margin-left: -2rem;
+  margin-right: -2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* Animated gradient bottom border */
+.page-navbar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.15), rgba(0, 229, 255, 0.1), transparent);
+  animation: navbar-border-pulse 4s ease-in-out infinite;
+}
+
+@keyframes navbar-border-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+[data-theme="light"] .page-navbar::after {
+  background: linear-gradient(90deg, transparent, rgba(0, 137, 74, 0.06), transparent);
+  animation: none;
+}
+
+.page-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.page-navbar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.page-navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Nav items with animated underline indicator */
+.page-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sweep effect */
+.page-nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.04), transparent);
+  transition: left 0.5s ease;
+}
+
+.page-nav-item:hover::before {
+  left: 100%;
+}
+
+.page-nav-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.page-nav-item.active {
+  color: var(--accent-primary);
+  background: rgba(0, 255, 136, 0.1);
+}
+
+/* Active indicator — animated glow underline */
+.page-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  background: var(--accent-primary);
+  border-radius: 1px;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+  animation: tab-indicator-glow 2s ease-in-out infinite;
+}
+
+@keyframes tab-indicator-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(0, 255, 136, 0.2); }
+  50% { box-shadow: 0 0 12px rgba(0, 255, 136, 0.5); }
+}
+
+[data-theme="light"] .page-nav-item.active::after {
+  box-shadow: none;
+  animation: none;
+}
+
+[data-theme="light"] .page-nav-item::before {
+  display: none;
+}
+
+.page-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.page-nav-item.active .page-nav-icon {
+  filter: drop-shadow(0 0 4px rgba(0, 255, 136, 0.3));
+}
+
+[data-theme="light"] .page-nav-item.active .page-nav-icon {
+  filter: none;
+}
+
+.page-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ============================================
+   MOBILE STYLES
+   ============================================ */
+@media (max-width: 768px) {
+  .page-navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .page-navbar-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .page-navbar-nav {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar on mobile nav */
+  .page-navbar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .page-navbar-right {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   LIGHT THEME
+   ============================================ */
+[data-theme="light"] .page-nav-item.active {
+  background: rgba(0, 137, 74, 0.05);
+}
+
+[data-theme="light"] .page-navbar {
+  border-bottom-color: #e2e2e2;
+}

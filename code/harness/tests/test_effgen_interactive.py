@@ -665,7 +665,9 @@ def test_internal_spin_ends_at_the_deadline(
     assert backend.executed_actions == []
     assert session.finish_result is not None
     assert session.finish_result.reason is TerminationReason.DEADLINE
-    assert "deadline" in _types(session)
+    # With a 50 s deadline and a 30 s margin, the run stops before a call that
+    # cannot finish; the event names the margin rather than plain expiry.
+    assert {"deadline", "deadline_margin"} & set(_types(session))
     assert len([event for event in _events(session) if event["event_type"] == "proposed"]) == 0
     session.close()
 
@@ -789,3 +791,60 @@ def test_resume_makes_an_old_action_rejected(
     assert backend.executed_actions == []
     session.close()
 
+
+def test_project_input_tokens_become_the_effgen_context_budget() -> None:
+    from effgen.core.thread_budget import resolve_context_budget
+    from webagent.config import BudgetConfig
+
+    model = ScriptedModel(["never used"])
+    config = build_effgen_config(model, [])
+    assert config.context_budget == 24_000, "the project budget is passed through unchanged"
+    resolved = resolve_context_budget(config.context_budget, model=model)
+    assert resolved is not None
+    assert resolved.budget_tokens == 24_000
+    assert resolved.source == "config"
+
+    # The native "auto" derivation on the same window is a different number; the
+    # project value wins instead of being silently replaced by it.
+    auto = resolve_context_budget("auto", model=model)
+    assert auto is not None and auto.budget_tokens != 24_000
+
+    custom = build_effgen_config(
+        model,
+        [],
+        app_config=AppConfig(
+            profile="fake",
+            backend="fake",
+            budget=BudgetConfig(input_tokens=12_000, planned_context_tokens=32_768),
+        ),
+    )
+    assert custom.context_budget == 12_000
+
+def test_mapped_context_budget_is_active_in_the_run_metadata(
+    backend: FakeBackend, clock: FakeClock, tmp_path: Path
+) -> None:
+    from webagent.config import BudgetConfig
+
+    session = _session(tmp_path, clock, backend)
+    model = ScriptedModel([
+        _action("web_click", {"target": "2"}),
+        "Thought: done.\nFinal Answer: clicked",
+    ])
+    app = AppConfig(
+        profile="fake",
+        backend="fake",
+        budget=BudgetConfig(input_tokens=12_000, planned_context_tokens=32_768),
+    )
+    driver = create_driver(session, model, app_config=app)
+    step = driver.start()
+    assert step.status is DriverStatus.ACTION
+    action = driver.take_action()
+    result = backend.execute(action)
+    step = driver.accept_observation(result.observation)
+    assert step.status is DriverStatus.COMPLETED
+    assert step.response is not None
+    budget_meta = step.response.metadata["context_budget"]
+    assert budget_meta["budget_tokens"] == 12_000
+    assert budget_meta["source"] == "config"
+    driver.close()
+    session.close()

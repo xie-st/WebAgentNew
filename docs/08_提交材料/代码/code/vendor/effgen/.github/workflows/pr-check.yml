@@ -1,0 +1,76 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for diff
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run unit tests with coverage
+        run: |
+          pytest tests/unit/ -v --cov=effgen --cov-report=xml --cov-report=term-missing \
+            --cov-fail-under=30 -m "not gpu and not api" \
+            --tb=short --no-header
+
+      - name: Check for TODO/FIXME additions
+        run: |
+          # Get added lines in this PR
+          ADDED_TODOS=$(git diff origin/main...HEAD --diff-filter=A -U0 -- '*.py' | \
+            grep -c '^\+.*\(TODO\|FIXME\|HACK\|XXX\)' || true)
+          if [ "$ADDED_TODOS" -gt 0 ]; then
+            echo "::warning::Found $ADDED_TODOS new TODO/FIXME/HACK/XXX comments in added files"
+            git diff origin/main...HEAD --diff-filter=A -U0 -- '*.py' | \
+              grep '^\+.*\(TODO\|FIXME\|HACK\|XXX\)' || true
+          fi
+
+      - name: Verify CHANGELOG.md updated
+        run: |
+          if git diff origin/main...HEAD --name-only | grep -q 'effgen/'; then
+            if ! git diff origin/main...HEAD --name-only | grep -q 'CHANGELOG.md'; then
+              echo "::warning::Source code changed but CHANGELOG.md not updated"
+            fi
+          fi
+
+      - name: Smoke test - import check
+        run: |
+          python -c "
+          from effgen import Agent, AgentConfig, load_model
+          from effgen import BaseTool, ToolRegistry
+          from effgen import ShortTermMemory, LongTermMemory
+          from effgen import GenerationConfig, GenerationResult
+          print('All imports OK')
+          "
+
+      - name: Smoke test - tool instantiation
+        run: |
+          python -c "
+          from effgen.tools.builtin import Calculator, DateTimeTool, JSONTool, TextProcessingTool
+          calc = Calculator()
+          dt = DateTimeTool()
+          jt = JSONTool()
+          tp = TextProcessingTool()
+          print(f'Tools instantiated: {calc.name}, {dt.name}, {jt.name}, {tp.name}')
+          "

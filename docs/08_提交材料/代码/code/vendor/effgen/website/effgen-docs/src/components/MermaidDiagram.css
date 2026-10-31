@@ -1,0 +1,199 @@
+/* ============================================
+   MERMAID DIAGRAM — Enhanced with glass morphism
+   ============================================ */
+.mermaid-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 2rem 0;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+}
+
+/* Animated gradient top border */
+.mermaid-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), rgba(0, 229, 255, 0.15), transparent);
+  background-size: 200% 100%;
+  animation: mermaid-border-flow 8s linear infinite;
+  opacity: 0.4;
+  z-index: 1;
+}
+
+@keyframes mermaid-border-flow {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+[data-theme="light"] .mermaid-container::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 137, 74, 0.1), transparent);
+  opacity: 0.2;
+  animation: none;
+}
+
+/* Subtle glow border on hover */
+.mermaid-container:hover {
+  border-color: rgba(0, 255, 136, 0.2);
+  box-shadow: var(--shadow-md), 0 0 20px rgba(0, 255, 136, 0.06);
+  transform: scale(1.005);
+}
+
+.mermaid-container:hover::before {
+  opacity: 0.7;
+}
+
+[data-theme="light"] .mermaid-container:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: scale(1.005);
+}
+
+/* Title with glass morphism header */
+.mermaid-title {
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.03), var(--bg-tertiary));
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.mermaid-title::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.1), transparent);
+}
+
+[data-theme="light"] .mermaid-title {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="light"] .mermaid-title::after {
+  display: none;
+}
+
+/* Diagram area with animated grid */
+.mermaid-scroll {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  /* Animated grid pattern background */
+  background-image:
+    linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: grid-move 30s linear infinite;
+  position: relative;
+}
+
+/* Subtle radial gradient overlay for depth */
+.mermaid-scroll::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, var(--bg-card) 100%);
+  pointer-events: none;
+}
+
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 20px 20px; }
+}
+
+[data-theme="light"] .mermaid-scroll {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.mermaid-scroll svg {
+  max-width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.mermaid-scroll:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+/* The label on an edge is drawn in a box of its own, and mermaid fills that box
+   from a theme variable it does not always honour. Painting it from the page's
+   own token is what keeps it the colour of the card it sits on in both modes. */
+.mermaid-scroll .edgeLabel,
+.mermaid-scroll .edgeLabel p,
+.mermaid-scroll .edgeLabel span,
+.mermaid-scroll .edgeLabel div {
+  background: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.mermaid-scroll .edgeLabel rect {
+  fill: var(--bg-card) !important;
+}
+
+.mermaid-error {
+  color: var(--error);
+  padding: 1rem;
+  text-align: center;
+}
+
+/* Ensure diagrams are readable with enhanced styling */
+.mermaid-scroll .node rect,
+.mermaid-scroll .node circle,
+.mermaid-scroll .node ellipse,
+.mermaid-scroll .node polygon,
+.mermaid-scroll .node path {
+  stroke-width: 2px;
+  transition: all 0.3s ease;
+}
+
+.mermaid-scroll .edgePath path {
+  stroke-width: 2px;
+}
+
+/* Custom scrollbar for diagram overflow */
+.mermaid-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.mermaid-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 255, 136, 0.02);
+}
+
+.mermaid-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.15);
+  border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+  .mermaid-scroll {
+    padding: 1rem;
+    justify-content: flex-start;
+  }
+
+  /* Narrow enough that fitting the diagram to the screen would shrink its
+     labels past reading size. It keeps its own size here and the container
+     scrolls instead — which is why the container is focusable. */
+  .mermaid-scroll svg {
+    max-width: none;
+  }
+}

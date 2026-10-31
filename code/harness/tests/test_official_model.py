@@ -207,3 +207,87 @@ def test_unload_is_safe_to_repeat_and_blocks_further_calls() -> None:
     model.unload()
     with pytest.raises(OfficialModelError):
         model.generate("two")
+
+def test_final_sdk_exit_enforces_project_message_and_byte_limits() -> None:
+    from webagent.budget import BudgetLimits
+    from webagent.errors import RequestLimitExceeded
+
+    normal_gateway = FakeGateway(["ok"])
+    normal = OfficialModel(_config(), model_api=normal_gateway)
+    result = normal.generate("short prompt")
+    assert result.text == "ok"
+    assert result.metadata["request_message_count"] == 1
+    assert result.metadata["request_bytes"] > 0
+
+    message_gateway = FakeGateway(["must not be called"])
+    message_limited = OfficialModel(
+        _config(),
+        model_api=message_gateway,
+        system_prompt="SYSTEM",
+        limits=BudgetLimits(max_messages=1),
+    )
+    with pytest.raises(RequestLimitExceeded) as error:
+        message_limited.generate("prompt")
+    assert error.value.limit_name == "max_messages"
+    assert error.value.limit == 1 and error.value.actual == 2
+    assert message_gateway.calls == [], "an over-limit request never reaches the SDK"
+    assert message_limited.calls[-1].status == "rejected"
+    assert message_limited.calls[-1].failure_type == "request_limit"
+
+    byte_gateway = FakeGateway(["must not be called"])
+    byte_limited = OfficialModel(
+        _config(),
+        model_api=byte_gateway,
+        limits=BudgetLimits(max_request_bytes=64),
+    )
+    with pytest.raises(RequestLimitExceeded) as error:
+        byte_limited.generate("x" * 500)
+    assert error.value.limit_name == "max_request_bytes"
+    assert byte_gateway.calls == []
+
+
+def test_mandatory_task_and_observation_overflow_is_reported_separately() -> None:
+    from webagent.budget import BudgetLimits, MandatoryContentOverflow
+    from webagent.errors import RequestLimitExceeded
+
+    mandatory = [{"role": "user", "content": "TASK:\n" + "x" * 400}]
+    gateway = FakeGateway(["must not be called"])
+    model = OfficialModel(
+        _config(),
+        model_api=gateway,
+        limits=BudgetLimits(max_request_bytes=200),
+        mandatory_provider=lambda: mandatory,
+    )
+    with pytest.raises(MandatoryContentOverflow) as error:
+        model.generate("short prompt")
+    assert error.value.limit_name == "max_request_bytes"
+    assert error.value.scope == "mandatory"
+    assert gateway.calls == []
+
+    # When the must-keep view fits but the whole request does not, the error is
+    # the ordinary request limit: the mandatory items themselves are not the
+    # problem and are never trimmed.
+    small_mandatory = [{"role": "user", "content": "TASK:\nsmall"}]
+    other_gateway = FakeGateway(["must not be called"])
+    other = OfficialModel(
+        _config(),
+        model_api=other_gateway,
+        limits=BudgetLimits(max_request_bytes=200),
+        mandatory_provider=lambda: small_mandatory,
+    )
+    with pytest.raises(RequestLimitExceeded) as error:
+        other.generate("y" * 500)
+    assert not isinstance(error.value, MandatoryContentOverflow)
+    assert error.value.limit_name == "max_request_bytes"
+
+
+def test_set_request_limits_installs_the_gate_after_construction() -> None:
+    from webagent.budget import BudgetLimits
+    from webagent.errors import RequestLimitExceeded
+
+    gateway = FakeGateway(["must not be called"])
+    model = OfficialModel(_config(), model_api=gateway)
+    model.set_request_limits(BudgetLimits(max_messages=1))
+    with pytest.raises(RequestLimitExceeded):
+        model.generate([{"role": "user", "content": "a"}, {"role": "user", "content": "b"}])
+    assert gateway.calls == []

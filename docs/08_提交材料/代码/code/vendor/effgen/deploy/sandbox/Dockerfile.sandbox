@@ -1,0 +1,56 @@
+# effGen Sandbox Image — effgen/sandbox:python-3.11
+#
+# Minimal Python 3.11 image hardened for code execution sandbox use.
+#
+# Build:
+#   docker build -f deploy/sandbox/Dockerfile.sandbox \
+#                -t effgen/sandbox:python-3.11 .
+#
+# Security posture:
+#   - Runs as non-root user 'sandbox' (uid=65534)
+#   - No shell installed beyond /bin/sh (via slim base)
+#   - Read-only filesystem enforced by docker run --read-only at runtime
+#   - Network isolation enforced by docker run --network=none at runtime
+#   - All capabilities dropped at runtime (--cap-drop=ALL)
+#   - pip, setuptools, wheel NOT installed (prevents package installs at runtime)
+#   - Only essential stdlib is present
+
+FROM python:3.11-slim AS base
+
+LABEL org.opencontainers.image.title="effGen Sandbox"
+LABEL org.opencontainers.image.description="Minimal Python 3.11 sandbox for effGen CodeExecutor"
+LABEL org.opencontainers.image.version="3.11"
+LABEL org.opencontainers.image.source="https://github.com/ctrl-gaurav/effGen"
+
+# --- Harden the base image ---
+# Remove pip, setuptools, wheel to prevent runtime package installation
+RUN pip uninstall -y pip setuptools wheel 2>/dev/null || true \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+       # Minimal: nothing extra beyond slim defaults
+       ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Create a dedicated non-root sandbox user
+RUN groupadd --gid 65534 sandbox \
+    && useradd --uid 65534 --gid sandbox \
+               --no-create-home --shell /usr/sbin/nologin \
+               sandbox
+
+# Create workspace directory owned by sandbox user
+RUN mkdir -p /workspace && chown sandbox:sandbox /workspace
+
+WORKDIR /workspace
+
+# Switch to sandbox user
+USER sandbox
+
+# Smoke-test: Python is runnable and cannot import network modules
+# (network block is enforced at docker-run time, not build time)
+RUN python3 -c "import sys; print('Python', sys.version)"
+
+# No ENTRYPOINT: DockerSandbox passes the full command explicitly
+# (e.g. `python3 script.py` / `node script.js` / `bash script.sh`). An
+# ENTRYPOINT here would be prepended to that command and break execution.
+CMD ["python3", "script.py"]

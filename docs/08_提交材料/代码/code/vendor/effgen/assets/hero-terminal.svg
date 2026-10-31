@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 428" width="880" height="428" font-family="'JetBrains Mono','Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace" role="img" aria-label="effGen quickstart terminal">
+  <defs>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141b34"/>
+      <stop offset="0.55" stop-color="#0d1226"/>
+      <stop offset="1" stop-color="#080b18"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6C63FF"/>
+      <stop offset="0.5" stop-color="#8A2BE2"/>
+      <stop offset="1" stop-color="#00B4CE"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#6C63FF" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <!-- card -->
+  <rect x="16" y="14" width="848" height="400" rx="18" fill="url(#card)" stroke="#2b3566" stroke-width="1.5" filter="url(#glow)"/>
+  <!-- accent top bar -->
+  <rect x="16" y="14" width="848" height="4" rx="2" fill="url(#accent)"/>
+
+  <!-- title bar -->
+  <circle cx="46"  cy="46" r="7" fill="#ff5f57"/>
+  <circle cx="70"  cy="46" r="7" fill="#febc2e"/>
+  <circle cx="94"  cy="46" r="7" fill="#28c840"/>
+  <text x="440" y="51" text-anchor="middle" font-size="14" fill="#8b93c9" letter-spacing="0.5">effgen — quickstart</text>
+  <line x1="16" y1="70" x2="864" y2="70" stroke="#232c54" stroke-width="1.2"/>
+
+  <!-- code -->
+  <g font-size="16" xml:space="preserve">
+    <text x="40" y="108"><tspan fill="#c3e88d">$</tspan><tspan fill="#d6deeb"> pip install effgen</tspan></text>
+
+    <text x="40" y="150"><tspan fill="#c792ea">from</tspan><tspan fill="#d6deeb"> effgen </tspan><tspan fill="#c792ea">import</tspan><tspan fill="#82aaff"> create_agent</tspan></text>
+    <text x="40" y="180"><tspan fill="#d6deeb">agent = </tspan><tspan fill="#82aaff">create_agent</tspan><tspan fill="#89ddff">(</tspan><tspan fill="#c3e88d">"research"</tspan><tspan fill="#89ddff">, </tspan><tspan fill="#c3e88d">"openai:gpt-5-nano"</tspan><tspan fill="#89ddff">)</tspan></text>
+
+    <text x="40" y="222"><tspan fill="#d6deeb">r = agent.</tspan><tspan fill="#82aaff">run</tspan><tspan fill="#89ddff">(</tspan><tspan fill="#c3e88d">"Capital of France? Cite a source."</tspan><tspan fill="#89ddff">)</tspan></text>
+    <text x="40" y="252"><tspan fill="#82aaff">print</tspan><tspan fill="#89ddff">(</tspan><tspan fill="#d6deeb">r.text</tspan><tspan fill="#89ddff">)</tspan><tspan fill="#676e95">      # Paris (Source: https://…/Paris)</tspan></text>
+    <text x="40" y="282"><tspan fill="#82aaff">print</tspan><tspan fill="#89ddff">(</tspan><tspan fill="#d6deeb">r.sources</tspan><tspan fill="#89ddff">)</tspan><tspan fill="#676e95">   # ['https://en.wikipedia.org/wiki/Paris']</tspan></text>
+    <text x="40" y="312"><tspan fill="#82aaff">print</tspan><tspan fill="#89ddff">(</tspan><tspan fill="#d6deeb">r.metadata</tspan><tspan fill="#89ddff">[</tspan><tspan fill="#c3e88d">"cost_usd"</tspan><tspan fill="#89ddff">]</tspan><tspan fill="#d6deeb">, r.metadata</tspan><tspan fill="#89ddff">[</tspan><tspan fill="#c3e88d">"latency_ms"</tspan><tspan fill="#89ddff">]</tspan><tspan fill="#89ddff">)</tspan></text>
+
+    <text x="40" y="356"><tspan fill="#c3e88d">$</tspan><tspan fill="#d6deeb"> effgen run --json -q </tspan><tspan fill="#c3e88d">"What is 25 * 17?"</tspan><tspan fill="#d6deeb"> | jq .output</tspan></text>
+    <text x="40" y="386"><tspan fill="#5b6488">→</tspan><tspan fill="#28c840"> 425</tspan><tspan fill="#676e95">   # clean JSON on stdout, ready for CI</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,38 @@
+You are a senior database performance engineer. The following SQL query runs on a standard SQL database and needs optimization.
+
+Schema:
+```sql
+CREATE TABLE orders (
+    order_id    INTEGER PRIMARY KEY,
+    customer_id INTEGER NOT NULL,
+    order_date  DATE    NOT NULL,
+    total_amt   NUMERIC(12,2) NOT NULL
+);
+
+CREATE TABLE customers (
+    customer_id INTEGER PRIMARY KEY,
+    name        VARCHAR(120) NOT NULL,
+    country     VARCHAR(60)  NOT NULL
+);
+```
+
+Observed performance issue: Full table scan on orders; query takes >10 s on 5 M rows.
+
+Query to optimize:
+```sql
+SELECT *
+FROM orders o, customers c
+WHERE o.customer_id = c.customer_id
+  AND YEAR(o.order_date) = 2023
+  AND c.country = 'US'
+ORDER BY o.total_amt DESC;
+```
+
+Think step by step:
+  Step 1 — Identify anti-patterns (e.g. SELECT *, implicit joins, non-sargable predicates, missing indexes, N+1 sub-queries, unnecessary DISTINCT/ORDER BY).
+  Step 2 — Explain the execution plan impact of each anti-pattern.
+  Step 3 — Propose a rewritten, optimized query.
+  Step 4 — List any indexes that should be created.
+  Step 5 — Estimate the expected improvement (order-of-magnitude, not exact numbers).
+
+Use the exact headings 'Step 1', 'Step 2', ..., 'Step 5' in your response.

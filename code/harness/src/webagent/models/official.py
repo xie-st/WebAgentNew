@@ -29,7 +29,9 @@ from effgen.models.base import (
     TokenCount,
 )
 
+from ..budget import BudgetLimits, enforce_request_limits
 from ..config import ModelConfig
+from ..errors import RequestLimitExceeded
 from ..redaction import DEFAULT_REDACTOR, Redactor
 
 _PLATFORM_USAGE_SOURCE = "missing"
@@ -93,6 +95,9 @@ class OfficialModel(BaseModel):
         call_sink: Callable[[OfficialCallRecord], None] | None = None,
         redactor: Redactor | None = None,
         token_count_source: str | None = None,
+        limits: BudgetLimits | None = None,
+        mandatory_provider: Callable[[], Any] | None = None,
+        limit_sink: Callable[[RequestLimitExceeded], None] | None = None,
     ) -> None:
         if config.provider != "official":
             raise ValueError("OfficialModel needs model.provider=official")
@@ -103,6 +108,9 @@ class OfficialModel(BaseModel):
         self._model_api = model_api
         self._system_prompt = system_prompt if system_prompt else None
         self._call_sink = call_sink
+        self._limits = limits or BudgetLimits()
+        self._mandatory_provider = mandatory_provider
+        self._limit_sink = limit_sink
         self.redactor = redactor or DEFAULT_REDACTOR
         self.token_count_source = token_count_source or config.token_count_source
         self.calls: list[OfficialCallRecord] = []
@@ -117,6 +125,20 @@ class OfficialModel(BaseModel):
     # --------------------------------------------------------------- lifecycle
     def set_call_sink(self, sink: Callable[[OfficialCallRecord], None] | None) -> None:
         self._call_sink = sink
+
+    def set_request_limits(
+        self,
+        limits: BudgetLimits,
+        mandatory_provider: Callable[[], Any] | None = None,
+        limit_sink: Callable[[RequestLimitExceeded], None] | None = None,
+    ) -> None:
+        """Install the project request limits checked at the final SDK exit."""
+
+        if not isinstance(limits, BudgetLimits):
+            raise ValueError("limits must be BudgetLimits")
+        self._limits = limits
+        self._mandatory_provider = mandatory_provider
+        self._limit_sink = limit_sink
 
     def load(self) -> None:
         if self._closed:
@@ -187,12 +209,15 @@ class OfficialModel(BaseModel):
         # and every inference parameter. Accepting it keeps the BaseModel contract.
         del config, kwargs
         messages = self.build_messages(prompt)
+        local_request_id = "oreq-" + uuid.uuid4().hex
+        # Final request exit: count messages and serialize the body once, before
+        # the SDK is called. No message is trimmed here; an overflow is refused.
+        measurement = self._check_request_limits(messages, local_request_id)
         if not self._is_loaded:
             self.load()
         api = self._api
         if api is None or not callable(getattr(api, "generate", None)):
             raise OfficialModelError("third_party_agent.model.generate is unavailable")
-        local_request_id = "oreq-" + uuid.uuid4().hex
         started = time.monotonic()
         try:
             response = api.generate(messages)
@@ -254,6 +279,9 @@ class OfficialModel(BaseModel):
             "request_id": request_id,
             "local_request_id": local_request_id,
             "request_id_source": "platform" if request_id else "unavailable",
+            "request_message_count": measurement.message_count,
+            "request_bytes": measurement.request_bytes,
+            "request_mandatory_bytes": measurement.mandatory_request_bytes,
             "usage_source": _PLATFORM_USAGE_SOURCE,
             "token_count_source": _PLATFORM_TOKEN_SOURCE,
             "input_tokens": None,
@@ -305,6 +333,54 @@ class OfficialModel(BaseModel):
         return "full"
 
     # ---------------------------------------------------------------- internals
+    def _check_request_limits(
+        self,
+        messages: Iterable[Mapping[str, str]],
+        local_request_id: str,
+    ) -> Any:
+        mandatory = None
+        if self._mandatory_provider is not None:
+            try:
+                supplied = self._mandatory_provider()
+            except Exception:  # noqa: BLE001 - the limit still applies without it
+                supplied = None
+            if supplied is not None:
+                mandatory = list(supplied)
+        try:
+            return enforce_request_limits(messages, self._limits, mandatory=mandatory)
+        except RequestLimitExceeded as exc:
+            body = list(messages)
+            self._record(
+                request_id=None,
+                local_request_id=local_request_id,
+                status="rejected",
+                latency_ms=0.0,
+                messages_count=len(body),
+                has_system_message=any(message["role"] == "system" for message in body),
+                input_chars=sum(len(message["content"]) for message in body),
+                output_chars=0,
+                failure_type="request_limit",
+                error_message=f"{exc.limit_name} limit exceeded: {exc}",
+                estimated_input=self._estimate_messages(body),
+            )
+            if self._limit_sink is not None:
+                try:
+                    self._limit_sink(exc)
+                except Exception:  # noqa: BLE001 - reporting never replaces the error
+                    pass
+            # EffGen retries "unknown" errors three times. A project limit is
+            # deterministic, so mark it invalid_request through EffGen's own
+            # documented error context; the refusal then fails fast.
+            try:
+                from effgen.models.errors import error_context_dict
+
+                exc.error_context = error_context_dict(
+                    "official", self.model_name, "generate", "invalid_request"
+                )
+            except Exception:  # noqa: BLE001 - classification is best-effort
+                pass
+            raise
+
     def _resolve_api(self) -> Any:
         if self._model_api is not None:
             api = self._model_api

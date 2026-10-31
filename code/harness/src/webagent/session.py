@@ -20,9 +20,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
-from .budget import Budget, BudgetLimits, Deadline
+from .budget import Budget, BudgetLimits, Deadline, DeadlineMarginReached
 from .clock import Clock, SystemClock
 from .errors import (
     ActionRejected,
@@ -33,9 +33,10 @@ from .errors import (
     RejectReason,
     SessionStateError,
 )
-from .events import EventLogger
+from .events import EventLogger, RunStatusWriter
 from .evidence import EvidenceStore
 from .protocol import (
+    ActionOp,
     ElementRef,
     FeedbackStatus,
     Finish,
@@ -83,18 +84,26 @@ class Session:
         budget: Budget | None = None,
         limits: BudgetLimits | None = None,
         page_id: str | None = None,
+        action_gate: Callable[[str], None] | None = None,
     ) -> None:
         validate_run_id(run_id)
         self.run_id = run_id
         self.clock = clock or SystemClock()
         self.redactor = redactor or DEFAULT_REDACTOR
         self.evidence = evidence or EvidenceStore(runtime_dir, run_id)
+        self._status_writer = RunStatusWriter(
+            run_id,
+            self.evidence.run_dir / "run_status.json",
+            clock=self.clock,
+            redactor=self.redactor,
+        )
         self.logger = logger or EventLogger(
             run_id,
             self.evidence.events_path,
             clock=self.clock,
             redactor=self.redactor,
             model_calls_total=lambda: self._model_calls,
+            on_event=self._update_run_status,
         )
         self.budget = budget or Budget(limits, clock=self.clock)
         self._page_id = page_id
@@ -102,16 +111,28 @@ class Session:
         self.state = SessionState.NEW
         self.task: str | None = None
         self.finish_result: Finish | None = None
+        self.termination: TerminationReason | None = None
+        self._termination_note: str | None = None
         self._observation: Observation | None = None
         self._seen_observations: set[str] = set()
         self._proposed: WebAction | None = None
         self._in_flight: WebAction | None = None
         self._consumed: set[str] = set()
         self._last_action_id: str | None = None
+        self._last_action_state: dict[str, Any] | None = None
         self._notes: list[str] = []
         self._model_calls = 0
+        self._model_attempts = 0
+        self._model_failures = 0
+        self._platform_request_ids: set[str] = set()
+        self._proposed_count = 0
+        self._dispatched_count = 0
+        self._completed_steps = 0
         self._deadline_logged = False
+        self._margin_logged = False
         self._closed = False
+        self._action_gate = action_gate
+        self._runtime_summary: dict[str, Any] = {}
         self.logger.emit(
             "run_start",
             result={"schema_version": "webagent.result.v1", "run_id": run_id},
@@ -142,12 +163,36 @@ class Session:
     def task_notes(self) -> tuple[str, ...]:
         return tuple(self._notes)
 
+    def set_action_gate(self, gate: Callable[[str], None] | None) -> None:
+        """Install the dispatch gate used by the phase-2 control layer.
+
+        The gate is consulted in :meth:`consume` only. A proposal may still be
+        recorded when a model result returns during a pause (the design requires
+        the unconsumed proposal to be dropped explicitly, not format-corrected),
+        but ``consume`` raises before anything reaches a backend. A gate must
+        raise :class:`~webagent.errors.ActionRejected` to refuse.
+        """
+
+        self._action_gate = gate
+
     def add_task_note(self, note: str) -> None:
         """Store a task-local fact for internal ``task_note`` tools."""
 
         if not isinstance(note, str) or not note.strip():
             raise ProtocolError("task note must be a non-empty string")
         self._notes.append(note)
+
+    def set_runtime_summary(self, summary: Mapping[str, Any]) -> None:
+        """Attach the entry point's actual runtime switches to the result summary.
+
+        ``result.json`` is written from :meth:`result_summary`; recording the
+        switches here means the persisted run record says which phase-2
+        behaviors were really enabled rather than only what the config named.
+        """
+
+        if not isinstance(summary, Mapping):
+            raise ProtocolError("runtime summary must be a mapping")
+        self._runtime_summary = dict(summary)
 
     @property
     def deadline(self) -> Deadline | None:
@@ -208,8 +253,12 @@ class Session:
         self._in_flight = None
         self._consumed.clear()
         self._last_action_id = None
+        self._last_action_state = None
         self._notes.clear()
         self._deadline_logged = False
+        self._margin_logged = False
+        self.termination = None
+        self._termination_note = None
         self.state = SessionState.READY
 
     def start_task(self, task: str) -> None:
@@ -265,6 +314,7 @@ class Session:
             action = self._in_flight
             feedback = observation.feedback
             assert feedback is not None
+            self._completed_steps += 1
             self.logger.emit(
                 "feedback",
                 page_id=page_id,
@@ -316,10 +366,101 @@ class Session:
             action_arguments=action.to_local_dict()["args"],
         )
         self._proposed = action
+        self._proposed_count += 1
         return action
+
+    def expand_proposal(
+        self,
+        action_id: str,
+        sub_actions: Sequence[WebAction],
+    ) -> tuple[WebAction, ...]:
+        """Replace one proposed action with its ordered sub-action sequence.
+
+        The proposed action is never dispatched: the execution layer hands each
+        sub-action to the platform in a later step. Every sub-action is validated
+        against the observation the proposal was built from before the proposal is
+        dropped, so an invalid plan changes nothing.
+        """
+
+        self._require_running_for_action("expand")
+        self.check_deadline("action expansion")
+        if self._in_flight is not None:
+            raise SessionStateError("cannot expand while an action is awaiting feedback")
+        proposed = self._proposed
+        if proposed is None or proposed.action_id != action_id:
+            raise SessionStateError("expand needs the currently proposed action")
+        subs = tuple(sub_actions)
+        if not subs:
+            raise ProtocolError("an expanded proposal needs at least one sub-action")
+        observation = self._observation
+        if observation is None:
+            raise ActionRejected(
+                RejectReason.NO_OBSERVATION,
+                details=["no current observation"],
+                correction="Wait for a current observation before expanding an action.",
+            )
+        for sub in subs:
+            if not isinstance(sub, WebAction):
+                raise ProtocolError("sub-actions must be WebAction values")
+            if sub.action_id in self._consumed:
+                raise ActionRejected(
+                    RejectReason.DUPLICATE_CONSUMPTION,
+                    details=[f"sub-action {sub.action_id!r} was already dispatched"],
+                    correction="Build a fresh expansion; a consumed action is never replayed.",
+                )
+            resolve_target(sub, observation)
+        self.logger.emit(
+            "expanded",
+            page_id=proposed.page_id,
+            url=observation.url,
+            observation_id=proposed.observation_id,
+            action_id=proposed.action_id,
+            action_type=proposed.op.value,
+            result={
+                "reason": "line_break_split",
+                "parent_action_id": proposed.action_id,
+                "sub_action_count": len(subs),
+                "sub_actions": [
+                    {
+                        "index": index,
+                        "op": sub.op.value,
+                        "target": sub.target,
+                        "keys": sub.keys,
+                        "text_chars": len(sub.text) if sub.text is not None else None,
+                    }
+                    for index, sub in enumerate(subs)
+                ],
+            },
+        )
+        self._proposed = None
+        return subs
+
+    def drop_proposal(self, reason: str = "dropped") -> None:
+        """Drop the unconsumed proposal without dispatching it."""
+
+        if self.state is not SessionState.RUNNING:
+            return
+        if self._in_flight is not None or self._proposed is None:
+            return
+        dropped = self._proposed
+        self.logger.emit(
+            "cancelled",
+            page_id=dropped.page_id,
+            url=None if self._observation is None else self._observation.url,
+            observation_id=dropped.observation_id,
+            action_id=dropped.action_id,
+            action_type=dropped.op.value,
+            result={"reason": str(reason), "scope": "proposed_action"},
+        )
+        self._proposed = None
 
     def consume(self, action_id: str | None = None) -> WebAction:
         self._require_running_for_action("consume")
+        if self._action_gate is not None:
+            # The phase-2 control gate owns "may this page action be sent now?".
+            # It raises ActionRejected(PAUSED/CLOSED) and leaves the proposal
+            # unconsumed so the caller can drop it explicitly.
+            self._action_gate("consume")
         self.check_deadline("action dispatch")
         if action_id is not None and action_id in self._consumed:
             raise ActionRejected(
@@ -354,6 +495,16 @@ class Session:
         self._consumed.add(action.action_id)
         self._proposed = None
         self._in_flight = action
+        self._dispatched_count += 1
+        self._last_action_state = {
+            "action_id": action.action_id,
+            "op": action.op.value,
+            "target": action.target,
+            "keys": action.keys,
+            "text_chars": len(action.text) if action.text is not None else None,
+            "text_preview": (action.text or "")[:120] if action.text is not None else None,
+            "submit": action.submit if action.op is ActionOp.TYPE else None,
+        }
         return action
 
     def pause(self) -> None:
@@ -436,8 +587,40 @@ class Session:
             },
         )
         self.finish_result = finish
+        self.termination = finish.reason
+        self._termination_note = finish.message or finish.claim
         self.state = SessionState.FINISHED
         self._write_result(finish=finish)
+
+    def finish_incomplete(self, finish: Finish) -> None:
+        """Finish when a dispatched action's observation could not be used.
+
+        Used by the split text path: if the platform's next observation cannot
+        be ingested, the dispatched sub-action is recorded as unanswered instead
+        of pretending it succeeded, and the task still gets a terminal result.
+        """
+
+        if self.state is not SessionState.RUNNING:
+            raise SessionStateError(f"cannot finish while session is {self.state.value}")
+        action = self._in_flight or self._proposed
+        if action is not None:
+            self.logger.emit(
+                "cancelled",
+                page_id=action.page_id,
+                url=None if self._observation is None else self._observation.url,
+                observation_id=action.observation_id,
+                action_id=action.action_id,
+                action_type=action.op.value,
+                result={
+                    "reason": finish.reason.value,
+                    "scope": "in_flight_action"
+                    if self._in_flight is not None
+                    else "proposed_action",
+                },
+            )
+        self._in_flight = None
+        self._proposed = None
+        self.finish(finish)
 
     def cancel(self, reason: str = "cancelled") -> None:
         if self.state is SessionState.CLOSED:
@@ -457,6 +640,8 @@ class Session:
         )
         self._proposed = None
         self._in_flight = None
+        self.termination = TerminationReason.CANCELLED
+        self._termination_note = str(reason)
         self.state = SessionState.CANCELLED
         self._write_result(termination=TerminationReason.CANCELLED)
 
@@ -491,8 +676,9 @@ class Session:
             result={
                 "final_state": final_state.value,
                 "termination": None
-                if self.finish_result is None
-                else self.finish_result.reason.value,
+                if self.termination is None
+                else self.termination.value,
+                "summary": self.result_summary(),
             },
         )
         self.logger.close()
@@ -527,6 +713,30 @@ class Session:
                 )
             raise
 
+    def check_model_call_margin(self, stage: str = "model call") -> None:
+        """Refuse a new model call when the deadline safety margin is reached."""
+
+        try:
+            self.budget.require_model_call_margin(stage)
+        except DeadlineMarginReached as exc:
+            if not self._margin_logged:
+                self._margin_logged = True
+                self.logger.emit(
+                    "deadline_margin",
+                    page_id=self._page_id,
+                    url=None if self._observation is None else self._observation.url,
+                    observation_id=None
+                    if self._observation is None
+                    else self._observation.observation_id,
+                    result={
+                        "stage": stage,
+                        "remaining_seconds": round(exc.remaining_seconds, 3),
+                        "margin_seconds": exc.margin_seconds,
+                        "action": "controlled_closeout",
+                    },
+                )
+            raise
+
     def record_model_call(
         self,
         *,
@@ -546,6 +756,11 @@ class Session:
         except BudgetExceeded as exc:
             self.log_exception("model_call", exc)
             raise
+        self._model_attempts += 1
+        if failure_type:
+            self._model_failures += 1
+        if isinstance(request_id, str) and request_id:
+            self._platform_request_ids.add(request_id)
         self._model_calls = max(self._model_calls, call_index)
         observation = self._observation
         return self.logger.emit_model_call(
@@ -660,6 +875,8 @@ class Session:
         observation = self._observation
         if termination is not None:
             termination_value = termination.value
+        elif self.termination is not None:
+            termination_value = self.termination.value
         elif finish is not None:
             termination_value = finish.reason.value
         else:
@@ -678,10 +895,81 @@ class Session:
                 "observation_id": observation.observation_id,
                 "url": observation.url,
             },
+            "summary": self.result_summary(),
             "model_calls_total": self.model_calls_total,
             "time": self.clock.iso(self.clock.now()),
         }
         self.evidence.write_result(self.redactor.redact(payload))
+
+    def result_summary(self) -> dict[str, Any]:
+        """Step/action totals and separate model-call counters for reconciliation."""
+
+        summary = {
+            "steps_completed": self._completed_steps,
+            "observations": len(self._seen_observations),
+            "actions_proposed": self._proposed_count,
+            "actions_dispatched": self._dispatched_count,
+            "last_action": self._last_action_state,
+            "unfinished": self._termination_note,
+            "model_calls": self.model_call_counts(),
+        }
+        if self._runtime_summary:
+            summary["runtime"] = dict(self._runtime_summary)
+        return summary
+
+    def model_call_counts(self) -> dict[str, int]:
+        """Three separate counts; a single total would hide what differs locally.
+
+        ``platform_calls`` is what this process saw the platform accept (a
+        distinct platform ``request_id`` was returned). ``local_attempts`` counts
+        every attempted SDK call, including refused and failed ones.
+        ``failures`` counts attempts with a failure type. The platform's own batch
+        number stays authoritative; these are local, reconcilable values.
+        """
+
+        return {
+            "platform_calls": len(self._platform_request_ids),
+            "local_attempts": self._model_attempts,
+            "failures": self._model_failures,
+        }
+
+    def run_status(self, last_event: Mapping[str, Any] | None = None) -> dict[str, Any]:
+        """The lightweight state persisted after every event."""
+
+        status: dict[str, Any] = {
+            "run_id": self.run_id,
+            "state": self.state.value,
+            "task_started": self.task is not None,
+            "termination": None if self.termination is None else self.termination.value,
+            "steps": {
+                "completed": self._completed_steps,
+                "proposed": self._proposed_count,
+                "dispatched": self._dispatched_count,
+            },
+            "last_action": self._last_action_state,
+            "model_calls": self.model_call_counts(),
+            "model_calls_total": self.model_calls_total,
+        }
+        if last_event is not None:
+            status["last_event"] = {
+                "event_type": last_event.get("event_type"),
+                "time": last_event.get("time"),
+                "action_id": last_event.get("action_id"),
+                "action_type": last_event.get("action_type"),
+                "observation_id": last_event.get("observation_id"),
+                "model_calls_total": last_event.get("model_calls_total"),
+            }
+        return status
+
+    def _update_run_status(self, event: Mapping[str, Any]) -> None:
+        # A status write must never break the run or the event log it describes.
+        try:
+            self._status_writer.write(self.run_status(event))
+        except Exception:  # noqa: BLE001 - best-effort local state file
+            pass
+
+    def status_path(self) -> Path:
+        return self._status_writer.path
 
     def __enter__(self) -> "Session":
         return self

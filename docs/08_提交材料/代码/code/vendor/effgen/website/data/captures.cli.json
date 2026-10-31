@@ -1,0 +1,1982 @@
+{
+  "generated_at": "2026-08-22T10:05:11Z",
+  "captures": {
+    "cli-help-root": {
+      "file": "cli-help-root.txt",
+      "command": "effgen --help",
+      "sha256": "4017a33acd1af60bde87866e183fd44cdee7b88ab5e37a6b74a6f6a3f1f94fc4",
+      "bytes": 4276,
+      "text": "usage: effgen [-h] [--version] [-v] [-q] [--log-file LOG_FILE] [--no-animation]\n              [--theme {default,high-contrast,monochrome,light}] [--completion {bash,zsh,fish}]\n              {run,resume,sessions,runs,chat,code,serve,top,monitor,config,tools,models,examples,health,doctor,create-plugin,presets,quickstart,tutorial,workflow,batch,eval,compare,battle,debug,cost,report,prompts,loadtest}\n              ...\n\neffGen v1.0.0 - CLI for agent framework\n\npositional arguments:\n  {run,resume,sessions,runs,chat,code,serve,top,monitor,config,tools,models,examples,health,doctor,create-plugin,presets,quickstart,tutorial,workflow,batch,eval,compare,battle,debug,cost,report,prompts,loadtest}\n                        Command to run\n    run                 Run an agent with a task\n    resume              Resume an interrupted agent run from a saved checkpoint snapshot (distinct\n                        from a conversation session — see `--session-id`)\n    sessions            Browse and manage saved conversations\n    runs                Browse agent run history\n    chat                Interactive chat mode\n    code                Coding agent: writes code, runs it, and fixes what fails\n    serve               Start API server\n    top                 Live terminal view of runs, traffic, spend and GPU\n    monitor             Alias for `effgen top`\n    config              Configuration management\n    tools               Tool management\n    models              Model management\n    examples            Run example scripts\n    health              Check effGen infrastructure health (contacts external services)\n    doctor              Check provider keys, the system, and what effgen code needs\n    create-plugin       Generate a plugin project scaffold\n    presets             List available agent presets\n    quickstart          Guided first run: pick a model, run an agent, then write and run code\n    tutorial            Alias of quickstart — the same guided first run\n    workflow            Run a DAG-based workflow\n    batch               Run batch queries from a file\n    eval                Evaluate an agent against a test suite\n    compare             Compare multiple models on a test suite\n    battle              Race several models on one prompt, side by side\n    debug               Run an agent in interactive debug mode\n    cost                View cost spend and manage budgets\n    report              Render a saved run/compare/eval/cost/loadtest JSON result as an HTML\n                        report\n    prompts             Prompt library management\n    loadtest            Run a load test against a local mock or a live provider\n\noptions:\n  -h, --help            show this help message and exit\n  --version             show program's version number and exit\n  -v, --verbose         Verbose output (show DEBUG/INFO logs)\n  -q, --quiet           Quiet output (errors only)\n  --log-file LOG_FILE   Log file path\n  --no-animation        Disable live spinners/progress animation (also via NO_COLOR or\n                        EFFGEN_NO_ANIM=1)\n  --theme {default,high-contrast,monochrome,light}\n                        Color theme for terminal output (also via EFFGEN_THEME). high-contrast\n                        targets low-vision readers; monochrome keeps structure without hue;\n                        NO_COLOR still turns color off entirely\n  --completion {bash,zsh,fish}\n                        Print shell completion script and exit\n\nExamples:\n  effgen run \"What is 25 * 17?\" --model Qwen/Qwen2.5-1.5B-Instruct\n  effgen run \"Summarize quantum computing\" -m gpt-5-nano --provider openai\n  effgen run \"Tell me a joke\" -m groq:llama-3.1-8b-instant\n  effgen chat -m gpt-5-nano --provider openai\n  effgen models list                 # provider registry overview\n  effgen models list --provider groq # full per-model detail\n  effgen doctor --live --cheap       # confirm providers are actually usable\n  effgen tools list\n\nModel id formats:\n  - Local HuggingFace repo:   Qwen/Qwen2.5-1.5B-Instruct\n  - Provider-prefixed:        openai:gpt-5-nano   groq:llama-3.1-8b-instant\n  - Bare id + --provider:     -m gpt-5-nano --provider openai\n  Providers: openai, anthropic, gemini, cerebras, groq, together,\n             fireworks, replicate, hf\n",
+      "lines": 73
+    },
+    "cli-top": {
+      "file": "cli-top.ansi",
+      "command": "effgen top --once",
+      "sha256": "9e189573796f9ffcd443928597868b3ea64a67cb4adc6f3c2e5c2883ab006c8f",
+      "bytes": 7936,
+      "text": "effGen 1.0.0 — wangserv — 2026-08-20T16:56:29Z\nserver http://127.0.0.1:8124 reachable\n\n                    Activity — completed runs, local run history (all processes)                    \n┏━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Time     ┃ Status ┃ Model                     ┃ Duration ┃ Cost      ┃ Task                      ┃\n┡━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ 12:56:28 │ error  │ no-such-model             │ 217ms    │ —         │ user: hi                  │\n│ 12:56:28 │ ok     │ gemini-3.1-flash-lite     │ 8.91s    │ $0.000008 │ user: What is 9 squared?  │\n│ 12:56:19 │ ok     │ gemini-3.1-flash-lite     │ 2.36s    │ $0.000052 │ user: Give me one fact    │\n│          │        │                           │          │           │ about Kyoto.              │\n│ 12:56:17 │ ok     │ gemini-3.1-flash-lite     │ 713ms    │ $0.000024 │ user: Name one property   │\n│          │        │                           │          │           │ of a B-tree.              │\n│ 12:56:16 │ ok     │ gemini-3.1-flash-lite     │ 4.15s    │ $0.000010 │ user: What is 25 * 17?    │\n│ 12:56:07 │ ok     │ gemini:gemini-3.1-flash-l │ 4.87s    │ $0.000955 │ what does textkit export? │\n│          │        │ ite                       │          │           │                           │\n│ 12:55:58 │ ok     │ openai:gpt-5-nano         │ 3.49s    │ $0.000177 │ What is 2 ** 40? Use the  │\n│          │        │                           │          │           │ calculator tool.          │\n│ 12:55:51 │ ok     │ openai:gpt-5-nano         │ 2.86s    │ $0.000129 │ What is the boiling point │\n│          │        │                           │          │           │ of water in Fahrenheit?   │\n│ 12:55:46 │ ok     │ gemini:gemini-3.1-flash-l │ 11.59s   │ $0.000104 │ Summarise what a B-tree   │\n│          │        │ ite                       │          │           │ is, in one sentence.      │\n│ 12:55:30 │ ok     │ gemini:gemini-3.1-flash-l │ 2.21s    │ $0.000077 │ What is 18723 * 4409? Use │\n│          │        │ ite                       │          │           │ the calculator tool.      │\n└──────────┴────────┴───────────────────────────┴──────────┴───────────┴───────────────────────────┘\n\n       Traffic — this server process since start       \n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Metric                      ┃ Value                 ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩\n│ Generation requests         │ 5                     │\n│ Errors                      │ 1 (20.0%)             │\n│ Latency p50 / p95 / p99     │ 1.75s / 8.75s / 9.75s │\n│ Tokens                      │ 136                   │\n│ HTTP responses (all routes) │ 200×5, 404×1          │\n└─────────────────────────────┴───────────────────────┘\n\n                     Per-model — this server process since start                      \n┏━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━┓\n┃ Model                 ┃ Provider ┃ Calls ┃ Errors ┃ Error rate ┃ p95   ┃ Cost      ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━┩\n│ gemini-3.1-flash-lite │ gemini   │ 4     │ 0      │ 0.0%       │ 9.00s │ $0.000094 │\n│ no-such-model         │ gemini   │ 1     │ 1      │ 100.0%     │ 242ms │ —         │\n└───────────────────────┴──────────┴───────┴────────┴────────────┴───────┴───────────┘\n\n Spend — local cost ledger, last 24 hours \n┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Metric       ┃ Value                   ┃\n┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ Total        │ $0.001536               │\n│ Requests     │ 10                      │\n│ Daily budget │ $1.00 (0.1% used)       │\n│ Burn rate    │ $0.001536/h (last hour) │\n└──────────────┴─────────────────────────┘\n\n        GPU — physical devices, all processes         \n┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━┓\n┃ GPU ┃ Name       ┃ Memory           ┃ Mem % ┃ Util ┃\n┡━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━┩\n│ 0   │ NVIDIA A40 │ 44.33 / 44.42 GB │ 100%  │ 96%  │\n│ 1   │ NVIDIA A40 │ 0.26 / 44.42 GB  │ 1%    │ 0%   │\n│ 2   │ NVIDIA A40 │ 44.38 / 44.42 GB │ 100%  │ 100% │\n│ 3   │ NVIDIA A40 │ 44.38 / 44.42 GB │ 100%  │ 100% │\n│ 4   │ NVIDIA A40 │ 44.38 / 44.42 GB │ 100%  │ 100% │\n│ 5   │ NVIDIA A40 │ 44.38 / 44.42 GB │ 100%  │ 100% │\n│ 6   │ NVIDIA A40 │ 43.93 / 44.42 GB │ 99%   │ 100% │\n│ 7   │ NVIDIA A40 │ 43.93 / 44.42 GB │ 99%   │ 100% │\n└─────┴────────────┴──────────────────┴───────┴──────┘\n",
+      "lines": 68
+    },
+    "cli-battle": {
+      "file": "cli-battle.ansi",
+      "command": "effgen battle \"Explain a B-tree in two sentences.\" -m openai:gpt-5-nano,gemini:gemini-3.1-flash-lite --no-animation",
+      "sha256": "e18971b278fd30b00b9e07c3a7d67febd65603723c3d48c94b5e8409e2c76485",
+      "bytes": 1350,
+      "text": "# Model Battle\n\n**Prompt:** Explain a B-tree in two sentences.\n\n| Model | Result | TTFT | Latency | Tokens (in/out) | Cost |\n|-------|--------|------|---------|-----------------|------|\n| openai:gpt-5-nano | answered | 12.13s | 12.89s | 25/1103 | $0.000442 |\n| gemini:gemini-3.1-flash-lite | answered | 2.51s | 3.77s | 21/63 | $0.000100 |\n\n## Verdict\n\n- **Fastest**: gemini:gemini-3.1-flash-lite — answered in 3.77s\n- **Cheapest**: gemini:gemini-3.1-flash-lite — $0.000100 for this run\n- **Longest**: openai:gpt-5-nano — 348 characters\n\n## openai:gpt-5-nano\n\nA B-tree is a self-balancing, multi-way search tree in which each node can contain multiple keys and have many children, keeping the tree shallow for efficient disk access. All leaves are at the same depth, and internal nodes guide searches by key ranges, allowing insert, delete, and search operations to run in logarithmic time on large datasets.\n\n## gemini:gemini-3.1-flash-lite\n\nA B-tree is a self-balancing search tree data structure that maintains sorted data and allows searches, sequential access, insertions, and deletions in logarithmic time. It is optimized for systems that read and write large blocks of data by allowing nodes to contain more than two children, which minimizes disk I/O operations.\n\n_2/2 answered in 16.40s; total cost $0.000542._\n",
+      "lines": 24
+    },
+    "cli-theme-default": {
+      "file": "cli-theme-default.ansi",
+      "command": "effgen --theme default models info gemini:gemini-3.1-flash-lite",
+      "sha256": "7cd58ef7c123ea8d880d676ee67b38ec43f127c3cd7c99959178d1430cae8e44",
+      "bytes": 1819,
+      "text": "\nModel: gemini:gemini-3.1-flash-lite\n┌───────────────────────────┬───────────────────────┐\n│ Provider                  │ gemini                │\n│ Display name              │ gemini-3.1-flash-lite │\n│ Family                    │ flash-lite            │\n│ Context window            │ 1,000,000             │\n│ Max output                │ 32,768                │\n│ Price ($/1M in / out)     │ $0.25/$1.5            │\n│ Tool calling              │ yes                   │\n│ Coding                    │ suitable              │\n│ Vision                    │ yes                   │\n│ Audio                     │ yes                   │\n│ Free tier                 │ yes                   │\n│ Rate limits (rpm/tpm/rpd) │ 15 / 250000 / 500     │\n│ Deprecated                │ no                    │\n│ Price source              │ bundled-catalog       │\n│ Verified on               │ 2026-08-13            │\n│ Auth ready                │ no (set key)          │\n└───────────────────────────┴───────────────────────┘\n\nUse: effgen run --provider gemini -m gemini-3.1-flash-lite \"...\"\n",
+      "lines": 22,
+      "spans": [
+        [],
+        [
+          [
+            "b:cyan",
+            "Model: gemini:gemini-3.1-flash-lite"
+          ]
+        ],
+        [
+          [
+            "",
+            "┌───────────────────────────┬───────────────────────┐"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Provider                 "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ gemini                │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Display name             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ gemini-3.1-flash-lite │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Family                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ flash-lite            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Context window           "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 1,000,000             │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Max output               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 32,768                │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Price ($/1M in / out)    "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ $0.25/$1.5            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Tool calling             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Coding                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ suitable              │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Vision                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Audio                    "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Free tier                "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Rate limits (rpm/tpm/rpd)"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 15 / 250000 / 500     │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Deprecated               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ no                    │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Price source             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ bundled-catalog       │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Verified on              "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 2026-08-13            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Auth ready               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ no (set key)          │"
+          ]
+        ],
+        [
+          [
+            "",
+            "└───────────────────────────┴───────────────────────┘"
+          ]
+        ],
+        [],
+        [
+          [
+            "d",
+            "Use: "
+          ],
+          [
+            "d:cyan",
+            "effgen run --provider gemini -m gemini-3.1-flash-lite \"...\""
+          ]
+        ]
+      ]
+    },
+    "cli-theme-high-contrast": {
+      "file": "cli-theme-high-contrast.ansi",
+      "command": "effgen --theme high-contrast models info gemini:gemini-3.1-flash-lite",
+      "sha256": "e70d6c0681e784c778573ccd06afd6eeaa30049817b8591c7ddfddd75222789c",
+      "bytes": 1962,
+      "text": "\nModel: gemini:gemini-3.1-flash-lite\n┌───────────────────────────┬───────────────────────┐\n│ Provider                  │ gemini                │\n│ Display name              │ gemini-3.1-flash-lite │\n│ Family                    │ flash-lite            │\n│ Context window            │ 1,000,000             │\n│ Max output                │ 32,768                │\n│ Price ($/1M in / out)     │ $0.25/$1.5            │\n│ Tool calling              │ yes                   │\n│ Coding                    │ suitable              │\n│ Vision                    │ yes                   │\n│ Audio                     │ yes                   │\n│ Free tier                 │ yes                   │\n│ Rate limits (rpm/tpm/rpd) │ 15 / 250000 / 500     │\n│ Deprecated                │ no                    │\n│ Price source              │ bundled-catalog       │\n│ Verified on               │ 2026-08-13            │\n│ Auth ready                │ no (set key)          │\n└───────────────────────────┴───────────────────────┘\n\nUse: effgen run --provider gemini -m gemini-3.1-flash-lite \"...\"\n",
+      "lines": 22,
+      "spans": [
+        [],
+        [
+          [
+            "b:bright-cyan",
+            "Model: gemini:gemini-3.1-flash-lite"
+          ]
+        ],
+        [
+          [
+            "",
+            "┌───────────────────────────┬───────────────────────┐"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Provider                 "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ gemini                │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Display name             "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ gemini-3.1-flash-lite │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Family                   "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ flash-lite            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Context window           "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ 1,000,000             │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Max output               "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ 32,768                │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Price ($/1M in / out)    "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ $0.25/$1.5            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Tool calling             "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Coding                   "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ suitable              │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Vision                   "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Audio                    "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Free tier                "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Rate limits (rpm/tpm/rpd)"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ 15 / 250000 / 500     │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Deprecated               "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ no                    │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Price source             "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ bundled-catalog       │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Verified on              "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ 2026-08-13            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "b:bright-white",
+            "Auth ready               "
+          ],
+          [
+            "b:bright-white",
+            " "
+          ],
+          [
+            "",
+            "│ no (set key)          │"
+          ]
+        ],
+        [
+          [
+            "",
+            "└───────────────────────────┴───────────────────────┘"
+          ]
+        ],
+        [],
+        [
+          [
+            ":white",
+            "Use: "
+          ],
+          [
+            ":bright-cyan",
+            "effgen run --provider gemini -m gemini-3.1-flash-lite \"...\""
+          ]
+        ]
+      ]
+    },
+    "cli-theme-monochrome": {
+      "file": "cli-theme-monochrome.ansi",
+      "command": "effgen --theme monochrome models info gemini:gemini-3.1-flash-lite",
+      "sha256": "96e3daa49cbb225eaffe7208825206eb7c5d9e50ac0f98e542c6b833e11e8e32",
+      "bytes": 1818,
+      "text": "\nModel: gemini:gemini-3.1-flash-lite\n┌───────────────────────────┬───────────────────────┐\n│ Provider                  │ gemini                │\n│ Display name              │ gemini-3.1-flash-lite │\n│ Family                    │ flash-lite            │\n│ Context window            │ 1,000,000             │\n│ Max output                │ 32,768                │\n│ Price ($/1M in / out)     │ $0.25/$1.5            │\n│ Tool calling              │ yes                   │\n│ Coding                    │ suitable              │\n│ Vision                    │ yes                   │\n│ Audio                     │ yes                   │\n│ Free tier                 │ yes                   │\n│ Rate limits (rpm/tpm/rpd) │ 15 / 250000 / 500     │\n│ Deprecated                │ no                    │\n│ Price source              │ bundled-catalog       │\n│ Verified on               │ 2026-08-13            │\n│ Auth ready                │ no (set key)          │\n└───────────────────────────┴───────────────────────┘\n\nUse: effgen run --provider gemini -m gemini-3.1-flash-lite \"...\"\n",
+      "lines": 22,
+      "spans": [
+        [],
+        [
+          [
+            "bu",
+            "Model: gemini:gemini-3.1-flash-lite"
+          ]
+        ],
+        [
+          [
+            "",
+            "┌───────────────────────────┬───────────────────────┐"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Provider                 "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ gemini                │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Display name             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ gemini-3.1-flash-lite │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Family                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ flash-lite            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Context window           "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 1,000,000             │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Max output               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 32,768                │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Price ($/1M in / out)    "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ $0.25/$1.5            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Tool calling             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Coding                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ suitable              │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Vision                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Audio                    "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Free tier                "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Rate limits (rpm/tpm/rpd)"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 15 / 250000 / 500     │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Deprecated               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ no                    │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Price source             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ bundled-catalog       │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Verified on              "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 2026-08-13            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Auth ready               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ no (set key)          │"
+          ]
+        ],
+        [
+          [
+            "",
+            "└───────────────────────────┴───────────────────────┘"
+          ]
+        ],
+        [],
+        [
+          [
+            "d",
+            "Use: "
+          ],
+          [
+            "d",
+            "effgen run --provider gemini -m gemini-3.1-flash-lite \"...\""
+          ]
+        ]
+      ]
+    },
+    "cli-theme-light": {
+      "file": "cli-theme-light.ansi",
+      "command": "effgen --theme light models info gemini:gemini-3.1-flash-lite",
+      "sha256": "01e01ba4297157ddd0c7f61df89235690f4b48e894c526e5e4349d217c3bb76b",
+      "bytes": 1819,
+      "text": "\nModel: gemini:gemini-3.1-flash-lite\n┌───────────────────────────┬───────────────────────┐\n│ Provider                  │ gemini                │\n│ Display name              │ gemini-3.1-flash-lite │\n│ Family                    │ flash-lite            │\n│ Context window            │ 1,000,000             │\n│ Max output                │ 32,768                │\n│ Price ($/1M in / out)     │ $0.25/$1.5            │\n│ Tool calling              │ yes                   │\n│ Coding                    │ suitable              │\n│ Vision                    │ yes                   │\n│ Audio                     │ yes                   │\n│ Free tier                 │ yes                   │\n│ Rate limits (rpm/tpm/rpd) │ 15 / 250000 / 500     │\n│ Deprecated                │ no                    │\n│ Price source              │ bundled-catalog       │\n│ Verified on               │ 2026-08-13            │\n│ Auth ready                │ no (set key)          │\n└───────────────────────────┴───────────────────────┘\n\nUse: effgen run --provider gemini -m gemini-3.1-flash-lite \"...\"\n",
+      "lines": 22,
+      "spans": [
+        [],
+        [
+          [
+            "b:blue",
+            "Model: gemini:gemini-3.1-flash-lite"
+          ]
+        ],
+        [
+          [
+            "",
+            "┌───────────────────────────┬───────────────────────┐"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Provider                 "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ gemini                │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Display name             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ gemini-3.1-flash-lite │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Family                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ flash-lite            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Context window           "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 1,000,000             │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Max output               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 32,768                │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Price ($/1M in / out)    "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ $0.25/$1.5            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Tool calling             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Coding                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ suitable              │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Vision                   "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Audio                    "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Free tier                "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ yes                   │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Rate limits (rpm/tpm/rpd)"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 15 / 250000 / 500     │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Deprecated               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ no                    │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Price source             "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ bundled-catalog       │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Verified on              "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ 2026-08-13            │"
+          ]
+        ],
+        [
+          [
+            "",
+            "│"
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "b",
+            "Auth ready               "
+          ],
+          [
+            "b",
+            " "
+          ],
+          [
+            "",
+            "│ no (set key)          │"
+          ]
+        ],
+        [
+          [
+            "",
+            "└───────────────────────────┴───────────────────────┘"
+          ]
+        ],
+        [],
+        [
+          [
+            "d",
+            "Use: "
+          ],
+          [
+            "d:blue",
+            "effgen run --provider gemini -m gemini-3.1-flash-lite \"...\""
+          ]
+        ]
+      ]
+    },
+    "cli-completion-bash": {
+      "file": "cli-completion-bash.txt",
+      "command": "effgen --completion bash",
+      "sha256": "15879877af4b89a3eb1643cbd2cc1030e0a8cf525941d5f9becb059503ec4941",
+      "bytes": 3455,
+      "text": "\n_effgen_completion() {\n    local cur prev commands presets tools\n    COMPREPLY=()\n    cur=\"${COMP_WORDS[COMP_CWORD]}\"\n    prev=\"${COMP_WORDS[COMP_CWORD-1]}\"\n\n    commands=\"batch battle chat code compare config cost create-plugin debug doctor eval examples health loadtest models monitor presets prompts quickstart report resume run runs serve sessions tools top tutorial workflow\"\n    presets=\"coding general math media minimal multimodal notify rag research\"\n    tools=\"agentic_search anthropic_bash anthropic_computer anthropic_text_editor arxiv audio_transcribe bash calculator code_execution code_executor crypto_price currency_converter dataframe datetime discord_webhook docker docx email_draft email_imap email_smtp excel file_operations geocode git github google_search hackernews http image_caption image_info json_tool language_detect maps multimodal_describe news notification ocr openai_code_interpreter openai_file_search openai_web_search pdf plot pubmed python_repl qr_generate qr_read reddit retrieval rss_feed semantic_scholar slack_draft slack_webhook stackoverflow stats stock_price system_info text_processing translate url_context url_fetch weather web_search wikipedia wolfram_alpha youtube_metadata youtube_transcript\"\n\n    case \"${prev}\" in\n        effgen|effgen-agent)\n            COMPREPLY=( $(compgen -W \"${commands}\" -- \"${cur}\") )\n            return 0\n            ;;\n        --preset)\n            COMPREPLY=( $(compgen -W \"${presets}\" -- \"${cur}\") )\n            return 0\n            ;;\n        --tools|-t)\n            COMPREPLY=( $(compgen -W \"${tools}\" -- \"${cur}\") )\n            return 0\n            ;;\n        --mode)\n            COMPREPLY=( $(compgen -W \"auto single sub_agents\" -- \"${cur}\") )\n            return 0\n            ;;\n        run|chat)\n            COMPREPLY=( $(compgen -W \"--model --provider --tools --preset --verbose --explain --stream --config --system-prompt --temperature --max-iterations --mode --output --session-id\" -- \"${cur}\") )\n            return 0\n            ;;\n        config)\n            COMPREPLY=( $(compgen -W \"init set show validate\" -- \"${cur}\") )\n            return 0\n            ;;\n        cost)\n            COMPREPLY=( $(compgen -W \"by-provider clear-budget set-budget today week\" -- \"${cur}\") )\n            return 0\n            ;;\n        examples)\n            COMPREPLY=( $(compgen -W \"list run\" -- \"${cur}\") )\n            return 0\n            ;;\n        models)\n            COMPREPLY=( $(compgen -W \"browse info list load refresh status unload\" -- \"${cur}\") )\n            return 0\n            ;;\n        prompts)\n            COMPREPLY=( $(compgen -W \"eval list playground render run show\" -- \"${cur}\") )\n            return 0\n            ;;\n        runs)\n            COMPREPLY=( $(compgen -W \"cleanup list show\" -- \"${cur}\") )\n            return 0\n            ;;\n        sessions)\n            COMPREPLY=( $(compgen -W \"browse cleanup delete export list show\" -- \"${cur}\") )\n            return 0\n            ;;\n        tools)\n            COMPREPLY=( $(compgen -W \"info list test\" -- \"${cur}\") )\n            return 0\n            ;;\n        workflow)\n            COMPREPLY=( $(compgen -W \"run validate\" -- \"${cur}\") )\n            return 0\n            ;;\n    esac\n\n    if [[ \"${cur}\" == -* ]]; then\n        COMPREPLY=( $(compgen -W \"--help --version --verbose --quiet --log-file\" -- \"${cur}\") )\n    fi\n}\ncomplete -F _effgen_completion effgen\ncomplete -F _effgen_completion effgen-agent\n",
+      "lines": 76
+    },
+    "cli-runs-list": {
+      "file": "cli-runs-list.ansi",
+      "command": "effgen runs list --limit 6",
+      "sha256": "287f735ae5a539dd709dbcb34bc9c9152690d3843b902c5a136ceb7b48ccd8f6",
+      "bytes": 3397,
+      "text": "┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━┳━━━━━━━━┓\n┃ Run          ┃ When             ┃ Model            ┃ Task            ┃      Cost ┃ Time ┃ Status ┃\n┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━╇━━━━━━━━┩\n│ 7bd4e604266d │ 2026-08-20 12:56 │ no-such-model    │ user: hi        │         — │ 0.2s │ error  │\n│ 1d13a0467f23 │ 2026-08-20 12:56 │ gemini-3.1-flash │ user: What is 9 │ $0.000008 │ 8.9s │ ok     │\n│              │                  │ -lite            │ squared?        │           │      │        │\n│ c724d0f7889e │ 2026-08-20 12:56 │ gemini-3.1-flash │ user: Give me   │ $0.000052 │ 2.4s │ ok     │\n│              │                  │ -lite            │ one fact about  │           │      │        │\n│              │                  │                  │ Kyoto.          │           │      │        │\n│ bfb86bca5539 │ 2026-08-20 12:56 │ gemini-3.1-flash │ user: Name one  │ $0.000024 │ 0.7s │ ok     │\n│              │                  │ -lite            │ property of a   │           │      │        │\n│              │                  │                  │ B-tree.         │           │      │        │\n│ f9ed5104a9f8 │ 2026-08-20 12:56 │ gemini-3.1-flash │ user: What is   │ $0.000010 │ 4.1s │ ok     │\n│              │                  │ -lite            │ 25 * 17?        │           │      │        │\n│ 0ceb32763836 │ 2026-08-20 12:56 │ gemini:gemini-3. │ what does       │   $0.0010 │ 4.9s │ ok     │\n│              │                  │ 1-flash…         │ textkit export? │           │      │        │\n└──────────────┴──────────────────┴──────────────────┴─────────────────┴───────────┴──────┴────────┘\n                          Stored in: /data/wang/gks/effgen-demo/home/runs                           \nOpen one with: effgen runs show <run-id>\n",
+      "lines": 19
+    },
+    "cli-runs-show": {
+      "file": "cli-runs-show.ansi",
+      "command": "effgen runs show 7bd4e604266d",
+      "sha256": "86009629d6a9a7f9311569677e35a64e7488580393cdf8bfd86d7328948ca2eb",
+      "bytes": 657,
+      "text": "Run:      7bd4e604266d\nWhen:     2026-08-20T12:56:28-04:00\nStatus:   error\nModel:    no-such-model (gemini)\nAgent:    api:gemini:no-such-model\nTokens:   0 in / 0 out\nCost:     —\nDuration: 0.22s\n\nTask:\nuser: hi\n\nError:\nGeneration failed: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/no-such-model is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported metho… (516 characters). Model id not found — run `effgen models list` to see ids, `effgen models refresh` to update the catalog, and verify the id/provider prefix.\n",
+      "lines": 14
+    },
+    "cli-sessions-list": {
+      "file": "cli-sessions-list.ansi",
+      "command": "effgen sessions list",
+      "sha256": "474e1eb6986a474d616ffc34e85b14c73d2b456706896cae9611a98d35d52004",
+      "bytes": 1474,
+      "text": "┏━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓\n┃ # ┃ Session      ┃ Messages ┃ Model                        ┃    Cost ┃ Updated          ┃\n┡━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩\n│ 1 │ textkit-tour │        2 │ gemini:gemini-3.1-flash-lite │ $0.0010 │ 2026-08-20 12:56 │\n└───┴──────────────┴──────────┴──────────────────────────────┴─────────┴──────────────────┘\n                    Stored in: /data/wang/gks/effgen-demo/home/sessions                    \nRead one:  effgen sessions show <id>\nContinue:  effgen chat --session-id <id>\n",
+      "lines": 8
+    },
+    "cli-cost-today": {
+      "file": "cli-cost-today.ansi",
+      "command": "effgen cost today",
+      "sha256": "589f41f4dd8d695d0c81e352d807ab993702b160e260e6312a65f6b5bb335681",
+      "bytes": 2392,
+      "text": "                              effGen Cost Summary — Last 24 hours                               \n┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┓\n┃ Provider ┃ Model                 ┃ Requests ┃ Prompt Tokens ┃ Completion Tokens ┃ Cost (USD) ┃\n┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━┩\n│ gemini   │ gemini-3.1-flash-lite │        8 │         3,906 │               169 │  $0.001230 │\n│ openai   │ gpt-5-nano            │        2 │           439 │               709 │  $0.000306 │\n├──────────┼───────────────────────┼──────────┼───────────────┼───────────────────┼────────────┤\n│          │                       │          │               │                   │  $0.001536 │\n└──────────┴───────────────────────┴──────────┴───────────────┴───────────────────┴────────────┘\n\nTotal: 10 requests  $0.001536 USD\nDaily budget: ░░░░░░░░░░░░░░░░░░░░ $0.0015 / $1.0000 (0%)\n",
+      "lines": 12
+    },
+    "cli-quickstart-init": {
+      "file": "cli-quickstart-init.ansi",
+      "command": "effgen quickstart --init .",
+      "sha256": "637d8c3bb6fb8e245e79f86ae5228db8727fdc090c0e9e5b0b512dfac58c95b9",
+      "bytes": 860,
+      "text": "\neffGen project\nDirectory: /data/wang/gks/effgen-demo/newproject\n\n  wrote    effgen.yaml   model, prompt and per-run caps\n  wrote    .env.example  key names, no values\n  wrote    example.py    a runnable agent script\n  wrote    .gitignore    keeps .env out of git\n\nModel:      cerebras:gpt-oss-120b\n            cerebras key detected\n            change it on the 'model:' line of effgen.yaml\n\nSpend cap:  $1.00 a day across all runs (already configured)\n            'effgen cost set-budget N' changes it\n            'effgen cost clear-budget' removes it\n\nNext three commands\n  1. cp .env.example .env  # then paste one key into it\n  2. effgen doctor  # confirm effGen sees it\n  3. effgen run \"What is 25 * 17?\" -c effgen.yaml\n\n💡 Tip: effgen code --plan proposes the change and its diffs without writing anything.\n",
+      "lines": 23
+    },
+    "cli-doctor": {
+      "file": "cli-doctor.ansi",
+      "command": "effgen doctor",
+      "sha256": "27c8380c3593bcf5e008ae7084e2aa0910f433b4520c04b6bdf91c5b7c20820e",
+      "bytes": 6219,
+      "text": "              effgen doctor — Provider Status              \n┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓\n┃ Provider          ┃ Key     ┃ Env Var          ┃ Models ┃\n┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩\n│ anthropic         │ missing │ —                │     17 │\n│ cerebras          │ present │ CEREBRAS_API_KEY │      2 │\n│ fireworks         │ missing │ —                │     16 │\n│ gemini            │ missing │ —                │      8 │\n│ groq              │ missing │ —                │     15 │\n│ hf                │ missing │ —                │    124 │\n│ openai            │ missing │ —                │     30 │\n│ openai_compatible │ missing │ —                │      0 │\n│ replicate         │ missing │ —                │     37 │\n│ together          │ missing │ —                │    168 │\n└───────────────────┴─────────┴──────────────────┴────────┘\n\nSystem\n┌───────────────────────────┬─────────────────────┐\n│ Physical GPUs (NVML)      │ 8                   │\n│ Driver CUDA               │ 13.3                │\n│ torch CUDA build          │ 13.0                │\n│ torch.cuda.is_available() │ True                │\n│ torch                     │ 2.11.0+cu130        │\n│ vLLM                      │ importable (0.26.0) │\n└───────────────────────────┴─────────────────────┘\n\nCoding (effgen code)\n┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Check     ┃ Status        ┃ Detail                                                   ┃\n┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ workspace │ ready         │ /data/wang/gks/effgen-demo (from current directory)      │\n│ sandbox   │ limited       │ subprocess — network isolated, writes confined to the    │\n│           │               │ workspace                                                │\n│ git       │ no repository │ git version 2.34.1; /data/wang/gks/effgen-demo is not    │\n│           │               │ inside a repository                                      │\n└───────────┴───────────────┴──────────────────────────────────────────────────────────┘\n  sandbox: Install Docker to confine reads as well; the subprocess sandbox is used until\nthen.\n  git: Run effgen code from a repository (or git init the workspace) for branch/status \ncontext.\n  Try it: effgen code \"write fib.py and run it\"\n\nMissing keys — set in ~/.effgen/.env or export:\n  export ANTHROPIC_API_KEY=<your-key>\n  export FIREWORKS_API_KEY=<your-key>\n  export GOOGLE_API_KEY=<your-key>\n  export GROQ_API_KEY=<your-key>\n  export HF_TOKEN or HUGGINGFACE_API_KEY=<your-key>\n  export OPENAI_API_KEY=<your-key>\n  export EFFGEN_BASE_URL or OPENAI_BASE_URL or OPENAI_API_BASE=<your-key>\n  export REPLICATE_API_TOKEN=<your-key>\n  export TOGETHER_API_KEY=<your-key>\n\n💡 Tip: set EFFGEN_TIPS=0 to silence these tips.\n",
+      "lines": 54
+    },
+    "cli-models-info": {
+      "file": "cli-models-info.ansi",
+      "command": "effgen models info openai:gpt-5-mini",
+      "sha256": "31b642d8fc135af911c4a74c52911fa0a538fe901e3594d2c01c6984b3c9e69f",
+      "bytes": 1671,
+      "text": "\nModel: openai:gpt-5-mini\n┌───────────────────────────┬─────────────────┐\n│ Provider                  │ openai          │\n│ Display name              │ gpt-5-mini      │\n│ Family                    │ chat            │\n│ Context window            │ 1,047,576       │\n│ Max output                │ 32,768          │\n│ Price ($/1M in / out)     │ $0.25/$2        │\n│ Tool calling              │ yes             │\n│ Coding                    │ suitable        │\n│ Vision                    │ yes             │\n│ Audio                     │ no              │\n│ Free tier                 │ no              │\n│ Rate limits (rpm/tpm/rpd) │ — / — / —       │\n│ Deprecated                │ no              │\n│ Price source              │ bundled-catalog │\n│ Verified on               │ 2026-06-17      │\n│ Auth ready                │ yes             │\n└───────────────────────────┴─────────────────┘\n\nUse: effgen run --provider openai -m gpt-5-mini \"...\"\n",
+      "lines": 22
+    },
+    "cli-chat-session": {
+      "file": "cli-chat-session.ansi",
+      "command": "effgen chat -m gemini:gemini-3.1-flash-lite",
+      "sha256": "c822e5da1a29d716b7db5889a8c5525a54de649dbb3818eb001bfa0a3dccdaba",
+      "bytes": 2807,
+      "text": "\neffGen v1.0.0 · chat\nModel: gemini-3.1-flash-lite\nType your message and press Enter.  End a line with \\ for multi-line input.\nSlash commands (type / for the menu): /help  /model  /tools  /status  /cost  /trace  \n/reset  /save  /session  /load  /doctor  /exit\ngemini-3.1-flash-lite › /help\n                                 Chat commands                                  \n┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Command  ┃ Does                                                              ┃\n┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ /help    │ Show this help (or type just / for the menu)                      │\n│ /model   │ Hot-swap the active model:  /model gpt-5-nano                     │\n│ /tools   │ List tools, or toggle one:  /tools calculator                     │\n│ /status  │ Show the session state: model, persona, tools, running totals     │\n│ /cost    │ Session token + cost total                                        │\n│ /reset   │ Clear the conversation memory                                     │\n│ /save    │ Save this chat to a file:  /save   (see /session to resume)       │\n│ /session │ Show or name the resumable session id (used by `effgen sessions`) │\n│ /load    │ Load a saved conversation:  /load                                 │\n│ /trace   │ Show the last turn's reasoning/tool steps                         │\n│ /doctor  │ Run a quick environment check                                     │\n│ /clear   │ Clear the screen                                                  │\n│ /exit    │ Leave chat (also: /quit, exit, quit)                              │\n└──────────┴───────────────────────────────────────────────────────────────────┘\ngemini-3.1-flash-lite › /exit\nGoodbye!\n",
+      "lines": 27
+    },
+    "cli-report-refusal": {
+      "file": "cli-report-refusal.txt",
+      "command": "effgen report notaresult.json",
+      "sha256": "6679b8611853f72a1fdb67f156a65ba2f286eb096e5ce204d289ff4cc46ee88d",
+      "bytes": 270,
+      "text": "✗ Could not tell which report this result is. Expected the JSON emitted by \n`effgen run --json`, `effgen compare --json`, `effgen eval --json`, `effgen cost\n--json`, or `effgen loadtest`. Pass --kind to say explicitly (run, comparison, \neval, cost, loadtest, battle).\n",
+      "lines": 4
+    }
+  },
+  "documents": {
+    "cli-top-json": {
+      "file": "cli-top.json",
+      "command": "effgen top --json",
+      "sha256": "bdd3429862f41ab4a32c1780351dc4002a23d7b7d774460df6f0e654fa6e1f50",
+      "document": {
+        "ts": "2026-08-20T16:56:37Z",
+        "header": {
+          "version": "1.0.0",
+          "hostname": "wangserv",
+          "server_url": "http://127.0.0.1:8124",
+          "server_reachable": true,
+          "server_detail": null,
+          "interval_s": null
+        },
+        "activity": {
+          "scope": "completed runs, local run history (all processes)",
+          "available": true,
+          "unavailable_reason": null,
+          "runs": [
+            {
+              "ts": "2026-08-20T12:56:28-04:00",
+              "run_id": "7bd4e604266d",
+              "status": "error",
+              "model": "no-such-model",
+              "agent": "api:gemini:no-such-model",
+              "duration_s": 0.21747660636901855,
+              "cost_usd": null,
+              "task": "user: hi",
+              "error": "Generation failed: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/no-such-model is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported metho… (516 characters). Model id not found — run `effgen models list` to see ids, `effgen models refresh` to update the catalog, and verify the id/provider prefix."
+            },
+            {
+              "ts": "2026-08-20T12:56:28-04:00",
+              "run_id": "1d13a0467f23",
+              "status": "ok",
+              "model": "gemini-3.1-flash-lite",
+              "agent": "api:gemini:gemini-3.1-flash-lite",
+              "duration_s": 8.905962944030762,
+              "cost_usd": 8e-06,
+              "task": "user: What is 9 squared?",
+              "error": null
+            },
+            {
+              "ts": "2026-08-20T12:56:19-04:00",
+              "run_id": "c724d0f7889e",
+              "status": "ok",
+              "model": "gemini-3.1-flash-lite",
+              "agent": "api:gemini:gemini-3.1-flash-lite",
+              "duration_s": 2.3642194271087646,
+              "cost_usd": 5.175e-05,
+              "task": "user: Give me one fact about Kyoto.",
+              "error": null
+            },
+            {
+              "ts": "2026-08-20T12:56:17-04:00",
+              "run_id": "bfb86bca5539",
+              "status": "ok",
+              "model": "gemini-3.1-flash-lite",
+              "agent": "api:gemini:gemini-3.1-flash-lite",
+              "duration_s": 0.7125062942504883,
+              "cost_usd": 2.375e-05,
+              "task": "user: Name one property of a B-tree.",
+              "error": null
+            },
+            {
+              "ts": "2026-08-20T12:56:16-04:00",
+              "run_id": "f9ed5104a9f8",
+              "status": "ok",
+              "model": "gemini-3.1-flash-lite",
+              "agent": "api:gemini:gemini-3.1-flash-lite",
+              "duration_s": 4.1480913162231445,
+              "cost_usd": 1.05e-05,
+              "task": "user: What is 25 * 17?",
+              "error": null
+            },
+            {
+              "ts": "2026-08-20T12:56:07-04:00",
+              "run_id": "0ceb32763836",
+              "status": "ok",
+              "model": "gemini:gemini-3.1-flash-lite",
+              "agent": "code-agent",
+              "duration_s": 4.873480796813965,
+              "cost_usd": 0.00095525,
+              "task": "what does textkit export?",
+              "error": null
+            },
+            {
+              "ts": "2026-08-20T12:55:58-04:00",
+              "run_id": "783dcdb255ae",
+              "status": "ok",
+              "model": "openai:gpt-5-nano",
+              "agent": "cli-agent",
+              "duration_s": 3.4919626712799072,
+              "cost_usd": 0.00017665,
+              "task": "What is 2 ** 40? Use the calculator tool.",
+              "error": null
+            },
+            {
+              "ts": "2026-08-20T12:55:51-04:00",
+              "run_id": "e035ed2e1561",
+              "status": "ok",
+              "model": "openai:gpt-5-nano",
+              "agent": "cli-agent",
+              "duration_s": 2.8647477626800537,
+              "cost_usd": 0.0001289,
+              "task": "What is the boiling point of water in Fahrenheit?",
+              "error": null
+            },
+            {
+              "ts": "2026-08-20T12:55:46-04:00",
+              "run_id": "5c27104db891",
+              "status": "ok",
+              "model": "gemini:gemini-3.1-flash-lite",
+              "agent": "cli-agent",
+              "duration_s": 11.587746620178223,
+              "cost_usd": 0.00010375,
+              "task": "Summarise what a B-tree is, in one sentence.",
+              "error": null
+            },
+            {
+              "ts": "2026-08-20T12:55:30-04:00",
+              "run_id": "8a3f2e92a884",
+              "status": "ok",
+              "model": "gemini:gemini-3.1-flash-lite",
+              "agent": "cli-agent",
+              "duration_s": 2.208224058151245,
+              "cost_usd": 7.7e-05,
+              "task": "What is 18723 * 4409? Use the calculator tool.",
+              "error": null
+            }
+          ]
+        },
+        "traffic": {
+          "scope": "this server process since start",
+          "available": true,
+          "unavailable_reason": null,
+          "server_url": "http://127.0.0.1:8124",
+          "requests": 5,
+          "errors": 1,
+          "error_rate": 0.2,
+          "tokens": 136,
+          "cost_usd": 9.4e-05,
+          "avg_latency_s": 3.2698,
+          "p50_latency_s": 1.75,
+          "p95_latency_s": 8.75,
+          "p99_latency_s": 9.75,
+          "availability": 0.8,
+          "by_status": {
+            "200": 6,
+            "404": 1
+          },
+          "by_status_scope": "all HTTP routes, this server process since start"
+        },
+        "by_model": {
+          "scope": "this server process since start",
+          "available": true,
+          "unavailable_reason": null,
+          "server_url": "http://127.0.0.1:8124",
+          "rows": [
+            {
+              "model": "gemini-3.1-flash-lite",
+              "provider": "gemini",
+              "calls": 4,
+              "errors": 0,
+              "input_tokens": 88,
+              "output_tokens": 48,
+              "outcomes": {
+                "ok": 4
+              },
+              "top_error": null,
+              "top_error_hint": null,
+              "error_rate": 0.0,
+              "p95_latency_s": 9.0,
+              "cost_usd": 9.4e-05
+            },
+            {
+              "model": "no-such-model",
+              "provider": "gemini",
+              "calls": 1,
+              "errors": 1,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "outcomes": {
+                "not_found": 1
+              },
+              "top_error": "not_found",
+              "top_error_hint": "Model id not found — run `effgen models list` to see ids, `effgen models refresh` to update the catalog, and verify the id/provider prefix.",
+              "error_rate": 1.0,
+              "p95_latency_s": 0.2425,
+              "cost_usd": null
+            }
+          ]
+        },
+        "spend": {
+          "scope": "local cost ledger, last 24 hours",
+          "available": true,
+          "unavailable_reason": null,
+          "total_cost_usd": 0.00153555,
+          "requests": 10,
+          "daily_budget_usd": 1.0,
+          "budget_used_pct": 0.15,
+          "burn_rate_usd_per_hour": 0.00153555,
+          "burn_window_s": 3600.0,
+          "unpriced_models": [],
+          "rows": [
+            {
+              "provider": "gemini",
+              "model": "gemini-3.1-flash-lite",
+              "requests": 8,
+              "tokens": 4075,
+              "cost_usd": 0.00123,
+              "cost_label": "$0.001230"
+            },
+            {
+              "provider": "openai",
+              "model": "gpt-5-nano",
+              "requests": 2,
+              "tokens": 1148,
+              "cost_usd": 0.00030555,
+              "cost_label": "$0.000306"
+            }
+          ]
+        },
+        "gpu": {
+          "scope": "physical devices, all processes",
+          "available": true,
+          "unavailable_reason": null,
+          "devices": [
+            {
+              "index": 0,
+              "name": "NVIDIA A40",
+              "total_gb": 44.42,
+              "used_gb": 44.33,
+              "free_gb": 0.09,
+              "memory_used_pct": 99.8,
+              "utilization_pct": 100.0
+            },
+            {
+              "index": 1,
+              "name": "NVIDIA A40",
+              "total_gb": 44.42,
+              "used_gb": 0.26,
+              "free_gb": 44.16,
+              "memory_used_pct": 0.6,
+              "utilization_pct": 0.0
+            },
+            {
+              "index": 2,
+              "name": "NVIDIA A40",
+              "total_gb": 44.42,
+              "used_gb": 44.38,
+              "free_gb": 0.05,
+              "memory_used_pct": 99.9,
+              "utilization_pct": 100.0
+            },
+            {
+              "index": 3,
+              "name": "NVIDIA A40",
+              "total_gb": 44.42,
+              "used_gb": 44.38,
+              "free_gb": 0.05,
+              "memory_used_pct": 99.9,
+              "utilization_pct": 100.0
+            },
+            {
+              "index": 4,
+              "name": "NVIDIA A40",
+              "total_gb": 44.42,
+              "used_gb": 44.38,
+              "free_gb": 0.05,
+              "memory_used_pct": 99.9,
+              "utilization_pct": 100.0
+            },
+            {
+              "index": 5,
+              "name": "NVIDIA A40",
+              "total_gb": 44.42,
+              "used_gb": 44.38,
+              "free_gb": 0.05,
+              "memory_used_pct": 99.9,
+              "utilization_pct": 100.0
+            },
+            {
+              "index": 6,
+              "name": "NVIDIA A40",
+              "total_gb": 44.42,
+              "used_gb": 43.93,
+              "free_gb": 0.5,
+              "memory_used_pct": 98.9,
+              "utilization_pct": 100.0
+            },
+            {
+              "index": 7,
+              "name": "NVIDIA A40",
+              "total_gb": 44.42,
+              "used_gb": 43.93,
+              "free_gb": 0.5,
+              "memory_used_pct": 98.9,
+              "utilization_pct": 100.0
+            }
+          ]
+        }
+      }
+    }
+  }
+}

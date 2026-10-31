@@ -1,0 +1,51 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "date": "2026-10-31",
+  "status": "待用户审查",
+  "generation_prompts": [
+    {
+      "id": "01_architecture",
+      "prompt": "Use case: infographic-diagram.\nCreate ONE finished raster academic systems diagram, NOT a complete slide, for the left visual area of a Chinese research presentation. Landscape aspect ratio about 1.7:1, ideally 2048 by 1216. Pure flat white #FFFFFF background, generous white margins, extremely crisp typography and clean straight orthogonal connector arrows. Only near-black #111111, academic blue #3B78C3, and light gray #CFCFCF. Thin lines and unfilled straight rectangular module outlines. Times New Roman for Latin text; clean Chinese Song/Ming serif glyphs visually matching it. Chinese labels must be spelled correctly and verbatim. No decoration, icons, browser screenshots, rounded cards, gradients, shadows, textures, 3D, photography, red, title, slide number, footnote, citation, or watermark.\nSubject: one EffGen decision loop adapts to two web environments. Arrange the graph in three clear horizontal levels rather than a dense matrix:\nTop row: a small \"任务输入\" rectangle pointing right to a larger \"EffGen\" rectangle with a second line \"Qwen3.6-35B-A3B\", which points right to \"统一网页工具\".\nAt right, the tool splits into two distinct branches stacked vertically: \"官方 SDK\" points to \"官方环境\"; \"Playwright\" points to \"真实浏览器\". Both represent alternative environment backends, never a chain from one backend into the other.\nPlace a small \"任务状态与证据\" rectangle below EffGen, connected bidirectionally to EffGen with thin gray lines.\nReserve a broad uncluttered horizontal return route along the lower part of the figure: observations from BOTH environment boxes converge on a line returning into EffGen. Label this return path exactly \"新观察\". This arrow must clearly point INTO EffGen. Label the tool outbound route exactly \"网页动作\". Keep return arrows clear of state box and text.\nUse blue for EffGen name and branch category labels, black for all other text. Do not add other labels. Diagram should read clearly at half-screen width and feel like a formal computer-science paper figure."
+    },
+    {
+      "id": "02_verification",
+      "prompt": "Use case: infographic-diagram.\nCreate ONE finished raster flowchart, NOT a complete slide, matching a formal Chinese computer-science presentation. Landscape aspect ratio about 1.7:1, ideally 2048 by 1216. Pure white #FFFFFF background and abundant whitespace. Crisp thin black and gray orthogonal connector arrows, blue #3B78C3 selectively for verification labels, light gray #CFCFCF auxiliary connectors. Straight unfilled rectangles and ONE diamond decision shape allowed. No rounded cards, UI panels, decorative icons, gradients, shadows, images, red, title, legend, footer, page number, citations, or watermark. Times New Roman for Latin characters and Chinese Song/Ming serif glyphs matching the serif style. Verbatim simplified Chinese labels; large and legible, with NO explanatory paragraphs.\nSubject: evidence-grounded task verification and local correction.\nDraw top row left to right: \"当前目标\" -> \"执行动作\" -> \"页面反馈\". A connector from 页面反馈 goes down into a centrally positioned diamond \"条件核验\".\nThe verification decision has EXACTLY THREE outcomes:\na path labeled \"通过\" going right into \"更新进度\";\na path labeled \"失败\" going left into \"继续纠正\", which loops back up into 执行动作;\na path labeled \"未知\" going down-right into \"补充取证\", whose return connector goes back into 条件核验. The \"未知\" path must NOT lead directly into 更新进度.\nAt bottom-left place a wide rectangular state store labeled \"任务账本\", with a second smaller line \"目标 · 事实 · 进度 · 证据\". Use subtle thin gray connectors to 当前目标 and 更新进度 to show the shared stored task state. Updating the ledger follows verified progress, never simply an issued action.\nAvoid crossed connectors, overlapped text, arrowheads crossing the diamond label, duplicated nodes, fake check marks, or numerical claims. All five flow node labels and the verification/ledger labels must be clear and correctly rendered. The key reading is feedback -> check -> confirmed progress or correction/evidence."
+    },
+    {
+      "id": "03_development",
+      "prompt": "Use case: infographic-diagram.\nCreate ONE finished raster development roadmap illustration, NOT a complete slide, for the left visual portion of an academic Chinese slide. Landscape aspect ratio about 1.7:1, ideally 2048 by 1216. Pure white #FFFFFF background, clean sparse editorial composition, generous whitespace, thin light-gray #CFCFCF timeline and black #111111 arrows, restrained academic blue #3B78C3 headings. Latin letters and digits in Times New Roman; Chinese glyphs in visually matching Song/Ming serif. No colored fills, rounded cards, UI panels, shadows, gradients, icons, photographs, red, citations, title, footer, watermark, or completion checkmarks.\nSubject: staged development then evidence-led iteration, WITHOUT implying the stages are already complete.\nA vertical timeline occupies the left two-thirds with exactly three stops, equally spaced. Use simple small blue dots and ordinary numerals \"1\", \"2\", \"3\", not badges. To the right of each stop place a bold blue heading and one short black supporting line:\n1 heading exactly \"双环境跑通\"; supporting line exactly \"模型 · 浏览器 · 官方平台\".\n2 heading exactly \"基础能力与测试环境\"; supporting line exactly \"状态 · 核验恢复 · 接管 · 并行\".\n3 heading exactly \"实验验证\"; supporting line exactly \"固定条件 · 逐项比较 · 回归检查\".\nIn the bottom quarter, a small horizontal iteration chain with simple arrows reads exactly \"运行证据\" -> \"问题定位\" -> \"最小修改\" -> \"对照验证\". A slim loop connector runs below this row from 对照验证 back to 运行证据, clearly forming an iterative cycle, without colliding with the timeline.\nKeep main headings equal font sizes with generous spacing. All labels must be verbatim, with no extra stage, promises, numerical results, or captions. Plain academic diagram, coherent spacing and confident typographic hierarchy."
+    }
+  ],
+  "edit_prompts": [
+    {
+      "id": "02_verification_v2",
+      "source": "C:\\Users\\hiyad\\.codex\\generated_images\\01a18ee9-da0d-7030-b0ed-76031b5120d1\\exec-93a19f60-515e-4c8b-811b-35831786b9e0.png",
+      "prompt": "Edit this supplied flowchart image with ONE targeted correction. Preserve the exact image dimensions, pure white background, fonts, all Chinese text, every node position, every black connector, blue labels, and the gray connection from 任务账本 to 当前目标. ONLY correct the long gray bottom-right connector between 更新进度 and 任务账本: remove the upward arrowhead currently pointing into 更新进度. The gray line should START without an arrowhead at the bottom center of 更新进度, descend to the existing bottom horizontal route, run LEFT, and end with a single leftward arrowhead entering the RIGHT EDGE of 任务账本. Thus its unambiguous direction must be 更新进度 -> 任务账本, because confirmed progress is written to the ledger. Keep the ledger -> 当前目标 gray arrow unchanged. Do not add any words, labels, shapes, colors or decorations. All other visual content stays unchanged."
+    },
+    {
+      "id": "03_development_v2",
+      "source": "C:\\Users\\hiyad\\.codex\\generated_images\\01a18ee9-da0d-7030-b0ed-76031b5120d1\\exec-5a02541c-6d2b-47a6-92b7-900ad5b599ec.png",
+      "prompt": "Edit this supplied academic development timeline with ONE targeted correction. Preserve all typography, exact Chinese text, node placement, white background, colors, dimensions, line weights, timeline, and the straight forward arrows across the four bottom labels. ONLY fix the long bottom loop connector. It must flow FROM 对照验证 on the right DOWN, then LEFT below the row, then UP with a single arrowhead INTO 运行证据 on the left. Remove the upward arrowhead currently at the right end under 对照验证. The right end should be a plain line emerging from the label with no arrowhead. Keep the upward arrowhead under 运行证据 at left. This creates the unambiguous cycle 运行证据 -> 问题定位 -> 最小修改 -> 对照验证 -> 运行证据. Do not add any words, labels, shapes, colors, or decorations. All other content must remain unchanged."
+    }
+  ],
+  "selection": [
+    {
+      "page": 1,
+      "id": "01_architecture",
+      "file": "01_整体架构_待审.png",
+      "reason": "双后端分支清楚，两端观察返回EffGen；标签可读。"
+    },
+    {
+      "page": 2,
+      "id": "02_verification_v2",
+      "file": "02_任务核验_待审.png",
+      "reason": "通过、失败、未知三条路径清楚；更新进度写入账本的箭头已纠正。"
+    },
+    {
+      "page": 3,
+      "id": "03_development_v2",
+      "file": "03_开发路线_待审.png",
+      "reason": "三阶段顺序清楚；对照验证返回运行证据，未标注全部完成。"
+    }
+  ]
+}

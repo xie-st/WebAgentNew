@@ -14,9 +14,9 @@ import pytest
 from webagent.backends.official import (
     OfficialActionFormatError,
     OfficialBackend,
+    TextMode,
     parse_ax_elements,
     serialize_stop,
-    unescape_text,
 )
 from webagent.clock import FakeClock
 from webagent.effgen_bridge import HarnessToolRuntime
@@ -191,7 +191,7 @@ def test_ax_numbers_are_the_only_action_numbers(official) -> None:
     assert error.value.reason is RejectReason.UNKNOWN_ELEMENT
 
 
-def test_action_commands_are_exact_and_escape_chinese_newlines_and_brackets(official) -> None:
+def test_action_commands_are_exact_and_text_is_not_escaped(official) -> None:
     _session, backend, _browser = official
     observation = backend.from_request(_payload())
     assert observation is not None
@@ -203,11 +203,27 @@ def test_action_commands_are_exact_and_escape_chinese_newlines_and_brackets(offi
     type_action = _current_action(
         backend, "web_type", {"target": "1", "text": original, "submit": False}
     )
-    escaped = r"价格（含税）\n第二行 \[备注\] C:\\temp"
+    # decompose (default) refuses a line break inside one type command: the
+    # official step path splits it into sub-actions first.
+    with pytest.raises(OfficialActionFormatError) as error:
+        backend.serialize_action(type_action)
+    assert "line break" in str(error.value)
+
+    # raw mode sends the same text unchanged; brackets and backslash are never
+    # rewritten into escapes (the platform has no unescape routine).
+    backend.text_mode = TextMode.RAW
     command = backend.serialize_action(type_action)
-    assert command == f"type [1] [{escaped}] [0]"
-    assert "\n" not in command and "\r" not in command
-    assert unescape_text(escaped) == original
+    assert command == f"type [1] [{original}] [0]"
+    assert "\n" in command
+    assert r"\n" not in command
+    assert r"\[" not in command and r"\]" not in command and r"\\" not in command
+
+    single_line = "第二行 [备注] C:\\temp"
+    backend.text_mode = TextMode.DECOMPOSE
+    plain = _current_action(
+        backend, "web_type", {"target": "1", "text": single_line, "submit": False}
+    )
+    assert backend.serialize_action(plain) == f"type [1] [{single_line}] [0]"
 
     submitted = _current_action(
         backend, "web_type", {"target": "1", "text": "中文", "submit": True}
@@ -224,11 +240,12 @@ def test_action_commands_are_exact_and_escape_chinese_newlines_and_brackets(offi
     assert backend.serialize_action(forward) == "go_forward"
 
 
-def test_stop_uses_the_same_escaping_and_keeps_one_bracket_pair() -> None:
+def test_stop_keeps_one_line_without_escaping_the_bracket() -> None:
     command = serialize_stop("已完成]\n再见")
-    assert command == r"stop [已完成\]\n再见]"
-    assert command.count("]") == 2  # the escaped text bracket plus the closing one
+    assert command == "stop [已完成] 再见]"
+    assert command.count("]") == 2  # the text's own bracket plus the closing one
     assert "\n" not in command
+    assert r"\n" not in command
 
 
 def test_goto_must_use_a_same_origin_url_observed_in_this_task(official) -> None:
@@ -282,6 +299,19 @@ def test_unrepresentable_action_content_is_an_explicit_error(official) -> None:
     )
     with pytest.raises(OfficialActionFormatError):
         backend.serialize_action(surrogate)
+
+    # A C0 control other than line break/tab/CR has no wire form; it is refused
+    # in both text modes and never replaced by a placeholder.
+    control = _current_action(
+        backend, "web_type", {"target": "1", "text": "bell \x07 text"}
+    )
+    with pytest.raises(OfficialActionFormatError) as error:
+        backend.serialize_action(control)
+    assert "U+0007" in str(error.value)
+    backend.text_mode = TextMode.RAW
+    with pytest.raises(OfficialActionFormatError):
+        backend.serialize_action(control)
+    backend.text_mode = TextMode.DECOMPOSE
 
     backend.from_request(_payload(url="http://example.test/a]b", text="[1] link 'x'"))
     bad_url = _current_action(

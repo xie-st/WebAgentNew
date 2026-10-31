@@ -1,0 +1,30 @@
+# Minimal Compose file for a local effGen API server.
+#
+#   docker compose -f deploy/docker/docker-compose.yml up --build
+#   curl http://localhost:8080/health   # {"status":"ok"}
+#
+# Runs in dev mode (auth disabled) for local testing, so the port is published
+# on the loopback interface only. For a deployment that faces a network, remove
+# EFFGEN_DEV_MODE, set the EFFGEN_OIDC_* variables, and widen the port mapping
+# to "8080:8080" (see docs/deploy/docker.md "Production run").
+services:
+  effgen:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+      args:
+        EXTRAS: server
+    image: effgen:local
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      EFFGEN_DEV_MODE: "1"
+      EFFGEN_PORT: "8080"
+      # Inject provider keys at runtime instead of baking them into the image:
+      #   OPENAI_API_KEY: ${OPENAI_API_KEY}
+      #   GROQ_API_KEY: ${GROQ_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

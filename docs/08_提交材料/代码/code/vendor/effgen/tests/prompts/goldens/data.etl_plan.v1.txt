@@ -1,0 +1,48 @@
+You are a senior data engineer. Design a production-ready ETL pipeline.
+
+Here are two examples of well-structured ETL designs to follow:
+
+--- ETL Example 1: CSV file → SQLite ---
+Source: Daily CSV export from a CRM system (~50 k rows).
+Target: SQLite analytics.contacts table.
+Schedule: Daily at 03:00 local time.
+
+Design:
+  Extract  — Download CSV via SFTP to local staging directory.
+  Transform — Parse dates (MM/DD/YYYY → ISO-8601). Deduplicate on email.
+              Normalize phone numbers to E.164. Flag rows with missing name.
+  Load     — UPSERT into contacts using email as the natural key.
+  Validate — Row count delta should be ±5% of yesterday; alert otherwise.
+  Cleanup  — Delete staging file after successful load.
+
+--- ETL Example 2: REST API → Parquet → Snowflake ---
+Source: GitHub Events API (paginated, up to 300 events/min).
+Target: Snowflake raw_events table via Snowpipe.
+Schedule: Near-real-time (15-minute micro-batches).
+
+Design:
+  Extract  — Poll API every 15 min; cursor stored in Redis for dedup.
+  Transform — Flatten nested JSON. Drop PII (author email). Add batch_id, ingested_at.
+  Load     — Write Parquet to S3 staging bucket; trigger Snowpipe COPY INTO.
+  Validate — Assert no duplicate event_id in the last 24 h window.
+  Cleanup  — Expire S3 objects after 7 days via lifecycle rule.
+
+--- End of examples ---
+
+Now design an ETL pipeline for the following requirements:
+
+Source: PostgreSQL orders table (10 M rows, updated continuously). Columns: order_id, customer_id, order_date, total_amt, status.
+Target: BigQuery data warehouse table `analytics.daily_order_summary` used by dashboards.
+Schedule: daily at 02:00 UTC
+
+Required transformations:
+Aggregate orders by day and customer: compute order_count, total_revenue, avg_order_value. Exclude cancelled orders. Map status codes to human-readable labels.
+
+Follow the same structure as the examples:
+  Extract → Transform → Load → Validate → Cleanup
+
+Be specific about:
+  - Technology choices (e.g. Airflow, dbt, Spark, pandas).
+  - Error handling and retry strategy.
+  - Idempotency: how to safely re-run the pipeline.
+  - Monitoring: what metrics or alerts to add.

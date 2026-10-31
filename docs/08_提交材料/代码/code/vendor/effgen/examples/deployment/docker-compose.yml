@@ -1,0 +1,68 @@
+# effGen Production Deployment Stack
+# ====================================
+# API server + Prometheus monitoring + Grafana dashboards
+#
+# Usage:
+#   docker-compose up -d
+#   # API:        http://localhost:8000
+#   # Prometheus: http://localhost:9090
+#   # Grafana:    http://localhost:3000 (admin/admin)
+
+services:
+  # ── effGen API Server ──────────────────────────────────────
+  effgen-api:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: effgen-api:latest
+    container_name: effgen-api
+    ports:
+      - "8000:8000"
+    environment:
+      - EFFGEN_HOST=0.0.0.0
+      - EFFGEN_PORT=8000
+      - EFFGEN_API_KEY=${EFFGEN_API_KEY:-changeme}
+      - EFFGEN_RATE_LIMIT=${EFFGEN_RATE_LIMIT:-60}
+      # Model config — adjust to your hardware
+      - EFFGEN_MODEL=${EFFGEN_MODEL:-Qwen/Qwen2.5-1.5B-Instruct}
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-0}
+    volumes:
+      - effgen-data:/app/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # ── Prometheus ─────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: effgen-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  # ── Grafana ────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: effgen-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  effgen-data:
+  prometheus-data:
+  grafana-data:

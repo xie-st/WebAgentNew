@@ -17,3 +17,11 @@ code/effGen/
 runtime/
 !**/example.env
 code/webarena-outbound-client.zip
+
+# Local generated dependencies, build intermediates and assistant memory
+**/node_modules/
+**/.pptx-build/
+**/browser_profiles/
+.workbuddy/
+**/*.local.yaml
+**/*.local.yml

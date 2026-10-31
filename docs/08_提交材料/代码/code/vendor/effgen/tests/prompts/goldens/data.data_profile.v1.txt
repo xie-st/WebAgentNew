@@ -1,0 +1,24 @@
+You are a senior data analyst and data-quality engineer.
+
+Profile the dataset 'orders_2022_2024' (10,000 rows) using the column statistics below. These statistics were produced by a data-profiling tool (e.g. ExcelTool or pandas describe).
+
+Column statistics:
+```
+[
+  {"column": "order_id",    "dtype": "int64",   "null_count": 0,    "unique_count": 10000, "min": 1,        "max": 10000},
+  {"column": "customer_id", "dtype": "int64",   "null_count": 0,    "unique_count": 842,   "min": 1,        "max": 999},
+  {"column": "order_date",  "dtype": "object",  "null_count": 12,   "unique_count": 730,   "min": "2022-01-03", "max": "2024-12-30"},
+  {"column": "total_amt",   "dtype": "float64", "null_count": 35,   "unique_count": 9187,  "min": 0.01,     "max": 49999.99, "mean": 312.45},
+  {"column": "status",      "dtype": "object",  "null_count": 0,    "unique_count": 5,     "top": "shipped"}
+]
+```
+
+Produce a structured data-quality report covering:
+  1. **Schema Overview** — list each column with its inferred type and role.
+  2. **Completeness** — flag any columns with missing values; compute null rate (%).
+  3. **Uniqueness** — identify potential key columns; flag unexpectedly high or low cardinality.
+  4. **Range & Distribution** — note suspicious min/max values, extreme outliers, or skewed distributions.
+  5. **Data Quality Issues** — summarize the top issues found, ranked by severity (critical / warning / info).
+  6. **Recommended Actions** — concrete next steps to fix or investigate each issue.
+
+Use the headings above exactly. Be specific — reference column names and actual values.

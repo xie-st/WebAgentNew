@@ -1,0 +1,298 @@
+{
+  "ts": "2026-08-20T16:56:37Z",
+  "header": {
+    "version": "1.0.0",
+    "hostname": "wangserv",
+    "server_url": "http://127.0.0.1:8124",
+    "server_reachable": true,
+    "server_detail": null,
+    "interval_s": null
+  },
+  "activity": {
+    "scope": "completed runs, local run history (all processes)",
+    "available": true,
+    "unavailable_reason": null,
+    "runs": [
+      {
+        "ts": "2026-08-20T12:56:28-04:00",
+        "run_id": "7bd4e604266d",
+        "status": "error",
+        "model": "no-such-model",
+        "agent": "api:gemini:no-such-model",
+        "duration_s": 0.21747660636901855,
+        "cost_usd": null,
+        "task": "user: hi",
+        "error": "Generation failed: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/no-such-model is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported metho… (516 characters). Model id not found — run `effgen models list` to see ids, `effgen models refresh` to update the catalog, and verify the id/provider prefix."
+      },
+      {
+        "ts": "2026-08-20T12:56:28-04:00",
+        "run_id": "1d13a0467f23",
+        "status": "ok",
+        "model": "gemini-3.1-flash-lite",
+        "agent": "api:gemini:gemini-3.1-flash-lite",
+        "duration_s": 8.905962944030762,
+        "cost_usd": 8e-06,
+        "task": "user: What is 9 squared?",
+        "error": null
+      },
+      {
+        "ts": "2026-08-20T12:56:19-04:00",
+        "run_id": "c724d0f7889e",
+        "status": "ok",
+        "model": "gemini-3.1-flash-lite",
+        "agent": "api:gemini:gemini-3.1-flash-lite",
+        "duration_s": 2.3642194271087646,
+        "cost_usd": 5.175e-05,
+        "task": "user: Give me one fact about Kyoto.",
+        "error": null
+      },
+      {
+        "ts": "2026-08-20T12:56:17-04:00",
+        "run_id": "bfb86bca5539",
+        "status": "ok",
+        "model": "gemini-3.1-flash-lite",
+        "agent": "api:gemini:gemini-3.1-flash-lite",
+        "duration_s": 0.7125062942504883,
+        "cost_usd": 2.375e-05,
+        "task": "user: Name one property of a B-tree.",
+        "error": null
+      },
+      {
+        "ts": "2026-08-20T12:56:16-04:00",
+        "run_id": "f9ed5104a9f8",
+        "status": "ok",
+        "model": "gemini-3.1-flash-lite",
+        "agent": "api:gemini:gemini-3.1-flash-lite",
+        "duration_s": 4.1480913162231445,
+        "cost_usd": 1.05e-05,
+        "task": "user: What is 25 * 17?",
+        "error": null
+      },
+      {
+        "ts": "2026-08-20T12:56:07-04:00",
+        "run_id": "0ceb32763836",
+        "status": "ok",
+        "model": "gemini:gemini-3.1-flash-lite",
+        "agent": "code-agent",
+        "duration_s": 4.873480796813965,
+        "cost_usd": 0.00095525,
+        "task": "what does textkit export?",
+        "error": null
+      },
+      {
+        "ts": "2026-08-20T12:55:58-04:00",
+        "run_id": "783dcdb255ae",
+        "status": "ok",
+        "model": "openai:gpt-5-nano",
+        "agent": "cli-agent",
+        "duration_s": 3.4919626712799072,
+        "cost_usd": 0.00017665,
+        "task": "What is 2 ** 40? Use the calculator tool.",
+        "error": null
+      },
+      {
+        "ts": "2026-08-20T12:55:51-04:00",
+        "run_id": "e035ed2e1561",
+        "status": "ok",
+        "model": "openai:gpt-5-nano",
+        "agent": "cli-agent",
+        "duration_s": 2.8647477626800537,
+        "cost_usd": 0.0001289,
+        "task": "What is the boiling point of water in Fahrenheit?",
+        "error": null
+      },
+      {
+        "ts": "2026-08-20T12:55:46-04:00",
+        "run_id": "5c27104db891",
+        "status": "ok",
+        "model": "gemini:gemini-3.1-flash-lite",
+        "agent": "cli-agent",
+        "duration_s": 11.587746620178223,
+        "cost_usd": 0.00010375,
+        "task": "Summarise what a B-tree is, in one sentence.",
+        "error": null
+      },
+      {
+        "ts": "2026-08-20T12:55:30-04:00",
+        "run_id": "8a3f2e92a884",
+        "status": "ok",
+        "model": "gemini:gemini-3.1-flash-lite",
+        "agent": "cli-agent",
+        "duration_s": 2.208224058151245,
+        "cost_usd": 7.7e-05,
+        "task": "What is 18723 * 4409? Use the calculator tool.",
+        "error": null
+      }
+    ]
+  },
+  "traffic": {
+    "scope": "this server process since start",
+    "available": true,
+    "unavailable_reason": null,
+    "server_url": "http://127.0.0.1:8124",
+    "requests": 5,
+    "errors": 1,
+    "error_rate": 0.2,
+    "tokens": 136,
+    "cost_usd": 9.4e-05,
+    "avg_latency_s": 3.2698,
+    "p50_latency_s": 1.75,
+    "p95_latency_s": 8.75,
+    "p99_latency_s": 9.75,
+    "availability": 0.8,
+    "by_status": {
+      "200": 6,
+      "404": 1
+    },
+    "by_status_scope": "all HTTP routes, this server process since start"
+  },
+  "by_model": {
+    "scope": "this server process since start",
+    "available": true,
+    "unavailable_reason": null,
+    "server_url": "http://127.0.0.1:8124",
+    "rows": [
+      {
+        "model": "gemini-3.1-flash-lite",
+        "provider": "gemini",
+        "calls": 4,
+        "errors": 0,
+        "input_tokens": 88,
+        "output_tokens": 48,
+        "outcomes": {
+          "ok": 4
+        },
+        "top_error": null,
+        "top_error_hint": null,
+        "error_rate": 0.0,
+        "p95_latency_s": 9.0,
+        "cost_usd": 9.4e-05
+      },
+      {
+        "model": "no-such-model",
+        "provider": "gemini",
+        "calls": 1,
+        "errors": 1,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "outcomes": {
+          "not_found": 1
+        },
+        "top_error": "not_found",
+        "top_error_hint": "Model id not found — run `effgen models list` to see ids, `effgen models refresh` to update the catalog, and verify the id/provider prefix.",
+        "error_rate": 1.0,
+        "p95_latency_s": 0.2425,
+        "cost_usd": null
+      }
+    ]
+  },
+  "spend": {
+    "scope": "local cost ledger, last 24 hours",
+    "available": true,
+    "unavailable_reason": null,
+    "total_cost_usd": 0.00153555,
+    "requests": 10,
+    "daily_budget_usd": 1.0,
+    "budget_used_pct": 0.15,
+    "burn_rate_usd_per_hour": 0.00153555,
+    "burn_window_s": 3600.0,
+    "unpriced_models": [],
+    "rows": [
+      {
+        "provider": "gemini",
+        "model": "gemini-3.1-flash-lite",
+        "requests": 8,
+        "tokens": 4075,
+        "cost_usd": 0.00123,
+        "cost_label": "$0.001230"
+      },
+      {
+        "provider": "openai",
+        "model": "gpt-5-nano",
+        "requests": 2,
+        "tokens": 1148,
+        "cost_usd": 0.00030555,
+        "cost_label": "$0.000306"
+      }
+    ]
+  },
+  "gpu": {
+    "scope": "physical devices, all processes",
+    "available": true,
+    "unavailable_reason": null,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA A40",
+        "total_gb": 44.42,
+        "used_gb": 44.33,
+        "free_gb": 0.09,
+        "memory_used_pct": 99.8,
+        "utilization_pct": 100.0
+      },
+      {
+        "index": 1,
+        "name": "NVIDIA A40",
+        "total_gb": 44.42,
+        "used_gb": 0.26,
+        "free_gb": 44.16,
+        "memory_used_pct": 0.6,
+        "utilization_pct": 0.0
+      },
+      {
+        "index": 2,
+        "name": "NVIDIA A40",
+        "total_gb": 44.42,
+        "used_gb": 44.38,
+        "free_gb": 0.05,
+        "memory_used_pct": 99.9,
+        "utilization_pct": 100.0
+      },
+      {
+        "index": 3,
+        "name": "NVIDIA A40",
+        "total_gb": 44.42,
+        "used_gb": 44.38,
+        "free_gb": 0.05,
+        "memory_used_pct": 99.9,
+        "utilization_pct": 100.0
+      },
+      {
+        "index": 4,
+        "name": "NVIDIA A40",
+        "total_gb": 44.42,
+        "used_gb": 44.38,
+        "free_gb": 0.05,
+        "memory_used_pct": 99.9,
+        "utilization_pct": 100.0
+      },
+      {
+        "index": 5,
+        "name": "NVIDIA A40",
+        "total_gb": 44.42,
+        "used_gb": 44.38,
+        "free_gb": 0.05,
+        "memory_used_pct": 99.9,
+        "utilization_pct": 100.0
+      },
+      {
+        "index": 6,
+        "name": "NVIDIA A40",
+        "total_gb": 44.42,
+        "used_gb": 43.93,
+        "free_gb": 0.5,
+        "memory_used_pct": 98.9,
+        "utilization_pct": 100.0
+      },
+      {
+        "index": 7,
+        "name": "NVIDIA A40",
+        "total_gb": 44.42,
+        "used_gb": 43.93,
+        "free_gb": 0.5,
+        "memory_used_pct": 98.9,
+        "utilization_pct": 100.0
+      }
+    ]
+  }
+}

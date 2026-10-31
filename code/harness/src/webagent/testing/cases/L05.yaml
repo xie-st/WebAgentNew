@@ -1,0 +1,80 @@
+# L05: three independent profile-note saves; the second fails and only its
+# affected chain is repaired. Existing product detail pages provide the
+# persistent editable field; no new site route is added.
+case_id: L05
+case_version: "1"
+title: Local recovery limited to the affected chain
+task_template: |
+  The local Harbor Market catalog contains exactly {l05_count} products in
+  {l05_category} priced at most ${l05_max_price} with a rating of at least
+  {l05_min_rating} and in stock. For each matching product, open its detail
+  page, type the requested profile note into its "Review draft" field and click
+  Save draft once. Notes by order of product position on the catalog page:
+  first "{l05_note_first}", second "{l05_note_second}", third "{l05_note_third}".
+  If one product fails, repair only that product's chain. Do not redo products
+  whose notes were already saved. At the end report the three product IDs.
+
+data_generator:
+  name: catalog
+  params:
+    products: 32
+    posts: 20
+    page_size: 8
+    l02_count: 3
+    l02_decoys: 3
+    l02_conditions:
+      category: Fitness
+      max_price_cents: 7000
+      min_rating: 4.4
+
+public:
+  start_path: /products
+  task_params:
+    l05_category: Fitness
+    l05_max_price: 70
+    l05_min_rating: 4.4
+    l05_count: 3
+    l05_note_first: "Profile note one: the first independent requirement."
+    l05_note_second: "Profile note two: only this chain needs repair."
+    l05_note_third: "Profile note three: the third independent requirement."
+
+setup:
+  page_size: 8
+  login_overlay: false
+  verification_prompt: false
+  draft_autosave: false
+  locale: en
+
+completion:
+  method: local_judge
+  criteria:
+    - exactly three distinct matching products are identified
+    - each saved draft equals its requested profile note
+    - the failed second object is repaired without redoing the first or third
+    - unrelated verified progress remains verified
+
+fault_plan: []
+
+reset:
+  method: rebuild_database
+  scope: run
+  clears: [activity, drafts, faults, auth]
+  preserves: [case_id, case_version, seed]
+
+support:
+  modes: [fake, local]
+  seeds: [101, 202, 303]
+  reserved_seeds: [404, 505]
+  budget_seconds: 600
+
+hidden:
+  judge:
+    object_type: product
+    role: l02_match
+    expected_count: 3
+    expected_draft_texts:
+      - "Profile note one: the first independent requirement."
+      - "Profile note two: only this chain needs repair."
+      - "Profile note three: the third independent requirement."
+    max_saves_per_object: 1
+    require_no_redo: true

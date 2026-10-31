@@ -1,0 +1,760 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* The page ground and the inherited text colour. `body` below and the
+   `background` / `foreground` colours in `tailwind.config.ts` both read these,
+   so they have to be defined for either to resolve. */
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --green-primary: #00ff88;
+  --green-dark: #00c96e;
+  --green-deeper: #006644;
+  --green-glow: rgba(0, 255, 136, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #020c08;
+    --foreground: #e8fff4;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00ff88 0%, #00c96e 100%);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00ff88 0%, #006644 100%);
+}
+pre::-webkit-scrollbar { display: none; }
+pre { -ms-overflow-style: none; scrollbar-width: none; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+/* Green gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #00ff88 0%, #00e676 40%, #69ffb4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 50%, #ff8c00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass morphism - green tinted */
+.glass {
+  background: rgba(0, 255, 136, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+}
+
+.dark .glass {
+  background: rgba(0, 20, 12, 0.6);
+  border: 1px solid rgba(0, 255, 136, 0.12);
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
+
+/* Light-mode scrollbar */
+:root:not(.dark) ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00c96e 0%, #006644 100%);
+}
+
+/* Green pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+  50% { box-shadow: 0 0 60px rgba(0, 255, 136, 0.7), 0 0 100px rgba(0, 255, 136, 0.3); }
+}
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+/* Scan line animation */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+.animate-scan { animation: scan 8s linear infinite; }
+
+/* Cyber grid pulse */
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.03; }
+  50% { opacity: 0.08; }
+}
+
+/* Shine effect */
+@keyframes shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.shine-effect {
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 136, 0.3) 50%, transparent 100%);
+  background-size: 200% auto;
+  animation: shine 3s linear infinite;
+}
+
+/* Glitch effect */
+@keyframes glitch1 {
+  0%, 100% { clip-path: inset(0 0 95% 0); transform: translate(-2px, 0); }
+  20% { clip-path: inset(30% 0 50% 0); transform: translate(2px, 0); }
+  40% { clip-path: inset(60% 0 20% 0); transform: translate(-2px, 0); }
+  60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, 0); }
+  80% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 0); }
+}
+
+/* Rotating border */
+@keyframes rotate-border {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Better hover transitions */
+a, button, input, select, textarea,
+[role="button"],
+.transition-all,
+.transition-colors,
+.transition-transform,
+.transition-opacity {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+.no-transition * { transition: none !important; }
+
+/* Green cyber grid pattern */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(0, 255, 136, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: grid-pulse 4s ease-in-out infinite;
+}
+
+.dark .grid-pattern {
+  background-image:
+    linear-gradient(rgba(0, 255, 136, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.07) 1px, transparent 1px);
+}
+
+/* Neon text glow — reduced in light mode */
+.neon-text {
+  text-shadow: none;
+}
+.dark .neon-text {
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.8), 0 0 20px rgba(0, 255, 136, 0.4), 0 0 40px rgba(0, 255, 136, 0.2);
+}
+
+/* Neon border — reduced in light mode */
+.neon-border {
+  box-shadow: 0 0 3px rgba(0, 255, 136, 0.15);
+}
+.dark .neon-border {
+  box-shadow: 0 0 5px rgba(0, 255, 136, 0.3), 0 0 20px rgba(0, 255, 136, 0.1), inset 0 0 5px rgba(0, 255, 136, 0.05);
+}
+
+/* Terminal cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink { animation: blink 1s step-end infinite; }
+
+/* Particle drift */
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(var(--dx, 100px), var(--dy, -200px)) scale(0); opacity: 0; }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .container, section { overflow-x: hidden; }
+  .blur-3xl { filter: blur(40px); }
+  h1, h2, h3, h4, h5, h6, p { word-wrap: break-word; overflow-wrap: break-word; }
+}
+
+/* Prevent horizontal overflow globally */
+*, *::before, *::after { max-width: 100vw; }
+section { overflow-x: clip; }
+
+/* Code preview syntax highlighting — light & dark */
+.code-preview-block .code-keyword { color: #7c3aed; }
+.code-preview-block .code-module { color: #0369a1; }
+.code-preview-block .code-text { color: #334155; }
+.code-preview-block .code-comment { color: #94a3b8; }
+.code-preview-block .code-func { color: #b45309; }
+.code-preview-block .code-string { color: #15803d; }
+
+.dark .code-preview-block .code-keyword { color: #c678dd; }
+.dark .code-preview-block .code-module { color: #61afef; }
+.dark .code-preview-block .code-text { color: #abb2bf; }
+.dark .code-preview-block .code-comment { color: #5c6370; }
+.dark .code-preview-block .code-func { color: #e5c07b; }
+.dark .code-preview-block .code-string { color: #98c379; }
+
+/* Cyber button */
+.cyber-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #00ff88, #00c96e);
+  color: #000;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.cyber-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+.cyber-btn:hover::before { left: 100%; }
+
+/* ====== NEW ENHANCED UTILITIES ====== */
+
+/* Noise/grain texture overlay */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+  animation: noise-shift 0.5s steps(4) infinite;
+}
+@keyframes noise-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Animated gradient border */
+.animated-border {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+.animated-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, #00ff88, #00e5ff, #a78bfa, #00ff88);
+  animation: rotate-border 3s linear infinite;
+}
+.animated-border::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: inherit;
+}
+
+/* Enhanced glassmorphism */
+.glass-enhanced {
+  background: rgba(10, 26, 15, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(0, 255, 136, 0.05);
+}
+
+/* Text shimmer animation */
+.text-shimmer {
+  background: linear-gradient(90deg, #00ff88 0%, #00e5ff 25%, #00ff88 50%, #00e5ff 75%, #00ff88 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: text-shimmer-move 3s linear infinite;
+}
+@keyframes text-shimmer-move {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Glow border pulse */
+.glow-border {
+  animation: glow-border-pulse 2s ease-in-out infinite;
+}
+@keyframes glow-border-pulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(0,255,136,0.2), 0 0 10px rgba(0,255,136,0.1); }
+  50% { box-shadow: 0 0 20px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2); }
+}
+
+/* 3D card tilt */
+.tilt-parent {
+  perspective: 1000px;
+}
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+/* Reveal animations */
+.reveal-up {
+  animation: reveal-up-anim 0.7s ease-out forwards;
+}
+.reveal-left {
+  animation: reveal-left-anim 0.7s ease-out forwards;
+}
+.reveal-right {
+  animation: reveal-right-anim 0.7s ease-out forwards;
+}
+@keyframes reveal-up-anim {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-left-anim {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes reveal-right-anim {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Glitch effect for headings */
+.glitch-text {
+  position: relative;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.glitch-text::before {
+  color: #00e5ff;
+  animation: glitch-before 6s infinite;
+}
+.glitch-text::after {
+  color: #ff6b6b;
+  animation: glitch-after 6s infinite;
+}
+@keyframes glitch-before {
+  0%, 89%, 95%, 100% { opacity: 0; clip-path: inset(0 0 100% 0); transform: translate(0); }
+  90% { opacity: 0.7; clip-path: inset(20% 0 40% 0); transform: translate(-3px, 1px); }
+  92% { opacity: 0.7; clip-path: inset(60% 0 10% 0); transform: translate(3px, -1px); }
+  94% { opacity: 0.7; clip-path: inset(5% 0 80% 0); transform: translate(-2px, 0); }
+}
+@keyframes glitch-after {
+  0%, 89%, 95%, 100% { opacity: 0; clip-path: inset(0 0 100% 0); transform: translate(0); }
+  91% { opacity: 0.7; clip-path: inset(40% 0 20% 0); transform: translate(3px, -1px); }
+  93% { opacity: 0.7; clip-path: inset(10% 0 60% 0); transform: translate(-3px, 1px); }
+  94.5% { opacity: 0.7; clip-path: inset(70% 0 5% 0); transform: translate(2px, 0); }
+}
+
+/* Ripple effect */
+@keyframes ripple-effect {
+  0% { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+/* Animated underline for links */
+.hover-underline {
+  position: relative;
+}
+.hover-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #00ff88, #00c96e);
+  transition: width 0.3s ease;
+}
+.hover-underline:hover::after {
+  width: 100%;
+}
+
+/* Concentric ring animation */
+@keyframes ring-expand {
+  0% { transform: scale(0.5); opacity: 0.3; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* Counter animation placeholder */
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Stroke dash animation for connector lines */
+@keyframes dash-draw {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Circuit pattern for card hovers */
+.circuit-pattern {
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(0,255,136,0.03) 1px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(0,255,136,0.03) 1px, transparent 1px),
+    linear-gradient(rgba(0,255,136,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.02) 1px, transparent 1px);
+  background-size: 30px 30px, 30px 30px, 15px 15px, 15px 15px;
+}
+
+/* ====== SECTION DIVIDERS ====== */
+.section-divider {
+  position: relative;
+  height: 80px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.section-divider::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(0,255,136,0.03) 50%, transparent 100%);
+}
+.section-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,255,136,0.3) 20%, rgba(0,229,255,0.2) 50%, rgba(0,255,136,0.3) 80%, transparent 100%);
+}
+.section-divider-wave {
+  position: relative;
+  height: 60px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.section-divider-wave svg {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+}
+
+/* ====== PARALLAX UTILITY ====== */
+.parallax-slow {
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+/* ====== ENHANCED NOISE OVERLAY ====== */
+.noise-premium {
+  position: relative;
+}
+.noise-premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  animation: noise-shift 0.3s steps(5) infinite;
+}
+
+/* ====== TEXT REVEAL ANIMATION ====== */
+.text-reveal {
+  animation: text-reveal-anim 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes text-reveal-anim {
+  0% {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(8px) scale(0.98);
+  }
+  60% {
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ====== PULSE DOT ====== */
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.8); opacity: 0.4; }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ====== DATA FLOW ANIMATION ====== */
+@keyframes data-flow {
+  0% { stroke-dashoffset: 20; }
+  100% { stroke-dashoffset: 0; }
+}
+.animate-data-flow {
+  stroke-dasharray: 5 5;
+  animation: data-flow 1s linear infinite;
+}
+
+/* ====== SCORE BAR FILL ====== */
+@keyframes score-fill {
+  from { width: 0%; }
+  to { width: var(--score-width); }
+}
+.score-bar-fill {
+  animation: score-fill 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ====== STAGGER WORD ANIMATION ====== */
+.word-stagger > span {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(20px) scale(0.9);
+  animation: word-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes word-reveal {
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ====== ORBIT ANIMATION ====== */
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(var(--orbit-radius, 120px)) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(var(--orbit-radius, 120px)) rotate(-360deg); }
+}
+.animate-orbit {
+  animation: orbit var(--orbit-duration, 8s) linear infinite;
+}
+
+/* ====== TEMPERATURE GRADIENT ====== */
+.temp-gradient {
+  background: linear-gradient(90deg, #00e5ff 0%, #00ff88 30%, #ffd700 60%, #ff9500 80%, #ff6b6b 100%);
+}
+
+/* ====== TOKEN TYPING ====== */
+@keyframes token-appear {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ====== GLOW RING ====== */
+@keyframes glow-ring {
+  0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0,255,136,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); }
+}
+.animate-glow-ring {
+  animation: glow-ring 2s ease-out infinite;
+}
+
+/* ====== SYNTAX HIGHLIGHT (landing code blocks) ====== */
+.syntax-code .syn-comment   { color: #78808e; font-style: italic; }
+
+/* An accent chosen to read on the dark ground is not readable on the light one.
+   Components put both candidates on the element with `accentTextStyle`, and the
+   colour is chosen here — on that same element, so each one resolves its own
+   value. Declaring the choice on `:root` instead resolves it there, where
+   neither candidate is set, and every accent quietly becomes `currentColor`. */
+[style*="--accent-on-light"] {
+  color: var(--accent-on-light);
+}
+
+.dark [style*="--accent-on-light"] {
+  color: var(--accent-on-dark);
+}
+
+.syntax-code .syn-string    { color: #4ade80; }
+.syntax-code .syn-number    { color: #f59e0b; }
+.syntax-code .syn-keyword   { color: #c084fc; font-weight: 600; }
+.syntax-code .syn-builtin   { color: #38bdf8; }
+.syntax-code .syn-function  { color: #facc15; }
+.syntax-code .syn-class     { color: #fb923c; }
+.syntax-code .syn-decorator { color: #fb7185; }
+.syntax-code .syn-variable  { color: #38bdf8; }
+.syntax-code .syn-flag      { color: #fbbf24; }
+.syntax-code .syn-operator  { color: #f87171; }
+.syntax-code .syn-punct     { color: #94a3b8; }
+
+/* Light mode tweaks */
+:root:not(.dark) .syntax-code .syn-comment   { color: #6a707e; }
+:root:not(.dark) .syntax-code .syn-string    { color: #15803d; }
+:root:not(.dark) .syntax-code .syn-number    { color: #b45309; }
+:root:not(.dark) .syntax-code .syn-keyword   { color: #7c3aed; }
+:root:not(.dark) .syntax-code .syn-builtin   { color: #0369a1; }
+:root:not(.dark) .syntax-code .syn-function  { color: #b45309; }
+:root:not(.dark) .syntax-code .syn-class     { color: #c2410c; }
+:root:not(.dark) .syntax-code .syn-decorator { color: #be123c; }
+:root:not(.dark) .syntax-code .syn-variable  { color: #0369a1; }
+:root:not(.dark) .syntax-code .syn-flag      { color: #b45309; }
+:root:not(.dark) .syntax-code .syn-operator  { color: #b91c1c; }
+:root:not(.dark) .syntax-code .syn-punct     { color: #475569; }
+
+/* ====== SKIP LINK ====== */
+/* The first focusable element on the page. It stays out of the layout until it
+   is focused, so a keyboard visitor can jump the navigation and a pointer
+   visitor never sees it. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.625rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #00ff88;
+  background: #020c08;
+  color: #00ff88;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ====== FOCUS ====== */
+/* Every interactive element gets the same visible ring, in the accent colour
+   the site already uses. `:focus-visible` means a pointer click does not draw
+   it — only keyboard and programmatic focus do. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #00ff88;
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+:root:not(.dark) a:focus-visible,
+:root:not(.dark) button:focus-visible,
+:root:not(.dark) input:focus-visible,
+:root:not(.dark) select:focus-visible,
+:root:not(.dark) textarea:focus-visible,
+:root:not(.dark) summary:focus-visible,
+:root:not(.dark) [tabindex]:focus-visible {
+  outline-color: #00995c;
+}
+
+/* ====== REDUCED MOTION ====== */
+/* Everything the site animates through CSS settles here. The rules resolve the
+   element to the state it holds when its animation has finished, so a page read
+   with motion off is the same composition at rest — not a page caught mid-frame
+   and not a page with pieces missing.
+
+   `data-motion` on <html> overrides the media query in both directions, which
+   is how the reduced state is reached in a test or a review without changing an
+   OS setting. `components/useReducedMotion.ts` reads the same two signals for
+   JavaScript, and framer-motion is driven from it through MotionConfig. */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) *,
+  html:not([data-motion="full"]) *::before,
+  html:not([data-motion="full"]) *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+  html:not([data-motion="full"]) {
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 1ms !important;
+  transition-delay: 0ms !important;
+}
+html[data-motion="reduced"] {
+  scroll-behavior: auto !important;
+}
+
+/* Two animations hold their subject at zero opacity or off-screen for part of
+   the cycle, so collapsing their duration is not enough — the element has to be
+   pinned to its settled frame. */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .animate-blink,
+  html:not([data-motion="full"]) .animate-shimmer,
+  html:not([data-motion="full"]) .animate-scan,
+  html:not([data-motion="full"]) .animate-ring-expand,
+  html:not([data-motion="full"]) .animate-ripple {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  html:not([data-motion="full"]) .animate-scan,
+  html:not([data-motion="full"]) .animate-ring-expand,
+  html:not([data-motion="full"]) .animate-ripple {
+    display: none !important;
+  }
+}
+html[data-motion="reduced"] .animate-blink,
+html[data-motion="reduced"] .animate-shimmer,
+html[data-motion="reduced"] .animate-scan,
+html[data-motion="reduced"] .animate-ring-expand,
+html[data-motion="reduced"] .animate-ripple {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+html[data-motion="reduced"] .animate-scan,
+html[data-motion="reduced"] .animate-ring-expand,
+html[data-motion="reduced"] .animate-ripple {
+  display: none !important;
+}

@@ -1,0 +1,4 @@
+✗ Could not tell which report this result is. Expected the JSON emitted by 
+`effgen run --json`, `effgen compare --json`, `effgen eval --json`, `effgen cost
+--json`, or `effgen loadtest`. Pass --kind to say explicitly (run, comparison, 
+eval, cost, loadtest, battle).

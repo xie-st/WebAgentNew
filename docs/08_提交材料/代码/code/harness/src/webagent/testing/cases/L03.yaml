@@ -1,0 +1,101 @@
+# L03: twenty post drafts, screenshots and cancellations with zero submissions.
+case_id: L03
+case_version: "1"
+title: Twenty post edit-screenshot-cancel cycles with zero sends
+task_template: |
+  Work through all {post_count} posts in the local Harbor Forum (there are
+  several pages). For each different post:
+  open it and judge whether it is relevant to the local gear/repair theme and
+  whether its tone is positive, neutral or negative; type a comment draft of at
+  least {min_draft_chars} characters that contains text plus at least one emoji;
+  take a screenshot of the edited comment draft; then click Cancel draft and
+  confirm the draft is cleared. Never click Send comment and never press
+  Ctrl+Enter or Cmd+Enter. At the end, report the number of posts completed and
+  confirm that zero comments were sent.
+
+data_generator:
+  name: catalog
+  params:
+    products: 32
+    posts: 20
+    page_size: 8
+    l03:
+      role: l03_target
+
+public:
+  start_path: /posts
+  task_params:
+    post_count: 20
+    min_draft_chars: 8
+    emoji_required: true
+
+setup:
+  page_size: 8
+  login_overlay: false
+  verification_prompt: false
+  draft_autosave: false
+  locale: en
+
+completion:
+  method: local_judge
+  criteria:
+    - all twenty distinct posts were opened
+    - every post has a non-empty text-plus-emoji draft record
+    - every post has screenshot evidence captured after editing
+    - every post's draft was cancelled
+    - the site submission count is zero
+
+fault_plan:
+  - fault_id: slow-posts
+    type: slow_response
+    enabled: false
+    trigger: {event: list_view, after: 1}
+    params: {delay_ms: 350, times: 1}
+    note: field reserved for E-batch slow-response checks
+  - fault_id: feedback-delay
+    type: feedback_delay
+    enabled: false
+    trigger: {event: draft_saved, after: 1}
+    params: {delay_ms: 600, times: 1}
+    note: field reserved for L04-style feedback loss checks
+  - fault_id: login-after-edit
+    type: login_overlay
+    enabled: false
+    trigger: {event: draft_saved, after: 7}
+    params: {}
+    note: field reserved for L06 takeover checks
+  - fault_id: verification-after-edit
+    type: verification_prompt
+    enabled: false
+    trigger: {event: draft_saved, after: 12}
+    params: {}
+    note: field reserved for L06 takeover checks
+  - fault_id: duplicate-send
+    type: duplicate_button
+    enabled: false
+    trigger: {event: view_item, after: 1}
+    params: {count: 2}
+    note: field reserved for E-batch duplicate-control checks
+
+reset:
+  method: rebuild_database
+  scope: run
+  clears: [activity, drafts, faults, auth]
+  preserves: [case_id, case_version, seed]
+
+support:
+  modes: [fake, local]
+  seeds: [101, 202, 303]
+  reserved_seeds: [404, 505]
+  budget_seconds: 1800
+
+hidden:
+  judge:
+    object_type: post
+    role: l03_target
+    expected_count: 20
+    min_draft_chars: 8
+    require_emoji: true
+    require_screenshot: true
+    require_cancel: true
+    max_submissions: 0

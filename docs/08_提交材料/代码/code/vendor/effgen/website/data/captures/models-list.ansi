@@ -1,0 +1,73 @@
+
+[1;36mAvailable Models[0m
+[3m                        Provider Registry (bundled catalog)                        [0m
+┏━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━━━┓
+┃[1;36m [0m[1;36mProvider [0m[1;36m [0m┃[1;36m [0m[1;36mModels[0m[1;36m [0m┃[1;36m [0m[1;36mDefault                               [0m[1;36m [0m┃[1;36m [0m[1;36mAuth[0m[1;36m [0m┃[1;36m [0m[1;36mVerified  [0m[1;36m [0m┃
+┡━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━╇━━━━━━━━━━━━┩
+│[35m [0m[35mopenai   [0m[35m [0m│     30 │[36m [0m[36mgpt-5.4-nano                          [0m[36m [0m│ [1;32mkey[0m  │[2m [0m[2m2026-06-17[0m[2m [0m│
+│[35m [0m[35manthropic[0m[35m [0m│     17 │[36m [0m[36m—                                     [0m[36m [0m│  [2m—[0m   │[2m [0m[2m2026-06-08[0m[2m [0m│
+│[35m [0m[35mgemini   [0m[35m [0m│      8 │[36m [0m[36mgemini-3.1-flash-lite                 [0m[36m [0m│  [2m—[0m   │[2m [0m[2m2026-08-13[0m[2m [0m│
+│[35m [0m[35mcerebras [0m[35m [0m│      2 │[36m [0m[36mgpt-oss-120b                          [0m[36m [0m│ [1;32mkey[0m  │[2m [0m[2m2026-06-08[0m[2m [0m│
+│[35m [0m[35mgroq     [0m[35m [0m│     15 │[36m [0m[36mllama-3.1-8b-instant                  [0m[36m [0m│  [2m—[0m   │[2m [0m[2m2026-08-07[0m[2m [0m│
+│[35m [0m[35mtogether [0m[35m [0m│    168 │[36m [0m[36mQwen/Qwen3.5-9B                       [0m[36m [0m│  [2m—[0m   │[2m [0m[2m2026-08-07[0m[2m [0m│
+│[35m [0m[35mfireworks[0m[35m [0m│     16 │[36m [0m[36maccounts/fireworks/models/gpt-oss-120b[0m[36m [0m│  [2m—[0m   │[2m [0m[2m2026-08-07[0m[2m [0m│
+│[35m [0m[35mreplicate[0m[35m [0m│     37 │[36m [0m[36mmeta/meta-llama-3-8b-instruct         [0m[36m [0m│  [2m—[0m   │[2m [0m[2m2026-08-07[0m[2m [0m│
+│[35m [0m[35mhf       [0m[35m [0m│    124 │[36m [0m[36mQwen/Qwen2.5-7B-Instruct              [0m[36m [0m│  [2m—[0m   │[2m [0m[2m2026-06-08[0m[2m [0m│
+└───────────┴────────┴────────────────────────────────────────┴──────┴────────────┘
+
+[2mDetail: [0m[2;36meffgen models list --provider <name>[0m[2m  ·  Filter: [0m[2;36m--free[0m[2m / [0m[2;36m--tools[0m[2m  ·  Update: [0m[2;36meffgen models refresh[0m
+[3m                     Local HuggingFace cache (47 ready)                     [0m
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃[1;36m [0m[1;36mModel                                           [0m[1;36m [0m┃[1;36m [0m[1;36m    Size[0m[1;36m [0m┃[1;36m [0m[1;36m  Status  [0m[1;36m [0m┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━┩
+│[36m [0m[36mBAAI/bge-m3                                     [0m[36m [0m│   4.3 GB │   [1;32mready[0m    │
+│[36m [0m[36mCohereLabs/aya-expanse-32b                      [0m[36m [0m│  60.2 GB │   [1;32mready[0m    │
+│[36m [0m[36mCohereLabs/aya-expanse-8b                       [0m[36m [0m│  15.0 GB │   [1;32mready[0m    │
+│[36m [0m[36mFinLang/finance-embeddings-investopedia         [0m[36m [0m│   0.4 GB │   [1;32mready[0m    │
+│[36m [0m[36mFremyCompany/BioLORD-2023                       [0m[36m [0m│   0.0 GB │ [33mincomplete[0m │
+│[36m [0m[36mQwen/Qwen2.5-0.5B-Instruct                      [0m[36m [0m│   0.9 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen2.5-1.5B-Instruct                      [0m[36m [0m│   2.9 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen2.5-14B-Instruct                       [0m[36m [0m│  27.5 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen2.5-32B-Instruct                       [0m[36m [0m│  61.0 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen2.5-3B-Instruct                        [0m[36m [0m│   5.8 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen2.5-7B-Instruct                        [0m[36m [0m│  14.2 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-0.6B                                 [0m[36m [0m│   1.4 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-1.7B                                 [0m[36m [0m│   3.8 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-14B                                  [0m[36m [0m│  27.5 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-32B                                  [0m[36m [0m│  61.0 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-4B                                   [0m[36m [0m│   7.5 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-4B-Instruct-2507                     [0m[36m [0m│   7.5 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-8B                                   [0m[36m [0m│  15.3 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-Embedding-0.6B                       [0m[36m [0m│   1.1 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3-Embedding-8B                         [0m[36m [0m│  14.1 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3.5-0.8B                               [0m[36m [0m│   1.6 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3.5-27B                                [0m[36m [0m│  51.8 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3.5-2B                                 [0m[36m [0m│   4.3 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3.5-9B                                 [0m[36m [0m│  18.0 GB │   [1;32mready[0m    │
+│[36m [0m[36mQwen/Qwen3.6-27B                                [0m[36m [0m│  51.8 GB │   [1;32mready[0m    │
+│[36m [0m[36mSystran/faster-whisper-base                     [0m[36m [0m│   0.1 GB │   [1;32mready[0m    │
+│[36m [0m[36mantofuller/CROMA                                [0m[36m [0m│   0.7 GB │   [1;32mready[0m    │
+│[36m [0m[36mcis-lmu/glotlid                                 [0m[36m [0m│   1.6 GB │   [1;32mready[0m    │
+│[36m [0m[36mgoogle/gemma-2-2b-it                            [0m[36m [0m│   4.9 GB │   [1;32mready[0m    │
+│[36m [0m[36mgoogle/gemma-3-12b-it                           [0m[36m [0m│   0.0 GB │ [33mincomplete[0m │
+│[36m [0m[36mgoogle/gemma-3-4b-it                            [0m[36m [0m│   8.0 GB │   [1;32mready[0m    │
+│[36m [0m[36mibm-esa-geospatial/TerraMind-1.0-Tokenizer-S1GRD[0m[36m [0m│   1.1 GB │   [1;32mready[0m    │
+│[36m [0m[36mibm-esa-geospatial/TerraMind-1.0-Tokenizer-S2L2A[0m[36m [0m│   1.1 GB │   [1;32mready[0m    │
+│[36m [0m[36mibm-esa-geospatial/TerraMind-1.0-base           [0m[36m [0m│   1.4 GB │   [1;32mready[0m    │
+│[36m [0m[36mibm-esa-geospatial/TerraMind-1.0-large          [0m[36m [0m│   3.5 GB │   [1;32mready[0m    │
+│[36m [0m[36mmeta-llama/Llama-3.1-8B-Instruct                [0m[36m [0m│  15.0 GB │   [1;32mready[0m    │
+│[36m [0m[36mmeta-llama/Llama-3.2-1B-Instruct                [0m[36m [0m│   2.3 GB │   [1;32mready[0m    │
+│[36m [0m[36mmeta-llama/Llama-3.2-3B-Instruct                [0m[36m [0m│  12.0 GB │   [1;32mready[0m    │
+│[36m [0m[36mmeta-llama/Llama-3.3-70B-Instruct               [0m[36m [0m│   0.0 GB │ [33mincomplete[0m │
+│[36m [0m[36mmicrosoft/Phi-3.5-mini-instruct                 [0m[36m [0m│   7.1 GB │   [1;32mready[0m    │
+│[36m [0m[36mmicrosoft/Phi-4-mini-instruct                   [0m[36m [0m│   7.2 GB │   [1;32mready[0m    │
+│[36m [0m[36mmicrosoft/Phi-4-mini-reasoning                  [0m[36m [0m│   7.2 GB │   [1;32mready[0m    │
+│[36m [0m[36mmicrosoft/Phi-4-reasoning                       [0m[36m [0m│  27.3 GB │   [1;32mready[0m    │
+│[36m [0m[36mmicrosoft/Phi-4-reasoning-plus                  [0m[36m [0m│  27.3 GB │   [1;32mready[0m    │
+│[36m [0m[36mmicrosoft/phi-4                                 [0m[36m [0m│  27.3 GB │   [1;32mready[0m    │
+│[36m [0m[36mmistralai/Mistral-Small-24B-Instruct-2501       [0m[36m [0m│  87.8 GB │   [1;32mready[0m    │
+│[36m [0m[36mopenai/gpt-oss-120b                             [0m[36m [0m│ 182.3 GB │   [1;32mready[0m    │
+│[36m [0m[36mopenai/gpt-oss-20b                              [0m[36m [0m│  38.5 GB │   [1;32mready[0m    │
+│[36m [0m[36msentence-transformers/all-MiniLM-L6-v2          [0m[36m [0m│   0.1 GB │   [1;32mready[0m    │
+│[36m [0m[36mzss01/PixelCraft-3B                             [0m[36m [0m│   7.6 GB │   [1;32mready[0m    │
+└──────────────────────────────────────────────────┴──────────┴────────────┘

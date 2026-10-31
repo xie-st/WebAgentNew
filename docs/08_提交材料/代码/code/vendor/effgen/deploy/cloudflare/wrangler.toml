@@ -1,0 +1,76 @@
+# effGen — Cloudflare Worker Configuration
+#
+# Deploy:
+#   npx wrangler deploy
+#
+# Develop locally (no Cloudflare account needed):
+#   npx wrangler dev
+#
+# Required secrets (set via `wrangler secret put <name>`):
+#   EFFGEN_BACKEND_TOKEN   — Bearer token accepted by the upstream effGen server
+#
+# Required environment variables (set in [vars] below or override per environment):
+#   EFFGEN_BACKEND_URL     — URL of the upstream effGen server
+#                            e.g. https://api.example.com  (no trailing slash)
+#
+# KV namespace "RATE_LIMIT" is used for per-IP / per-token fixed-window counters.
+
+name = "effgen-edge-proxy"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# ── Variables ────────────────────────────────────────────────────────────────
+# Non-secret configuration.  Override per environment below.
+[vars]
+# URL of the upstream effGen backend (Docker/K8s/Lambda).
+# Override with `wrangler secret put EFFGEN_BACKEND_URL` if you want it secret,
+# or set EFFGEN_BACKEND_URL in each [[env]] block.
+EFFGEN_BACKEND_URL = "https://api.example.com"
+
+# Allowed CORS origins (comma-separated).  "*" disables origin enforcement.
+EFFGEN_CORS_ORIGINS = "*"
+
+# Rate-limit window in seconds.
+EFFGEN_RATE_LIMIT_WINDOW_SECONDS = "60"
+
+# Max requests per IP per window.  "0" disables IP-level rate limiting.
+EFFGEN_RATE_LIMIT_IP_MAX = "100"
+
+# Max requests per authenticated token per window.  "0" disables.
+EFFGEN_RATE_LIMIT_TOKEN_MAX = "200"
+
+# ── KV Namespace ─────────────────────────────────────────────────────────────
+# Used for fixed-window rate-limit counters.
+# Create with:  wrangler kv namespace create RATE_LIMIT
+# Then replace <KV_NAMESPACE_ID> with the returned id.
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id      = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"   # replace with real namespace id
+preview_id = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy" # replace for `wrangler dev`
+
+# ── Routes ───────────────────────────────────────────────────────────────────
+# Bind the worker to your zone (replace with your real zone/hostname).
+# Comment out when using `workers.dev` subdomain only.
+# [[routes]]
+# pattern = "api.example.com/*"
+# zone_name = "example.com"
+
+# ── Environments ─────────────────────────────────────────────────────────────
+
+[env.staging]
+name = "effgen-edge-proxy-staging"
+vars = { EFFGEN_BACKEND_URL = "https://staging-api.example.com", EFFGEN_CORS_ORIGINS = "https://staging.example.com", EFFGEN_RATE_LIMIT_IP_MAX = "50" }
+
+[[env.staging.kv_namespaces]]
+binding    = "RATE_LIMIT"
+id         = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+preview_id = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+
+[env.production]
+name = "effgen-edge-proxy"
+vars = { EFFGEN_BACKEND_URL = "https://api.example.com", EFFGEN_CORS_ORIGINS = "https://app.example.com", EFFGEN_RATE_LIMIT_IP_MAX = "100" }
+
+[[env.production.kv_namespaces]]
+binding    = "RATE_LIMIT"
+id         = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+preview_id = "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"

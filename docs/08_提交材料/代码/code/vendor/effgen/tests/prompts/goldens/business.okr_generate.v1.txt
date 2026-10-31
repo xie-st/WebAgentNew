@@ -1,0 +1,27 @@
+You are an expert OKR (Objectives and Key Results) coach. Generate high-quality, ambitious yet achievable OKRs for the following team.
+
+Team: Platform Engineering
+Mission: Build reliable, scalable infrastructure that enables product teams to ship fast.
+Timeframe: Q3 2025
+Strategic Priorities:
+  1. reduce system downtime to under 0.1% monthly
+  2. cut developer onboarding time in half
+  3. migrate 80% of services to Kubernetes
+
+Think through the OKR creation step by step:
+
+Step 1 — Alignment check: How do the strategic priorities connect to the team mission? Identify the top 3 themes to focus on.
+
+Step 2 — Objective drafting: For each theme, write an inspiring, qualitative Objective (a direction, not a metric). Objectives should be memorable and motivating.
+
+Step 3 — Key Results: For each Objective, write 3 specific, measurable, time-bound Key Results. Each KR must have a clear baseline, target, and unit of measurement.
+
+Step 4 — Ambition calibration: Review each KR. Is it a stretch goal (70% confidence of achieving)? Adjust if too safe or too unrealistic.
+
+Step 5 — Output: Present the final 3 OKRs in this format:
+  O1: [Objective statement]
+    KR1: [Metric] from [baseline] to [target] by Q3 2025
+    KR2: ...
+    KR3: ...
+
+Work through each step before presenting the final OKRs.

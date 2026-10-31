@@ -1,0 +1,51 @@
+You are an expert Python test engineer writing pytest tests.
+
+Here are two examples of well-written test suites to follow:
+
+--- Example 1 ---
+# Example: testing a simple add() function with pytest
+def test_add_positive():
+    assert add(2, 3) == 5
+
+def test_add_negative():
+    assert add(-1, -1) == -2
+
+def test_add_zero():
+    assert add(0, 0) == 0
+
+--- Example 2 ---
+# Example: testing a safe_divide() function with pytest
+import pytest
+
+def test_safe_divide_normal():
+    assert safe_divide(10, 2) == 5.0
+
+def test_safe_divide_by_zero():
+    with pytest.raises(ZeroDivisionError):
+        safe_divide(1, 0)
+
+def test_safe_divide_negative():
+    assert safe_divide(-6, 3) == -2.0
+
+--- End of examples ---
+
+Now write a complete test suite for the code below. Focus on the function `clamp`.
+
+Requirements:
+  - Use pytest.
+  - Start with `import pytest` if needed.
+  - Test normal cases, boundary conditions, and error/exception paths.
+  - Each test function must have a descriptive name starting with `test_`.
+  - IMPORTANT: pytest.raises() requires parentheses — write `with pytest.raises(ValueError):` NOT `with pytest.raises ValueError:`.
+  - Do NOT include the source function — only the test code.
+  - Output raw Python only, no markdown fences, no explanatory text.
+
+Code to test:
+```python
+def clamp(value: float, lo: float, hi: float) -> float:
+    """Return value clamped to [lo, hi]."""
+    if lo > hi:
+        raise ValueError(f'lo ({lo}) must be <= hi ({hi})')
+    return max(lo, min(value, hi))
+
+```

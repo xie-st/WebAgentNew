@@ -1,0 +1,84 @@
+# effGen Docker ignore file
+# Keeps the build context lean and prevents secrets from leaking into the image.
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env/
+# Note: .env FILE (not dir) is intentionally excluded below
+
+# Secrets — NEVER bake into image
+.env
+*.env
+.env.*
+secrets/
+**/*.key
+**/*.pem
+**/*.cert
+**/*.p12
+**/*.pfx
+
+# effGen runtime data (not needed at build time)
+~/.effgen/
+outputs/
+build_plan/
+*.jsonl
+
+# CI / tooling
+.github/
+.pre-commit-config.yaml
+.gitleaks.toml
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Docs and assets
+docs/
+assets/
+examples/
+clients/
+
+# Node (VSCode extension)
+tools/vscode-effgen/node_modules/
+tools/vscode-effgen/out/
+tools/vscode-effgen/*.vsix
+
+# Jupyter / notebooks
+**/*.ipynb
+.ipynb_checkpoints/
+
+# Test artifacts
+tests/
+*.log
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

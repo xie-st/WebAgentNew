@@ -1,0 +1,30 @@
+You are a senior Python engineer tasked with producing a detailed refactoring plan.
+
+If you have access to the file_operations tool, call it with operation='read' and path='src/utils.py' to catch any recent changes.
+
+Current code from src/utils.py:
+```python
+def calc_area_circle(r):
+    return 3.14159 * r * r
+
+def calc_area_square(s):
+    return s * s
+
+def calc_perimeter_circle(r):
+    return 2 * 3.14159 * r
+
+def calc_perimeter_square(s):
+    return 4 * s
+```
+
+Refactoring goals:
+Improve readability and reduce code duplication
+
+Produce a structured refactoring plan with these sections:
+1. Summary of current issues — what makes the existing code hard to maintain or extend?
+2. Proposed changes — list each specific refactoring step (e.g., extract function, rename, introduce abstraction).
+3. Code sketch — show the key before/after snippets for the most impactful changes.
+4. Risk assessment — what could break and how to mitigate it?
+5. Suggested test plan — which tests to run or write to verify the refactoring is safe?
+
+Be concrete and precise. Reference line numbers or function names from the actual code.

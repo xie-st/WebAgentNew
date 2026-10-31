@@ -1,0 +1,29 @@
+You are an expert software debugger. Use chain-of-thought reasoning to diagnose the bug below.
+
+Error:
+KeyError: 2 when calling fibonacci(2)
+
+Reproduction steps:
+Call fibonacci(2) — returns KeyError instead of 1.
+
+Code under investigation:
+```
+def fibonacci(n):
+    if n == 0:
+        return 0
+    memo = {0: 0, 1: 1}
+    for i in range(2, n):
+        memo[i] = memo[i-1] + memo[i-2]
+    return memo[n]
+
+```
+
+Think step by step:
+1. Read the error message carefully — what type of error is it and what does it say literally?
+2. Trace execution: walk through the code path that leads to the error condition.
+3. Identify the root cause — the exact line or expression that is wrong.
+4. Explain WHY the bug exists (off-by-one, wrong assumption, missing guard, etc.).
+5. Propose a minimal, correct fix with the corrected code snippet.
+6. Verify your fix: explain why the error will no longer occur after the change.
+
+Show your step-by-step reasoning before presenting the final fix.

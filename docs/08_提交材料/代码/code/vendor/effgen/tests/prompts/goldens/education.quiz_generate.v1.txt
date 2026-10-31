@@ -1,0 +1,9 @@
+Create a medium 5-question multiple-choice quiz on "photosynthesis" for students.
+
+Requirements:
+  - Exactly 5 questions, numbered.
+  - Each question has four options labeled A, B, C, D, with exactly one correct answer and three plausible distractors.
+  - Keep wording clear and unambiguous; avoid trick questions.
+  - After all questions, add an 'Answer Key' section listing the correct letter and a one-sentence explanation for each.
+
+Write the quiz now:

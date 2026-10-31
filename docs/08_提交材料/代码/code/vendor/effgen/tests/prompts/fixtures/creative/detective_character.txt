@@ -1,0 +1,3 @@
+a retired detective haunted by an unsolved case
+genre: noir thriller
+role: protagonist

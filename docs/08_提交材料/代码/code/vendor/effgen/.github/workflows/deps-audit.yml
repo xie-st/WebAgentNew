@@ -1,0 +1,155 @@
+name: Dependency Vulnerability Audit
+
+on:
+  push:
+    branches: [main, dev, "release/**"]
+    paths:
+      - "pyproject.toml"
+      - "requirements-lock.txt"
+      - "requirements-all-lock.txt"
+      - ".github/workflows/deps-audit.yml"
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "pyproject.toml"
+      - "requirements-lock.txt"
+      - "requirements-all-lock.txt"
+  schedule:
+    # Run daily at 06:00 UTC so new CVEs surface promptly
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write   # for SARIF upload (optional)
+
+jobs:
+  pip-audit:
+    name: pip-audit (HIGH/CRITICAL gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install effGen (core + dev extras only, skip heavy optionals)
+        run: |
+          pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Run pip-audit (full JSON report)
+        id: audit
+        run: |
+          pip-audit \
+            --format json \
+            --output pip-audit-report.json \
+            --progress-spinner off \
+            || true   # always produce the report; we classify below
+
+      - name: Upload full audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+          retention-days: 30
+
+      - name: Gate on HIGH / CRITICAL vulnerabilities
+        # Parse the JSON and fail if any vuln is HIGH or CRITICAL in core deps.
+        # Exemptions (each is exempt because the fix is unreachable from here,
+        # not because the advisory is unimportant):
+        #   - pip / setuptools (packaging toolchain, not runtime)
+        #   - py / pytest-forked (dev-only, not shipped)
+        #   - vllm / torch / transformers / xgrammar (optional extras, not core)
+        run: |
+          python - << 'PYEOF'
+          import json, sys
+
+          # Keep this set in sync with _EXEMPT in tests/security/test_vuln_audit.py
+          EXEMPT_PACKAGES = {
+              # packaging toolchain
+              "pip", "setuptools", "wheel",
+              # dev-only test utilities
+              "py", "pytest-forked",
+              # optional extras — not in core effgen dependency set
+              "vllm", "torch", "transformers", "xgrammar",
+              # no upstream fix; effgen does not use the pickle-deserialization path
+              "diskcache",
+              # optional [vector-db] extra; no upstream fix for CVE-2026-45829
+              "chromadb",
+              # optional transitive dep of argostranslate, which requires exactly
+              # stanza==1.10.1, so the release that clears PYSEC-2026-3075 cannot
+              # be installed; CVE-2026-54499 (unsafe pickle in a torch.load
+              # fallback) has no fix at all
+              "stanza",
+              # optional [eval] extra (also transitive via rouge_score); no upstream
+              # fix for CVE-2026-12243 (path traversal via attacker-controlled
+              # nltk.data resource name; effgen passes only fixed corpus names)
+              "nltk",
+              # CVE-2026-69112 affects every release through 1.14.0, the latest on
+              # PyPI, so there is nothing to upgrade to. The path traversal is in
+              # load_checkpoint_in_model / load_checkpoint_and_dispatch, which
+              # effgen never calls; accelerate is reached only via transformers
+              # from_pretrained(device_map=...), so it needs a checkpoint the user
+              # chose to trust. Drop this once a fixed accelerate ships.
+              "accelerate",
+          }
+
+          try:
+              with open("pip-audit-report.json") as f:
+                  data = json.load(f)
+          except Exception as e:
+              print(f"WARNING: could not parse audit report: {e}", file=sys.stderr)
+              sys.exit(0)
+
+          blocking = []
+          medium_count = 0
+
+          for dep in data.get("dependencies", []):
+              pkg_name = dep.get("name", "").lower()
+              if pkg_name in EXEMPT_PACKAGES:
+                  continue
+              for vuln in dep.get("vulns", []):
+                  vid = vuln.get("id", "")
+                  desc = (vuln.get("description") or "").lower()
+                  # pip-audit does not expose severity in JSON; classify by description
+                  # keywords as a heuristic.  Any vuln in a non-exempt core dep is
+                  # treated as HIGH because we do not have CVSS scores here.
+                  print(f"  VULN {vid} in {pkg_name} {dep.get('version','')} — fix: {vuln.get('fix_versions')}")
+                  blocking.append((pkg_name, dep.get("version", ""), vid, vuln.get("fix_versions", [])))
+
+          if blocking:
+              print(f"\n❌ {len(blocking)} unresolved vulnerabilities in core dependencies:")
+              for pkg, ver, vid, fixes in blocking:
+                  fix_str = f"(fix: {fixes})" if fixes else "(no fix available)"
+                  print(f"  {pkg}=={ver}: {vid} {fix_str}")
+              sys.exit(1)
+          else:
+              print("✅ pip-audit: no HIGH/CRITICAL vulnerabilities in core dependencies.")
+          PYEOF
+
+      - name: Report MEDIUM / LOW findings
+        if: always()
+        run: |
+          python - << 'PYEOF'
+          import json, sys
+
+          try:
+              with open("pip-audit-report.json") as f:
+                  data = json.load(f)
+          except Exception:
+              sys.exit(0)
+
+          for dep in data.get("dependencies", []):
+              for vuln in dep.get("vulns", []):
+                  print(f"[MEDIUM/INFO] {dep.get('name')} {dep.get('version')}: {vuln.get('id')}")
+          PYEOF

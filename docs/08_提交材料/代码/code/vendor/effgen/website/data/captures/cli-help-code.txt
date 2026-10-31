@@ -1,0 +1,126 @@
+usage: effgen code [-h] [-p [TASK]] [-m MODEL] [--provider PROVIDER] [-w DIR] [--plan]
+                   [--auto-edit] [-y] [--review [TARGET]] [-f PATH] [--session-id ID] [--commit]
+                   [--commit-message MSG] [--undo] [--undo-count N]
+                   [--max-iterations MAX_ITERATIONS] [--temperature TEMPERATURE]
+                   [--max-tokens MAX_TOKENS] [--json] [-v] [-q] [--no-animation]
+                   [task]
+
+Run a coding agent over a workspace. It proposes an approach, writes files, executes code in the configured sandbox, reads the real output, and iterates until the task is done or the iteration cap is reached. Each file change is shown as a unified diff before it is written, and --undo reverses the last applied edit. On a terminal with no task it opens an interactive session with slash commands (/plan, /review, /diff, /apply, /undo, /run, /context, /git, /model, /help); a task, -p, piped stdin or --json runs once and exits. --review makes a run read-only, and --session-id continues a saved session.
+
+positional arguments:
+  task                  What to build, change or debug (omit on a terminal to open an interactive
+                        session)
+
+options:
+  -h, --help            show this help message and exit
+  -p [TASK], --print [TASK]
+                        Run one task and print the result. Takes the task directly, or reads it
+                        from stdin when given alone.
+  -m MODEL, --model MODEL
+                        Model to use
+  --provider PROVIDER   Provider for a bare model id (e.g. openai, groq, cerebras, gemini,
+                        together, fireworks, replicate, anthropic, hf). Equivalent to the
+                        "provider:model" prefix.
+  -w DIR, --workspace DIR
+                        Directory the agent reads and writes (created if missing). Sets
+                        EFFGEN_WORKSPACE for the run; nothing outside it is written.
+  --plan                Propose the change without writing a file or running a command
+  --auto-edit           Apply file writes and sandboxed runs without asking; shell commands still
+                        need confirmation
+  -y, --yes             Apply writes, sandboxed runs and shell commands without asking (still
+                        confined to the workspace)
+  --review [TARGET]     Review instead of change: read-only, with no tool that writes a file or
+                        runs a command. TARGET is uncommitted (the default), staged, or any
+                        revision or range git accepts (HEAD~3, main...HEAD). Combine with
+                        -f/--file, or use -f/--file alone to review files outside a repository.
+  -f PATH, --file PATH  Include a workspace file in the review, in full. Repeatable. Used with
+                        --review, or on its own to review files without a diff.
+  --session-id ID, --resume ID
+                        Continue a persistent session by id (the same store as `effgen chat
+                        --session-id` and `effgen sessions list`). Prior turns are recalled and
+                        new ones saved, along with the workspace, files in context and files
+                        written; a new id starts a fresh session.
+  --commit              After the run, offer to commit the files it wrote (y/N; needs --yes
+                        without a terminal). Only those files are committed, and it never pushes,
+                        amends, resets or discards your work.
+  --commit-message MSG  Commit message for --commit (default: a message naming the changed files
+                        and the task)
+  --undo                Reverse the last applied edit(s) in the workspace instead of running a
+                        task, restoring the previous file content
+  --undo-count N        With --undo, how many recent edits to reverse (default 1)
+  --max-iterations MAX_ITERATIONS
+                        Iteration cap for the plan/run/fix loop (default: the coding preset's)
+  --temperature TEMPERATURE
+                        Temperature
+  --max-tokens MAX_TOKENS
+                        Max output tokens per call (raise for reasoning models that spend part of
+                        the budget before any visible text)
+  --json                Emit the result as one JSON document on stdout (answer, files_written,
+                        diffs, actions, tokens, cost). Human output goes to stderr.
+  -v, --verbose         Verbose output (show DEBUG/INFO logs)
+  -q, --quiet           Quiet output (answer only)
+  --no-animation        Disable live spinners/progress animation
+
+Examples:
+  effgen code                         # interactive session
+  effgen code "write fib.py with fib(n) and print fib(10)" --auto-edit
+  effgen code -p "add a --retries flag to cli.py" --json | jq .files_written
+  cat pytest.log | effgen code -p "why did this fail?"
+  effgen code --undo                  # revert the last applied edit
+  effgen code "fix the failing test" --auto-edit --commit
+  effgen code --review                # review everything uncommitted
+  effgen code --review staged -p "is this safe to merge?"
+  effgen code --review main...HEAD --json | jq -r .answer
+  effgen code -f src/app.py -f src/db.py -p "where can this raise?"
+  effgen code --session-id refactor-42 # continue a saved session
+
+Review mode is read-only in the tools it holds, not only in the
+mode it runs in: the file tool is narrowed to reading and the git
+tool is the read-only surface, so there is nothing attached that
+writes a file, runs code or runs a shell command. The change under
+review is handed to the model as context. --review cannot be
+combined with a permission flag, --commit or --undo.
+
+--session-id restores the conversation, the files in context, the
+files the session wrote, and (on a terminal, when no permission
+flag was given) the permission mode. The workspace always comes
+from -w/--workspace or the current directory; a stored one that
+differs is reported and not adopted. Edits proposed by /plan are
+not stored -- re-run /plan against the current files.
+
+In a git repository the branch, the short status and a bounded file
+layout (ignored files excluded) become part of the agent's context,
+and an AGENTS.md in the workspace is read as project instructions.
+The confirmed commit behind --commit is the only repository change a
+session makes: push, reset, checkout, rebase, tag and stash are refused
+in every mode, from the shell too.
+
+Permission modes (pick at most one):
+  --plan        propose only; show the diffs, write nothing, run nothing
+  (default)     with a terminal, show each diff and confirm every write
+                and command; without one, behave as --plan
+  --auto-edit   apply writes and sandboxed runs; confirm shell commands
+  --yes         apply writes, runs and shell commands without asking
+
+Exit codes: 0 completed, 1 failed, 2 completed but changes were
+withheld because there was no terminal to confirm on (including a
+--commit that could not be confirmed).
+
+Stdin: when it is not a terminal it is read to EOF before the run
+starts -- with a task it is folded in as context, without one it is
+the task. A pipe that stays open therefore holds the run; after a
+couple of seconds the wait is reported on stderr. Pass < /dev/null
+to skip the read.
+
+Environment:
+  EFFGEN_WORKSPACE          the directory the agent reads and writes,
+                            and the only one sandboxed code may write
+                            to (created if missing). Unset: the
+                            current directory. -w/--workspace
+                            overrides it.
+  EFFGEN_SANDBOX_BACKEND    docker|subprocess. Docker confines the
+                            filesystem and network for executed code;
+                            the subprocess fallback isolates the
+                            network and confines writes to the
+                            workspace, leaving the rest of the
+                            filesystem readable but read-only.

@@ -1,0 +1,24 @@
+SERVICE AGREEMENT
+
+This Service Agreement ("Agreement") is entered into as of January 1, 2024,
+by and between Acme Corp ("Client") and TechVendor Inc ("Vendor").
+
+1. SERVICES. Vendor shall provide software development services as described
+in Schedule A attached hereto.
+
+2. TERM. This Agreement shall commence on January 1, 2024 and continue for
+twelve (12) months, unless earlier terminated.
+
+3. PAYMENT. Client shall pay Vendor $10,000 per month within 30 days of invoice.
+
+4. CONFIDENTIALITY. Each party agrees to maintain the confidentiality of the
+other party's proprietary information.
+
+5. TERMINATION. Either party may terminate this Agreement upon 30 days' written
+notice. Client may terminate immediately for cause.
+
+6. LIMITATION OF LIABILITY. Neither party shall be liable for indirect,
+consequential, or punitive damages.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement as of the date
+first written above.

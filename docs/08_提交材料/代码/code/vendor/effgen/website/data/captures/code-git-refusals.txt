@@ -1,0 +1,15 @@
+allowed:   add, commit, config, diff, ls-files, rev-parse, status
+refused:   am, apply, branch, checkout, cherry-pick, clean, fetch, filter-branch, gc, merge, mv, notes, prune, pull, push, rebase, reflog, remote, reset, restore, revert, rm, stash, submodule, switch, tag, update-ref, worktree
+
+$ git status
+  -> allowed
+$ git commit -m 'wip'
+  -> allowed
+$ git push origin main
+  -> git push is not available to a coding session: it publishes, rewrites or discards work.
+$ bash -c 'git reset --hard HEAD~1'
+  -> git reset is not available to a coding session: it publishes, rewrites or discards work.
+$ git commit --amend
+  -> git commit --amend is not available to a coding session: it would rewrite, force or discard work.
+$ python3 -c "import subprocess; subprocess.run(['git', 'push'])"
+  -> git push is not available to a coding session: it publishes, rewrites or discards work.

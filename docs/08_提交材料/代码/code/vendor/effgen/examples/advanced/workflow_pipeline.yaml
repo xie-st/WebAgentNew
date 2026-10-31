@@ -1,0 +1,16 @@
+# A minimal DAG workflow you can run with the effGen CLI:
+#
+#   effgen workflow validate examples/advanced/workflow_pipeline.yaml
+#   effgen workflow run examples/advanced/workflow_pipeline.yaml -m Qwen/Qwen2.5-1.5B-Instruct
+#
+# Each node names a `task:` (its default input) and optionally a `preset:`
+# (research / coding / analysis / general / ...) or `model:`. Edges are declared
+# with `depends_on:`; a node receives the upstream node outputs as context.
+workflow:
+  name: research_report
+  nodes:
+    - id: draft
+      task: "Write two factual sentences about the planet Mars."
+    - id: review
+      task: "Improve the wording of the text below and fix any inaccuracies. Reply with only the improved text."
+      depends_on: [draft]

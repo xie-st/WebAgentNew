@@ -1,0 +1,2 @@
+✗ --plan, --auto-edit cannot be combined — they select different permission 
+modes. Pass one.

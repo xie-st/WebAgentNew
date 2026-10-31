@@ -27,11 +27,80 @@ budget:
   input_tokens: 24000
   planned_context_tokens: 32768
   max_model_calls: null
+  # Disable early close-out; continue model calls until the platform deadline.
+  deadline_margin_seconds: 0
 
 limits:
+  # The platform README states a maximum of 256 messages and 1 MiB total input
+  # JSON per request. These are checked at the final SDK message exit.
   max_messages: 256
   max_request_bytes: 1048576
+
+official:
+  # Wire text policy for text actions.
+  # decompose (default): a line break is never sent inside one `type` command;
+  #   the execution layer splits it into type + press [Enter] sub-actions.
+  # raw: text is sent unchanged, including line breaks. Use this on a real page
+  #   to verify the platform's character semantics (line breaks, brackets,
+  #   backslash) before changing the default in the next reviewed revision.
+  text_mode: decompose
+  # Explicit phase-2 behavior switches. Off means the tools are not registered,
+  # their schemas are not in the prompt, and the finish gate is not installed.
+  # recovery (R wave) enables takeover pause/handoff+re-observe, bounded local
+  # recovery and restart-from-snapshot. It is implemented and stays off by
+  # default; enabling it is an explicit per-run decision.
+  behaviors:
+    verification: true
+    state_tools: true
+    recovery: false
 
 logging:
   level: INFO
   redact_extra: []
+
+context:
+  # G-wave necessary-context protection and the final input-budget check. This is
+  # an independent switch: false (the default) builds no protector, appends
+  # nothing to the prompt and leaves the model send path exactly as before.
+  # When true, the harness appends its ledger short view and unconfirmed-effect
+  # list to the prompt and checks the exact final send once before every model
+  # call: the task text, current AX view, ledger view and effect records must be
+  # present byte-for-byte, and an over-budget request is refused with an explicit
+  # error instead of dropping any of them.
+  enabled: false
+  # Project token/byte ceiling for that final send. The token value equals
+  # budget.input_tokens, the budget the native EffGen compaction path receives.
+  max_input_tokens: 24000
+  max_request_bytes: 1048576
+  # Size bounds for the two harness blocks. Only the optional ledger detail (the
+  # fact list) is shortened; the task, AX text, ledger core and effect records
+  # are never shortened here.
+  ledger_max_chars: 2000
+  effects_max_chars: 1200
+
+# F-wave scheduling skeleton. The official profile never exposes Tab tools and
+# never runs more than one action or one model call at a time, so parallel stays
+# off here; a config that sets enabled: true is rejected at load time.
+parallel:
+  enabled: false
+  capacity: 1
+  model_concurrency: 1
+
+# F-wave scheduling skeleton. The official profile never exposes Tab tools and
+# never runs more than one action or one model call at a time, so parallel stays
+# off here; a config that sets enabled: true is rejected at load time.
+parallel:
+  enabled: false
+  capacity: 1
+  model_concurrency: 1
+
+experience:
+  # G wave (G06): approved local text experience only. Off means no allowlist is
+  # opened and no entry file is read, so the sent prompt is unchanged. When on,
+  # only the allowlist file names entries; an unapproved version, a version
+  # mismatch or an unmet precondition is not injected. Page content can never
+  # add an entry or change an approval state.
+  enabled: false
+  allowlist: null
+  max_entries: 8
+  max_chars: 4000

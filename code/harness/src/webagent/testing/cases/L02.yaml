@@ -1,0 +1,89 @@
+# L02: collect five distinct matching products from paginated results.
+case_id: L02
+case_version: "1"
+title: Paginated collection of five distinct objects
+task_template: |
+  On the local Harbor Market site, search the product catalog across all pages
+  and collect the five different products in {l02_category} priced at most
+  ${l02_max_price} with a rating of at least {l02_min_rating} and in stock.
+  Open each matching product's detail page to verify it and take a screenshot
+  for each one. Do not report the same product twice and do not count visits as
+  separate objects. When finished, report the five product IDs as a list.
+
+data_generator:
+  name: catalog
+  params:
+    products: 32
+    posts: 20
+    page_size: 8
+    l02_count: 5
+    l02_decoys: 4
+    l02_conditions:
+      category: Camping
+      max_price_cents: 6500
+      min_rating: 4.5
+
+public:
+  start_path: /products
+  task_params:
+    l02_category: Camping
+    l02_max_price: 65
+    l02_min_rating: 4.5
+    l02_expected_count: 5
+
+setup:
+  page_size: 8
+  login_overlay: false
+  verification_prompt: false
+  draft_autosave: false
+  locale: en
+
+completion:
+  method: local_judge
+  criteria:
+    - exactly five distinct matching product IDs are reported
+    - every reported product was opened on its detail page
+    - each reported product has screenshot evidence
+    - duplicates or visits cannot be used to reach the count
+
+fault_plan:
+  - fault_id: slow-list
+    type: slow_response
+    enabled: false
+    trigger: {event: list_view, after: 2}
+    params: {delay_ms: 350, times: 2}
+    note: field reserved for E-batch slow-response checks
+  - fault_id: feedback-delay
+    type: feedback_delay
+    enabled: false
+    trigger: {event: draft_saved, after: 1}
+    params: {delay_ms: 600, times: 1}
+    note: field reserved for L04-style feedback loss checks
+  - fault_id: duplicate-send
+    type: duplicate_button
+    enabled: false
+    trigger: {event: view_item, after: 1}
+    params: {count: 2}
+    note: field reserved for E-batch duplicate-control checks
+
+reset:
+  method: rebuild_database
+  scope: run
+  clears: [activity, drafts, faults, auth]
+  preserves: [case_id, case_version, seed]
+
+support:
+  modes: [fake, local]
+  seeds: [101, 202, 303]
+  reserved_seeds: [404, 505]
+  budget_seconds: 600
+
+hidden:
+  judge:
+    object_type: product
+    role: l02_match
+    expected_count: 5
+    answer_field: product_ids
+    require_distinct: true
+    require_evidence_each: true
+    max_submissions: 0

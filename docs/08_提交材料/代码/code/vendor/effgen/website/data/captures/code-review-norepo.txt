@@ -1,0 +1,3 @@
+✗ /data/wang/gks/effgen-demo/notarepo is not inside a git repository, so there 
+is no diff to review. Name the files instead (-f/--file PATH, repeatable), or 
+run the review from inside a repository.

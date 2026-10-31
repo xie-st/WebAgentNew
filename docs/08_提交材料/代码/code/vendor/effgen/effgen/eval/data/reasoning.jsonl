@@ -1,0 +1,40 @@
+{"query": "If all roses are flowers and some flowers fade quickly, can we conclude that some roses fade quickly?", "expected": "no", "tools": [], "tags": ["logic"], "difficulty": "medium"}
+{"query": "A bat and a ball cost $1.10. The bat costs $1.00 more than the ball. How much does the ball cost?", "expected": "0.05", "tools": ["calculator"], "tags": ["word_problem"], "difficulty": "medium"}
+{"query": "If it takes 5 machines 5 minutes to make 5 widgets, how long would it take 100 machines to make 100 widgets?", "expected": "5", "tools": [], "tags": ["word_problem"], "difficulty": "medium"}
+{"query": "In a lake, there is a patch of lily pads. Every day, the patch doubles in size. If it takes 48 days for the patch to cover the entire lake, how many days to cover half?", "expected": "47", "tools": [], "tags": ["word_problem"], "difficulty": "medium"}
+{"query": "A farmer has 17 sheep. All but 9 die. How many sheep does the farmer have left?", "expected": "9", "tools": [], "tags": ["word_problem"], "difficulty": "easy"}
+{"query": "Alice is taller than Bob. Bob is taller than Charlie. Is Alice taller than Charlie?", "expected": "yes", "tools": [], "tags": ["logic"], "difficulty": "easy"}
+{"query": "If the day before yesterday was Thursday, what day is tomorrow?", "expected": "Sunday", "tools": [], "tags": ["logic"], "difficulty": "medium"}
+{"query": "What comes next in the sequence: 2, 6, 12, 20, 30, ?", "expected": "42", "tools": [], "tags": ["pattern"], "difficulty": "medium"}
+{"query": "If you rearrange the letters 'CIFAIPC', what common English word do you get?", "expected": "pacific", "tools": [], "tags": ["word_puzzle"], "difficulty": "medium"}
+{"query": "If you flip a fair coin 3 times, what is the probability of getting exactly 2 heads?", "expected": "0.375", "tools": ["calculator"], "tags": ["probability"], "difficulty": "medium"}
+{"query": "A snail climbs 3 feet up a wall during the day and slides back 2 feet at night. If the wall is 10 feet tall, how many days to reach the top?", "expected": "8", "tools": ["calculator"], "tags": ["word_problem"], "difficulty": "medium"}
+{"query": "There are 3 light switches outside a room. You can only enter the room once. How do you determine which switch controls which light?", "expected": "heat", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "You have a 3-gallon jug and a 5-gallon jug. How do you measure exactly 4 gallons?", "expected": "4", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "Three people check into a hotel room that costs $30. They each pay $10. The manager gives $5 back via the bellboy who keeps $2, returning $1 each. Where is the missing dollar?", "expected": "no missing dollar", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "If you have 8 balls and one is slightly heavier, what is the minimum number of weighings on a balance scale?", "expected": "2", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "A train leaves Station A at 9 AM going 60 mph. Another train leaves Station B (300 miles away) at 10 AM going 90 mph toward A. At what time do they meet?", "expected": "11", "tools": ["calculator"], "tags": ["word_problem"], "difficulty": "hard"}
+{"query": "You have 12 coins, one is counterfeit (lighter). Using a balance scale, what is the minimum weighings to find it?", "expected": "3", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "A clock shows 3:15. What is the angle between the hour and minute hands?", "expected": "7.5", "tools": ["calculator"], "tags": ["geometry"], "difficulty": "hard"}
+{"query": "You have 3 boxes labeled 'Apples', 'Oranges', 'Both'. All labels are wrong. You pick one fruit from one box to determine all labels. Which box?", "expected": "both", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "How many squares are on a standard 8x8 chessboard counting all sizes?", "expected": "204", "tools": ["calculator"], "tags": ["combinatorics"], "difficulty": "hard"}
+{"query": "Two fathers and two sons go fishing. They each catch one fish. They bring home 3 fish. How is this possible?", "expected": "grandfather", "tools": [], "tags": ["logic"], "difficulty": "easy"}
+{"query": "What is the next number: 1, 1, 2, 3, 5, 8, 13, ?", "expected": "21", "tools": [], "tags": ["pattern"], "difficulty": "easy"}
+{"query": "A doctor gives you 3 pills and says take one every 30 minutes. How long until all pills are taken?", "expected": "60", "tools": [], "tags": ["logic"], "difficulty": "easy"}
+{"query": "If you have a bowl with six apples and you take away four, how many do you have?", "expected": "4", "tools": [], "tags": ["logic"], "difficulty": "easy"}
+{"query": "What weighs more: a pound of feathers or a pound of steel?", "expected": "same", "tools": [], "tags": ["logic"], "difficulty": "easy"}
+{"query": "How many months have 28 days?", "expected": "12", "tools": [], "tags": ["logic"], "difficulty": "easy"}
+{"query": "I am an odd number. Take away one letter, and I become even. What number am I?", "expected": "seven", "tools": [], "tags": ["word_puzzle"], "difficulty": "medium"}
+{"query": "What number comes next: 1, 4, 9, 16, 25, ?", "expected": "36", "tools": [], "tags": ["pattern"], "difficulty": "easy"}
+{"query": "A ship anchored in port has a ladder hanging over the side. The rungs are 1 foot apart and 10 rungs are above water. The tide rises 5 feet. How many rungs are above water?", "expected": "10", "tools": [], "tags": ["logic"], "difficulty": "medium"}
+{"query": "You are in a race and overtake the person in second place. What place are you in?", "expected": "second", "tools": [], "tags": ["logic"], "difficulty": "easy"}
+{"query": "A man is looking at a photograph. 'Brothers and sisters I have none, but that man's father is my father's son.' Who is in the photo?", "expected": "son", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "Three consecutive even numbers sum to 78. What are they?", "expected": "26", "tools": ["calculator"], "tags": ["algebra"], "difficulty": "medium"}
+{"query": "A rectangular room is 12m x 8m. How many 2m x 2m tiles are needed to cover the floor?", "expected": "24", "tools": ["calculator"], "tags": ["word_problem"], "difficulty": "medium"}
+{"query": "You have 10 bags of gold coins. 9 bags have coins weighing 10g each, 1 bag has coins weighing 9g. Using a digital scale ONCE, how do you find the light bag?", "expected": "1 from bag 1, 2 from bag 2", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "The sequence 1, 11, 21, 1211, 111221, ... What is the next term?", "expected": "312211", "tools": [], "tags": ["pattern"], "difficulty": "hard"}
+{"query": "If A implies B, and B implies C, and we know C is false, what can we conclude about A?", "expected": "false", "tools": [], "tags": ["logic"], "difficulty": "medium"}
+{"query": "A store offers 25% off, then an additional 10% off the reduced price. What is the total percentage discount?", "expected": "32.5", "tools": ["calculator"], "tags": ["word_problem"], "difficulty": "medium"}
+{"query": "There are 100 lockers, all closed. 100 students walk by. Student 1 opens every locker. Student 2 toggles every 2nd. Student 3 toggles every 3rd, etc. How many lockers are open at the end?", "expected": "10", "tools": [], "tags": ["logic"], "difficulty": "hard"}
+{"query": "A frog is at the bottom of a 30-foot well. Each day it climbs 3 feet and slips back 2 feet at night. How many days to escape?", "expected": "28", "tools": ["calculator"], "tags": ["word_problem"], "difficulty": "hard"}
+{"query": "You have two ropes. Each takes exactly 1 hour to burn but burns non-uniformly. How do you measure 45 minutes?", "expected": "light both ends", "tools": [], "tags": ["logic"], "difficulty": "hard"}

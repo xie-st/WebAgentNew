@@ -1,0 +1,48 @@
+{{- if .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "effgen.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "effgen.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "effgen.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    {{- if .Values.networkPolicy.egressEnabled }}
+    - Egress
+    {{- end }}
+
+  ingress:
+    # Allow HTTP traffic from within the same namespace
+    - from:
+        - podSelector: {}
+        {{- if .Values.networkPolicy.ingressNamespaceSelector }}
+        - namespaceSelector:
+            {{- toYaml .Values.networkPolicy.ingressNamespaceSelector | nindent 12 }}
+        {{- end }}
+      ports:
+        - port: 8080
+          protocol: TCP
+
+  {{- if .Values.networkPolicy.egressEnabled }}
+  egress:
+    # Allow DNS resolution
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # Allow HTTPS egress (LLM provider APIs, OIDC endpoints)
+    - ports:
+        - port: 443
+          protocol: TCP
+    # Allow HTTP (internal service mesh / health checks)
+    - ports:
+        - port: 80
+          protocol: TCP
+  {{- end }}
+{{- end }}

@@ -1,0 +1,1461 @@
+"""
+Abstract base class for all model implementations in effGen.
+
+This module defines the interface that all model engines must implement,
+ensuring consistent behavior across vLLM, Transformers, and API adapters.
+"""
+
+from __future__ import annotations
+
+import functools
+import logging
+import threading
+import time
+import weakref
+from abc import ABC, abstractmethod
+from collections.abc import Iterator
+from dataclasses import dataclass
+from enum import Enum
+from types import TracebackType
+from typing import Any, Literal
+
+logger = logging.getLogger(__name__)
+
+
+class ModelType(Enum):
+    """Enumeration of supported model types."""
+    VLLM = "vllm"
+    TRANSFORMERS = "transformers"
+    OPENAI = "openai"
+    ANTHROPIC = "anthropic"
+    GEMINI = "gemini"
+    MLX = "mlx"
+    MLX_VLM = "mlx_vlm"
+
+
+@dataclass(frozen=True)
+class PromptCachePolicy:
+    """What a provider's prompt cache needs, as the adapter declares it.
+
+    A provider only caches a prompt prefix that reaches it in a form it can
+    recognise, and the two families want different things: some match the
+    rendered prefix themselves, and some want the caller to say where the
+    stable part ends. An adapter that returns one of these from
+    :meth:`BaseModel.prompt_cache_policy` is saying which family it is in and
+    what its usage payload reports back, so a run can ask for a cache, read the
+    hit and price it without anything upstream naming a provider or a model.
+
+    Attributes:
+        style: ``"automatic"`` when the provider matches the prefix itself and
+            the request needs no marker, ``"explicit"`` when the caller places
+            the breakpoints and the adapter renders them.
+        min_prefix_tokens: The shortest prefix the provider will cache, when it
+            publishes one; ``None`` when it publishes none. Reported, never
+            enforced — a prefix below it is simply not cached, and padding one
+            to reach it would be buying a discount with tokens the caller did
+            not ask for.
+        max_breakpoints: How many breakpoints one request may carry. ``0`` on
+            an automatic policy, which carries none.
+        reports_cached_tokens: The usage payload carries the number of prompt
+            tokens served from the cache.
+        reports_cache_writes: The usage payload carries the number of prompt
+            tokens written to the cache, which is billed above the input rate.
+        ttl_options: The cache lifetimes the provider accepts, when it accepts
+            a choice.
+    """
+
+    style: Literal["automatic", "explicit"]
+    min_prefix_tokens: int | None = None
+    max_breakpoints: int = 0
+    reports_cached_tokens: bool = False
+    reports_cache_writes: bool = False
+    ttl_options: tuple[str, ...] = ()
+
+
+@dataclass
+class GenerationConfig:
+    """Configuration for text generation."""
+    temperature: float = 0.7
+    top_p: float = 0.9
+    top_k: int = 50
+    max_tokens: int | None = None
+    stop_sequences: list[str] | None = None
+    presence_penalty: float = 0.0
+    frequency_penalty: float = 0.0
+    repetition_penalty: float = 1.0
+    seed: int | None = None
+    # Optional draft model for speculative decoding. Backends that
+    # do not support speculative decoding should ignore this field.
+    draft_model: Any = None
+    # Reasoning model controls (OpenAI o-series). Both default to None
+    # for full back-compat — non-reasoning models silently ignore them.
+    reasoning_effort: Literal["none", "minimal", "low", "medium", "high", "xhigh"] | None = None
+    max_reasoning_tokens: int | None = None
+    # Gemini thinking controls. thinking_budget=None means field not sent;
+    # 0 disables thinking; >0 sets token budget. include_thoughts=True
+    # surfaces the reasoning trace in ModelResponse.metadata["thinking"].
+    thinking_budget: int | None = None
+    include_thoughts: bool = False
+    # Gemini grounding. When True AND the model supports_grounding, Google
+    # Search grounding is activated and grounding_chunks appear in metadata.
+    grounding: bool = False
+    # Anthropic extended thinking. Pass {"type": "enabled", "budget_tokens": N}.
+    # None means the field is not sent (standard generation).
+    thinking: dict | None = None
+    # Structured-output controls. When set, backends that support a native
+    # JSON/structured mode constrain generation accordingly. response_mime_type
+    # (e.g. "application/json") asks the provider to emit raw JSON; response_schema
+    # is an optional JSON-Schema dict the provider validates against where it can.
+    # Both default to None so ordinary generation is unaffected.
+    response_mime_type: str | None = None
+    response_schema: dict | None = None
+
+    def __post_init__(self) -> None:
+        """Accept a bare string for ``stop_sequences``.
+
+        Every consumer — the adapters, the local engines, the agent's own
+        trimming — iterates this field, so a string given directly is walked
+        character by character and cuts the text at the first single letter that
+        matches. The OpenAI API accepts a bare string, so it is the shape a
+        caller naturally reaches for; it becomes a one-element list here, once,
+        rather than in each consumer.
+        """
+        from effgen.models._adapter_utils import normalize_stop_sequences
+
+        self.stop_sequences = normalize_stop_sequences(self.stop_sequences)
+
+
+@dataclass
+class GenerationResult:
+    """Result from a generation call.
+
+    On a reasoning model, ``text`` can be empty even on a normal (non-error)
+    return: the output-token budget is spent on hidden reasoning before any
+    visible token is emitted. This is reported as ``finish_reason == "length"``
+    and ``metadata["truncated"] is True`` — check either before trusting an
+    empty ``text``/``str(result)``, or call through :class:`~effgen.core.agent.Agent`
+    instead, which already raises a clear error in that case.
+    """
+    text: str
+    tokens_used: int
+    finish_reason: str
+    model_name: str
+    metadata: dict[str, Any] | None = None
+
+    def __str__(self) -> str:
+        """The generated text, so ``print(model.generate(...))`` shows the
+        answer rather than the full dataclass repr — mirroring ``AgentResponse``.
+        The unambiguous ``repr()`` still shows every field for debugging."""
+        return self.text
+
+    def _repr_html_(self) -> str:
+        """Rich HTML card for Jupyter/IPython — mirrors ``AgentResponse`` so a
+        raw ``load_model(...).generate(...)`` renders a tidy card (answer +
+        model · time · tokens · cost) in a notebook, not a dataclass repr."""
+        from effgen.ui import generation_result_html
+
+        return generation_result_html(self)
+
+    def _repr_markdown_(self) -> str:
+        """Plain-markdown notebook view (answer + a small metric footer)."""
+        from effgen.ui import generation_result_markdown
+
+        return generation_result_markdown(self)
+
+
+@dataclass
+class TokenCount:
+    """Token count information."""
+    count: int
+    model_name: str
+
+
+def _stamp_latency(result: Any, elapsed_s: float) -> Any:
+    """Fold per-call wall-clock latency + a truncation flag onto a
+    ``GenerationResult``'s metadata.
+
+    Adds ``latency_ms`` and ``duration_s`` (via ``setdefault``, so an engine that
+    measures its own latency wins) so benchmarkers can read throughput straight off
+    a raw ``generate()`` result. Also adds ``truncated`` (``finish_reason ==
+    "length"``) so a caller working directly with ``model.generate()`` (no
+    ``Agent`` in between) can detect a truncated/empty-from-truncation result
+    without string-matching ``finish_reason`` itself, and ``tool_calls`` (empty
+    for an engine that reports none) so the key is present on every result —
+    including the local engines, which report tool calls as text rather than as
+    a structured list. Non-``GenerationResult`` values pass through untouched.
+    """
+    if isinstance(result, GenerationResult):
+        meta = result.metadata
+        if meta is None:
+            meta = {}
+            result.metadata = meta
+        meta.setdefault("latency_ms", round(elapsed_s * 1000.0, 1))
+        meta.setdefault("duration_s", round(elapsed_s, 4))
+        meta.setdefault("truncated", result.finish_reason == "length")
+        meta.setdefault("tool_calls", [])
+    return result
+
+
+#: Serializes every read-modify-write of an adapter's cumulative ``total_cost``
+#: and ``total_tokens``. One adapter commonly serves many agents at once — the
+#: server hands the same instance to every request, and a thread pool of agents
+#: shares one — and ``total = total + cost`` spread over a load, an add and a
+#: store loses one call's money whenever two threads interleave across it. The
+#: work under the lock is a few arithmetic operations, so a single process-wide
+#: lock costs less than one per instance would.
+_TOTALS_LOCK = threading.Lock()
+
+
+def fold_call_totals(
+    model: "BaseModel",
+    cost: float | None = None,
+    tokens: int | None = None,
+) -> float:
+    """Add one call's cost and tokens to *model*'s session totals.
+
+    Args:
+        model: The adapter the call was made on.
+        cost: This call's USD cost, or ``None`` when the model publishes no
+            price — an unpriced call leaves the total where it was rather than
+            adding a zero.
+        tokens: This call's total prompt+completion tokens, if known.
+
+    Returns:
+        The cumulative cost after this call, read under the same lock that
+        wrote it, so the value reported alongside a call is the total that
+        included it rather than one a concurrent call has since moved.
+    """
+    with _TOTALS_LOCK:
+        if cost is not None:
+            model.total_cost = getattr(model, "total_cost", 0.0) + cost
+        if tokens:
+            model.total_tokens = getattr(model, "total_tokens", 0) + tokens
+        return getattr(model, "total_cost", 0.0)
+
+
+def _stamp_cost(model: "BaseModel", result: Any) -> None:
+    """Accumulate this call's cost onto the model instance's running total.
+
+    Populates ``metadata["total_cost"]`` via presence check, so an adapter that
+    already tracks its own cumulative total (OpenAI, Gemini, Anthropic) keeps
+    its own bookkeeping untouched; every other adapter gets the same
+    cumulative-cost field for free, derived from the ``cost_usd`` it already
+    reports per call. Skipped when the result carries no ``cost_usd`` (e.g.
+    local engines that do not price calls).
+
+    **Tokens fold here too**, from the same per-call metadata. They used not to,
+    so on the six adapters that rely on this wrapper — groq, cerebras, together,
+    fireworks, replicate, hf_inference — ``model.total_cost`` was right while
+    ``model.total_tokens`` never moved. The presence check is what keeps that
+    from double-counting: the three adapters that fold their own totals also
+    write ``total_cost`` into the metadata, so this returns before touching
+    either counter for them.
+    """
+    if not isinstance(result, GenerationResult):
+        return
+    meta = result.metadata
+    if meta is None or "total_cost" in meta:
+        return
+    cost = meta.get("cost_usd")
+    if cost is None:
+        return
+    tokens = meta.get("total_tokens")
+    if tokens is None:
+        prompt = meta.get("prompt_tokens") or 0
+        completion = meta.get("completion_tokens") or 0
+        tokens = prompt + completion
+    meta["total_cost"] = fold_call_totals(model, cost, tokens)
+
+
+class _StreamState:
+    """What one stream has recorded: its tool calls so far and its usage."""
+
+    __slots__ = ("tool_calls", "usage")
+
+    def __init__(self) -> None:
+        self.tool_calls: list[dict[str, Any]] = []
+        self.usage: dict[str, Any] | None = None
+
+
+class _ThreadStreams(threading.local):
+    """Per thread, per model: the stream being pulled now, and the last one.
+
+    One model object is routinely shared — one loaded model, many agents on it
+    — and the attributes a stream used to record onto that object were shared
+    with it, so two streams at once read each other's tool calls and usage.
+    Each stream now records into a state of its own. A stream's generator runs
+    in whichever thread pulls it, and the consumer reads what it recorded in
+    that same thread straight after pulling, so the state is found through the
+    thread: ``active`` while the adapter is producing a piece, ``last`` for the
+    consumer afterwards.
+    """
+
+    def __init__(self) -> None:
+        self.active: weakref.WeakKeyDictionary[Any, _StreamState] = weakref.WeakKeyDictionary()
+        self.last: weakref.WeakKeyDictionary[Any, _StreamState] = weakref.WeakKeyDictionary()
+
+
+_THREAD_STREAMS = _ThreadStreams()
+
+
+def _stream_state(model: Any, *, active_only: bool = False) -> _StreamState | None:
+    """The state of the stream this thread is pulling (or last pulled) on *model*."""
+    try:
+        state = _THREAD_STREAMS.active.get(model)
+        if state is None and not active_only:
+            state = _THREAD_STREAMS.last.get(model)
+        return state
+    except TypeError:  # a model that cannot be weakly referenced keeps the attributes
+        return None
+
+
+def _pull_scoped(iterator: Iterator[Any], model: Any, state: _StreamState) -> Any:
+    """Pull one piece of *iterator* with *state* as *model*'s stream on this thread."""
+    try:
+        previous = _THREAD_STREAMS.active.get(model)
+        _THREAD_STREAMS.active[model] = state
+        _THREAD_STREAMS.last[model] = state
+    except TypeError:
+        return next(iterator)
+    try:
+        return next(iterator)
+    finally:
+        if previous is None:
+            _THREAD_STREAMS.active.pop(model, None)
+        else:
+            _THREAD_STREAMS.active[model] = previous
+
+
+def _forget_last_stream(model: Any) -> None:
+    """Drop this thread's record of the last stream on *model* (a new one starts)."""
+    try:
+        _THREAD_STREAMS.last.pop(model, None)
+    except TypeError:
+        pass
+
+
+def clear_stream_usage(model: "BaseModel") -> None:
+    """Drop any usage recorded by a previous streaming call on *model*.
+
+    Called by a consumer immediately before it starts a stream, so that reading
+    the usage afterwards returns this call's numbers or ``None`` — never the
+    previous call's numbers for a stream that reported none.
+    """
+    state = _stream_state(model, active_only=True)
+    if state is not None:
+        state.usage = None
+    else:
+        _forget_last_stream(model)
+    try:
+        model._last_stream_usage = None  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001 - a model that rejects attributes still streams
+        logger.debug("Could not clear stream usage", exc_info=True)
+
+
+def get_stream_usage(model: "BaseModel") -> dict[str, Any] | None:
+    """Return the usage of the most recent streaming call on *model*.
+
+    The dict carries ``prompt_tokens``, ``completion_tokens``, ``total_tokens``
+    and ``cost_usd`` (``None`` when the model publishes no per-token price).
+    Returns ``None`` when the call reported no usage — local engines and
+    providers that omit usage from their stream.
+    """
+    state = _stream_state(model)
+    shared = getattr(model, "_last_stream_usage", None)
+    usage = state.usage if state is not None else shared
+    if state is not None and shared is not usage:
+        logger.debug(
+            "[stream] read this stream's own usage; another stream on the same "
+            "model recorded since"
+        )
+    return usage if isinstance(usage, dict) else None
+
+
+def record_stream_usage(
+    model: "BaseModel",
+    prompt_tokens: int | None,
+    completion_tokens: int | None,
+    cost_usd: float | None = None,
+    cached_input_tokens: int | None = None,
+    cache_write_tokens: int | None = None,
+) -> None:
+    """Record the token counts and cost of the streaming call that just ended.
+
+    ``generate()`` returns a ``GenerationResult`` whose metadata carries this
+    data; ``generate_stream()`` has no return value, so an adapter that learns
+    the real usage after the stream is exhausted records it here. The consumer
+    reads it back with :func:`get_stream_usage`, which is what lets a streamed
+    turn report its tokens and cost without a second billed call.
+
+    Args:
+        model: The adapter whose stream just ended.
+        prompt_tokens: Input tokens the provider reported, when it did.
+        completion_tokens: Output tokens the provider reported, when it did.
+        cost_usd: What the stream cost, when the provider prices it.
+        cached_input_tokens: Prompt tokens the provider served from its cache,
+            when it reported them. Stored under ``cached_input_tokens`` only
+            when given, so the run's ledger counts them for a streamed call as
+            it does for a blocking one.
+        cache_write_tokens: Prompt tokens the provider wrote to its cache, when
+            it reports them separately. A write is billed above the input rate,
+            so a run that only ever writes is spending more than one that never
+            cached at all — and no reader can see that unless it is recorded.
+    """
+    if prompt_tokens is None and completion_tokens is None and cost_usd is None:
+        return
+    total: int | None = None
+    if prompt_tokens is not None or completion_tokens is not None:
+        total = int(prompt_tokens or 0) + int(completion_tokens or 0)
+    usage: dict[str, Any] = {
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": total,
+        "cost_usd": cost_usd,
+    }
+    if cached_input_tokens is not None:
+        usage["cached_input_tokens"] = int(cached_input_tokens)
+    if cache_write_tokens is not None:
+        usage["cache_write_tokens"] = int(cache_write_tokens)
+    state = _stream_state(model, active_only=True)
+    if state is not None:
+        state.usage = usage
+    try:
+        model._last_stream_usage = usage  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001 - usage accounting must not break streaming
+        logger.debug("Could not record stream usage", exc_info=True)
+
+
+def clear_stream_tool_calls(model: "BaseModel") -> None:
+    """Drop any tool calls recorded by a previous streaming call on *model*.
+
+    Called immediately before a stream starts, so reading the buffer afterwards
+    returns this call's tool calls or an empty list — never the previous call's.
+    """
+    state = _stream_state(model, active_only=True)
+    if state is not None:
+        state.tool_calls = []
+    else:
+        _forget_last_stream(model)
+    try:
+        model._last_stream_tool_calls = []  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001 - a model that rejects attributes still streams
+        logger.debug("Could not clear stream tool calls", exc_info=True)
+
+
+def get_stream_tool_calls(model: "BaseModel") -> list[dict[str, Any]]:
+    """Return the tool calls the current or most recent stream declared.
+
+    Each entry is in the documented ``metadata["tool_calls"]`` shape (see
+    :func:`effgen.models._usage.tool_call_entry`). An adapter records a call as
+    soon as its first delta arrives, so a consumer reading this mid-stream can
+    tell that the turn is making a call before any text is committed as the
+    answer. Returns ``[]`` when the stream declared none, or when the adapter
+    does not record streamed calls (see :meth:`BaseModel.streams_tool_calls`).
+    """
+    state = _stream_state(model)
+    shared = getattr(model, "_last_stream_tool_calls", None)
+    calls = state.tool_calls if state is not None else shared
+    if state is not None and isinstance(shared, list) and shared != calls:
+        logger.debug(
+            "[stream] read this stream's own tool calls; another stream on the "
+            "same model recorded since"
+        )
+    return list(calls) if isinstance(calls, list) else []
+
+
+def record_stream_tool_calls(
+    model: "BaseModel", calls: list[dict[str, Any]]
+) -> None:
+    """Record the tool calls a streaming call has declared so far.
+
+    ``generate()`` returns them in ``GenerationResult.metadata["tool_calls"]``;
+    ``generate_stream()`` has no return value, so an adapter records them here
+    and the consumer reads them back with :func:`get_stream_tool_calls`. Called
+    repeatedly as the arguments accumulate — each call replaces the buffer with
+    the current state — and once more when the stream ends.
+
+    Args:
+        model: The adapter whose stream declared the calls.
+        calls: The calls so far, in the documented ``tool_calls`` shape.
+    """
+    state = _stream_state(model, active_only=True)
+    if state is not None:
+        state.tool_calls = list(calls)
+    try:
+        model._last_stream_tool_calls = list(calls)  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001 - tool-call accounting must not break streaming
+        logger.debug("Could not record stream tool calls", exc_info=True)
+
+
+#: Engine types whose ``count_tokens`` runs against a local tokenizer — no
+#: network call, so it is cheap enough to use for an after-the-fact estimate.
+_LOCAL_ENGINE_TYPES = frozenset(
+    {ModelType.TRANSFORMERS, ModelType.VLLM, ModelType.MLX, ModelType.MLX_VLM}
+)
+
+
+def _provider_of(model: "BaseModel") -> str | None:
+    """Resolve the pricing-catalog provider name for *model*, or ``None``.
+
+    Adapters name their provider in ``get_metadata()``, in a ``_provider``
+    class attribute, or through their ``model_type``, in that order; local
+    engines have no provider and return ``None``. The class attribute comes
+    before ``model_type`` because an adapter that reuses another's protocol —
+    a server the caller runs, spoken to as OpenAI — keeps that adapter's model
+    type while naming a provider of its own.
+    """
+    try:
+        provider = (model.get_metadata() or {}).get("provider")
+        if isinstance(provider, str) and provider:
+            return provider
+    except Exception:  # noqa: BLE001 - metadata is optional
+        pass
+    declared = getattr(type(model), "_provider", None)
+    if isinstance(declared, str) and declared:
+        return declared
+    model_type = getattr(model, "model_type", None)
+    value = getattr(model_type, "value", None)
+    if isinstance(value, str) and value not in {t.value for t in _LOCAL_ENGINE_TYPES}:
+        return value
+    return None
+
+
+def _price_estimate(
+    model: "BaseModel", prompt_tokens: int, completion_tokens: int
+) -> float | None:
+    """Price locally counted tokens, or return ``None`` for an unpriced model.
+
+    Uses the same rate table the adapters bill against, and only when the
+    catalog reports the model as priced — a free-tier or unpriced model returns
+    ``None`` rather than a fabricated ``$0``.
+    """
+    provider = _provider_of(model)
+    name = getattr(model, "model_name", None)
+    if not provider or not name:
+        return None
+    try:
+        from effgen.models._cost import _rate, pricing_status
+
+        if pricing_status(provider, name) != "priced":
+            return None
+        input_rate, output_rate = _rate(provider, name)
+    except Exception:  # noqa: BLE001 - pricing is optional; report unpriced
+        return None
+    return (prompt_tokens * input_rate + completion_tokens * output_rate) / 1_000_000
+
+
+def estimate_stream_usage(
+    model: "BaseModel", prompt_text: str, completion_text: str
+) -> dict[str, Any]:
+    """Estimate token counts for a stream whose backend reported no usage.
+
+    Local engines are counted with their own tokenizer (offline and exact);
+    anything else falls back to a four-characters-per-token approximation. The
+    counts are priced at the model's catalog rate when it has one, so a stream
+    the caller stopped reading early still reports a cost rather than nothing.
+    The returned dict is shaped like :func:`get_stream_usage`'s and carries
+    ``estimated: True`` so a caller can label the numbers as counted locally
+    rather than reported by the provider.
+
+    Args:
+        model: The adapter the stream came from.
+        prompt_text: The prompt that was sent.
+        completion_text: The text the stream produced.
+
+    Returns:
+        The usage block, marked ``estimated`` so a reader knows the counts were
+        derived locally.
+    """
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    if getattr(model, "model_type", None) in _LOCAL_ENGINE_TYPES:
+        try:
+            prompt_tokens = int(model.count_tokens(prompt_text).count)
+            completion_tokens = int(model.count_tokens(completion_text).count)
+        except Exception:  # noqa: BLE001 - fall through to the approximation
+            prompt_tokens = completion_tokens = None
+    if prompt_tokens is None or completion_tokens is None:
+        prompt_tokens = max(1, len(prompt_text) // 4) if prompt_text else 0
+        completion_tokens = max(1, len(completion_text) // 4) if completion_text else 0
+    return {
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": prompt_tokens + completion_tokens,
+        "cost_usd": _price_estimate(model, prompt_tokens, completion_tokens),
+        "estimated": True,
+    }
+
+
+def accumulate_stream_cost(
+    model: "BaseModel",
+    cost: float | None,
+    tokens: int | None = None,
+    prompt_tokens: int | None = None,
+    completion_tokens: int | None = None,
+    cached_input_tokens: int | None = None,
+    cache_write_tokens: int | None = None,
+) -> None:
+    """Fold a completed streaming call's cost and tokens onto the model's totals.
+
+    ``generate()``/``generate_batch()`` get their cumulative cost for free from
+    ``_stamp_cost`` because they return a ``GenerationResult`` the wrapper can
+    inspect. ``generate_stream()`` has no equivalent return value — it yields
+    text chunks and the final usage is only known once the stream is exhausted
+    — so every adapter that streams must call this once, after pricing the
+    completed call, instead of writing ``self.total_cost += cost`` by hand.
+    A ``None`` cost (no usage data — the caller never priced the call) leaves
+    ``total_cost`` untouched. A real ``0.0`` (a genuine free-tier call that was
+    priced and came back free) still folds in, matching what a non-streaming
+    ``generate()`` call on the same free-tier adapter already reports via
+    ``_stamp_cost``, so ``get_total_cost()`` reads ``0.0`` instead of leaving
+    the attribute unset after a real, tracked call. ``tokens`` (the call's
+    total prompt+completion tokens) folds onto ``total_tokens`` the same way a
+    non-streaming call updates it, so a streamed turn's token count reaches the
+    per-turn footer instead of reading zero. ``prompt_tokens``/
+    ``completion_tokens``, when supplied, are also recorded as this call's own
+    usage (see :func:`record_stream_usage`) so the caller can read the split and
+    the cost for the turn it just streamed, not only the running totals.
+    ``cached_input_tokens``/``cache_write_tokens`` travel with them, so a
+    streamed turn reports what the provider served from its cache exactly as a
+    blocking one does.
+    """
+    fold_call_totals(model, cost, tokens)
+    if prompt_tokens is not None or completion_tokens is not None:
+        record_stream_usage(
+            model,
+            prompt_tokens,
+            completion_tokens,
+            cost,
+            cached_input_tokens=cached_input_tokens,
+            cache_write_tokens=cache_write_tokens,
+        )
+
+
+def _warn_if_silently_empty(model: "BaseModel", result: Any) -> None:
+    """Log a warning when a reasoning model's raw ``generate()`` call returns
+    empty text because its output budget was spent on hidden reasoning before
+    any visible token (``finish_reason == "length"``).
+
+    :class:`~effgen.core.agent.Agent` already detects and escalates this case;
+    a caller using ``model.generate()`` directly has no such safety net, so an
+    empty ``GenerationResult`` would otherwise look like a working call that
+    produced nothing.
+
+    An adapter that saw the provider's reasoning chain reports the same turn in
+    more detail (``metadata["reasoning_only"]``, naming the cap and the reasoning
+    budget), so this stands down rather than saying it a second time.
+    """
+    if not isinstance(result, GenerationResult):
+        return
+    if result.text or result.finish_reason != "length":
+        return
+    if (result.metadata or {}).get("reasoning_only"):
+        return
+    from ._adapter_utils import needs_reasoning_headroom
+    if not needs_reasoning_headroom(model):
+        return
+    logger.warning(
+        "%s returned empty text after exhausting its token budget on internal "
+        "reasoning (finish_reason='length'). Increase max_tokens, or check "
+        "metadata['truncated'] before trusting an empty result.",
+        getattr(model, "model_name", model.__class__.__name__),
+    )
+
+
+def _preflight_budget_check(model: "BaseModel") -> None:
+    """Refuse to start a call when a configured budget is already at or over its cap.
+
+    Runs before the provider call is made, so a call refused here never reaches
+    the network and is never billed — unlike the check inside
+    ``CostTracker.record()``, which runs after a call's tokens are already known
+    and its cost already persisted. A tracker or budget-config read failure is
+    swallowed (best-effort; the post-spend check still applies as a backstop).
+    """
+    try:
+        from effgen.models._cost import CostTracker
+    except ImportError:
+        return
+    # The provider the call is recorded under, so the preflight asks about the
+    # same price the check after the call will charge. A local engine has none:
+    # the cap lets it run, since nothing it does is billed.
+    provider = _provider_of(model) or ""
+    model_name = getattr(model, "model_name", "") or ""
+    CostTracker.get().check_preflight(provider, model_name)
+
+
+def _redact_credentials(exc: BaseException) -> None:
+    """Strip secret material from *exc* and everything it chains to.
+
+    Applied at the boundary every engine call leaves through, so a provider
+    SDK's 401 body — which commonly quotes the key that was submitted — cannot
+    reach a traceback, a log record or a crash dump. The typed error the caller
+    reads is already redacted; this covers the ``__cause__`` under it.
+    """
+    try:
+        from effgen.models.errors import scrub_exception
+
+        scrub_exception(exc)
+    except Exception:  # noqa: BLE001 - redaction must not replace the error
+        pass
+
+
+def _redacted_call(func):
+    """Wrap a method so any error it raises leaves with its secrets stripped."""
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except BaseException as exc:
+            _redact_credentials(exc)
+            raise
+    wrapper.__effgen_timed__ = True
+    return wrapper
+
+
+def _timed_generate(func):
+    """Wrap a ``generate`` method with a pre-call budget check and call latency."""
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        _preflight_budget_check(self)
+        start = time.perf_counter()
+        try:
+            result = func(self, *args, **kwargs)
+        except BaseException as exc:
+            _redact_credentials(exc)
+            raise
+        result = _stamp_latency(result, time.perf_counter() - start)
+        _stamp_cost(self, result)
+        _warn_if_silently_empty(self, result)
+        return result
+    wrapper.__effgen_timed__ = True
+    return wrapper
+
+
+def _timed_generate_batch(func):
+    """Wrap a ``generate_batch`` method with a pre-call budget check so each
+    result carries call latency.
+
+    The whole batch shares one wall-clock measurement (the per-item split isn't
+    knowable here); each result gets it via ``setdefault`` so an engine that
+    records true per-item latency keeps its own value.
+    """
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        _preflight_budget_check(self)
+        start = time.perf_counter()
+        try:
+            results = func(self, *args, **kwargs)
+        except BaseException as exc:
+            _redact_credentials(exc)
+            raise
+        elapsed = time.perf_counter() - start
+        if isinstance(results, list):
+            for r in results:
+                _stamp_latency(r, elapsed)
+                _stamp_cost(self, r)
+                _warn_if_silently_empty(self, r)
+        return results
+    wrapper.__effgen_timed__ = True
+    return wrapper
+
+
+def _redacting_iter(iterator, model=None):
+    """Yield from *iterator*, redacting any error it raises mid-stream.
+
+    With *model* given, every piece is pulled with this stream's own state as
+    the model's current stream on the pulling thread, so what the adapter
+    records — tool calls, usage — belongs to this stream even while other
+    streams run on the same model object at the same time.
+    """
+    state = _StreamState()
+    while True:
+        try:
+            if model is None:
+                item = next(iterator)
+            else:
+                item = _pull_scoped(iterator, model, state)
+        except StopIteration:
+            return
+        except BaseException as exc:
+            _redact_credentials(exc)
+            raise
+        yield item
+
+
+def _budget_gated_stream(func):
+    """Wrap a ``generate_stream`` method with a pre-call budget check.
+
+    The check runs synchronously when the caller invokes ``generate_stream``
+    (not on first ``next()``), so a refusal happens before any token request
+    reaches the provider. A stream that fails part-way through — the provider
+    dropping the connection, a 401 arriving on the first frame — has its error
+    redacted the same way a non-streaming call's does.
+    """
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        _preflight_budget_check(self)
+        try:
+            iterator = iter(func(self, *args, **kwargs))
+        except BaseException as exc:
+            _redact_credentials(exc)
+            raise
+        return _redacting_iter(iterator, self)
+    wrapper.__effgen_timed__ = True
+    return wrapper
+
+
+class BaseModel(ABC):
+    """
+    Abstract base class for all model implementations.
+
+    This class defines the interface that all model engines must implement,
+    including vLLM, Transformers, OpenAI, Anthropic, and Gemini adapters.
+
+    Attributes:
+        model_name: The name or identifier of the model
+        model_type: The type of model engine
+        context_length: Maximum context length supported by the model
+    """
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Auto-instrument each engine's generation methods with a budget
+        pre-check and call timing.
+
+        Every concrete engine that defines ``generate``/``generate_batch``/
+        ``generate_stream`` gets a pre-call check against any configured
+        daily/monthly budget (refusing before the provider call is made once
+        the period is already at or over its cap) and, for ``generate``/
+        ``generate_batch``, its result(s) stamped with ``latency_ms``/
+        ``duration_s`` (see ``_stamp_latency``) — without each engine repeating
+        the bookkeeping. Abstract or already-wrapped methods are left alone, so
+        this is safe across the engine hierarchy.
+
+        ``load`` and ``generate_with_tools`` are wrapped too, with redaction
+        only: a credential rejected at load time reaches a traceback the same
+        way one rejected mid-call does.
+        """
+        super().__init_subclass__(**kwargs)
+        for name, wrapper in (("generate", _timed_generate),
+                              ("generate_batch", _timed_generate_batch),
+                              ("generate_stream", _budget_gated_stream),
+                              ("load", _redacted_call),
+                              ("generate_with_tools", _redacted_call)):
+            func = cls.__dict__.get(name)
+            if (
+                func is not None
+                and callable(func)
+                and not getattr(func, "__isabstractmethod__", False)
+                and not getattr(func, "__effgen_timed__", False)
+            ):
+                setattr(cls, name, wrapper(func))
+
+    def __init__(
+        self,
+        model_name: str,
+        model_type: ModelType,
+        context_length: int | None = None,
+        **kwargs: Any
+    ) -> None:
+        """
+        Initialize the base model.
+
+        Args:
+            model_name: Name or identifier of the model
+            model_type: Type of model engine
+            context_length: Maximum context length (auto-detected if None)
+            **kwargs: Additional model-specific parameters
+        """
+        self.model_name = model_name
+        self.model_type = model_type
+        self._context_length = context_length
+        self._is_loaded = False
+        self._metadata: dict[str, Any] = {}
+        # Session totals, folded by ``fold_call_totals``. Declared here so both
+        # exist from construction: an adapter whose folds all went through
+        # ``_stamp_cost`` never had ``total_tokens`` assigned at all, and
+        # reading it raised AttributeError rather than reporting zero.
+        self.total_cost: float = 0.0
+        self.total_tokens: int = 0
+
+    @abstractmethod
+    def load(self) -> None:
+        """
+        Load the model into memory.
+
+        This method should handle all initialization logic including:
+        - Model weight loading
+        - Device allocation
+        - Tokenizer initialization
+        - Configuration setup
+
+        Raises:
+            RuntimeError: If model loading fails
+            ValueError: If configuration is invalid
+        """
+        pass
+
+    @abstractmethod
+    def generate(
+        self,
+        prompt: str,
+        config: GenerationConfig | None = None,
+        **kwargs: Any
+    ) -> GenerationResult:
+        """
+        Generate text from a prompt synchronously.
+
+        Args:
+            prompt: Input text prompt
+            config: Generation configuration parameters
+            **kwargs: Additional generation parameters
+
+        Returns:
+            GenerationResult containing generated text and metadata
+
+        Raises:
+            RuntimeError: If generation fails
+            ValueError: If prompt is invalid or exceeds context length
+        """
+        pass
+
+    @abstractmethod
+    def generate_stream(
+        self,
+        prompt: str,
+        config: GenerationConfig | None = None,
+        **kwargs: Any
+    ) -> Iterator[str]:
+        """
+        Generate text from a prompt with token-by-token streaming.
+
+        Args:
+            prompt: Input text prompt
+            config: Generation configuration parameters
+            **kwargs: Additional generation parameters
+
+        Yields:
+            str: Individual tokens or chunks of generated text
+
+        Raises:
+            RuntimeError: If generation fails
+            ValueError: If prompt is invalid or exceeds context length
+        """
+        pass
+
+    @abstractmethod
+    def count_tokens(self, text: str) -> TokenCount:
+        """
+        Count the number of tokens in the given text.
+
+        Args:
+            text: Text to count tokens for
+
+        Returns:
+            TokenCount object with token count and model name
+
+        Raises:
+            RuntimeError: If tokenization fails
+        """
+        pass
+
+    @abstractmethod
+    def get_context_length(self) -> int:
+        """
+        Get the maximum context length supported by the model.
+
+        Returns:
+            int: Maximum number of tokens the model can handle
+        """
+        pass
+
+    @abstractmethod
+    def unload(self) -> None:
+        """
+        Unload the model from memory and free resources.
+
+        This method should:
+        - Free GPU/CPU memory
+        - Close any open connections
+        - Clean up temporary files
+        """
+        pass
+
+    def supports_tool_calling(self) -> bool:
+        """
+        Check if the model supports native tool/function calling.
+
+        Native tool calling uses the model's built-in tool call format
+        (e.g., chat template ``tools`` parameter, API tool_calls) instead
+        of parsing free-text ReAct output.
+
+        Returns:
+            bool: True if native tool calling is supported.
+        """
+        return False
+
+    def tool_call_support(self) -> str:
+        """Report *how* the model receives tool definitions.
+
+        Two mechanisms hide behind the single boolean of
+        :meth:`supports_tool_calling`, and they behave differently:
+
+        - ``"api"`` — the provider accepts tool definitions as a request
+          parameter and returns any tool call as structured data. Whether a
+          call is emitted is decided by the provider's tool-calling layer.
+        - ``"template"`` — the definitions are rendered into the prompt by a
+          local chat template. Nothing enforces the format; whether the model
+          emits a call is up to the model.
+        - ``"none"`` — no native tool calling. The ReAct text protocol is the
+          only way to reach a tool.
+
+        The default derives the value from :meth:`supports_tool_calling`, so a
+        subclass that only implements the boolean keeps working unchanged. The
+        local chat-template engines override it.
+
+        Returns:
+            str: One of ``"api"``, ``"template"`` or ``"none"``.
+        """
+        return "api" if self.supports_tool_calling() else "none"
+
+    def supports_conversation(self) -> bool:
+        """Whether this adapter turns a list of messages into a request.
+
+        An adapter says so by answering the ``_create_messages`` seam: the one
+        place a conversation becomes the provider's own message array. An
+        adapter that does not — a local engine that takes one string of text
+        and renders it through a chat template itself — is sent a string, and a
+        run's persona and earlier turns reach it as text instead of as roles.
+
+        This is a weaker question than :meth:`supports_message_protocol`, which
+        also asks whether a tool call and its result survive the conversion. A
+        conversation of plain user and assistant turns needs only this one.
+
+        Returns:
+            bool: True if a ``list[Message]`` prompt reaches the provider as a
+            conversation.
+        """
+        return hasattr(type(self), "_create_messages")
+
+    def supports_message_protocol(self) -> bool:
+        """Whether this adapter carries a tool call and a tool result through.
+
+        A conversation held as messages puts the model's own reasoning and the
+        call it made on one assistant turn, and answers that call with a tool
+        turn carrying the call id. An adapter that drops either part sends a
+        request the provider rejects, or — worse — one it accepts with the
+        tool exchange silently missing.
+
+        This is a separate question from :meth:`tool_call_support`. An adapter
+        can take tool *definitions* as a request parameter and still drop the
+        two parts when converting a conversation, so the declaration is about
+        the conversion, and the default is ``False``: an adapter carries the
+        shape only once it says it does.
+
+        Returns:
+            bool: True if a conversation's tool call and tool result reach the
+            provider intact.
+        """
+        return False
+
+    def prompt_cache_policy(self) -> "PromptCachePolicy | None":
+        """What this provider's prompt cache needs, or ``None`` for no cache.
+
+        A growing conversation repeats a long, unchanging head on every turn —
+        the instructions, the tool definitions, the task — and most providers
+        will serve that head from a cache and charge less for it. What they
+        need in order to do so differs: some match the rendered prefix
+        themselves, and some want ``cache_control``-style breakpoints saying
+        where the stable part ends.
+
+        The default is ``None``: an adapter caches only once it says it does,
+        so a provider with no cache (and any adapter written before this
+        existed) receives exactly the request it received before. An adapter
+        that declares the ``"explicit"`` style is also declaring that it knows
+        how to render the breakpoints a caller asks for — a run hands it the
+        ask, never a provider's marker shape.
+
+        Nothing reads a model id or a provider name to decide this; a per-model
+        minimum belongs in the adapter's own catalog, which is where the rest of
+        that provider's per-model facts already live.
+
+        Returns:
+            The policy, or ``None`` when this provider caches nothing.
+        """
+        return None
+
+    def prompt_detail(self) -> str | None:
+        """How much detail this model needs about a tool it is handed in prose.
+
+        A tool described in a prompt can be stated two ways: in full — every
+        parameter with its type, whether it is required, its default and its
+        options, plus a worked call — or compactly, as the name, the sentence
+        the tool describes itself with, and one example. The full form is what a
+        model that has never been trained to read a tool schema needs in order
+        to get the arguments right; on a model that reads a schema natively it
+        is tokens spent on every request of every run to say something the model
+        already knows.
+
+        Which of the two a model wants is a fact about the model, so the adapter
+        that serves it is what answers. The default is ``None`` — "this adapter
+        has not said" — and a run that is told nothing states the tools in full,
+        which is the safe direction: a prompt that over-explains costs tokens,
+        while one that under-explains costs a malformed call and the turn that
+        repairs it. ``AgentConfig.verbose_tools`` overrides both.
+
+        Nothing here matches a model id against a list of names. An adapter that
+        serves one vendor's own catalog can answer for that catalog; one that
+        serves whatever endpoint the caller configured answers ``None`` and lets
+        the caller say.
+
+        Returns:
+            ``"compact"``, ``"full"``, or ``None`` when the adapter has not said.
+        """
+        return None
+
+    def supports_suppressed_tool_call(self) -> bool:
+        """Whether a turn can offer tools and still forbid a call.
+
+        Offering tools and permitting one are separate: a run that has what it
+        needs and wants the answer stated has to stop the model calling again,
+        and the cheap way to do that is to send the same request with the call
+        forbidden. The alternative — dropping the definitions and rewriting the
+        turn — throws away the prefix every provider's cache was matching.
+
+        The default is ``False``: an adapter advertises this only once
+        ``tool_choice="none"`` is known to reach the provider in a form it
+        honours, so an adapter that has not considered it keeps today's
+        behaviour and asks in words instead.
+
+        Returns:
+            bool: True if a request offering tools can forbid a call.
+        """
+        return False
+
+    def supports_stop_with_tools(self) -> bool:
+        """Whether a request that carries tool definitions may also carry stop sequences.
+
+        The agent sends a stop sequence beside its tools so that a model which
+        writes a tool call as text stops where the tool's result would begin,
+        instead of writing that result itself. An adapter whose provider rejects
+        ``stop`` alongside ``tools`` answers ``False``; the agent then leaves the
+        stop sequences off such a request and cuts the returned text at them
+        itself, so the reading is the same and the request is accepted.
+
+        The default is ``True``: it is what every request carried before this
+        question existed, and it is what the providers the shipped adapters
+        talk to accept.
+
+        Returns:
+            bool: True if ``stop`` may travel beside ``tools``.
+        """
+        return True
+
+    def supports_forced_tool_call(self) -> bool:
+        """Whether a turn can be sent that *requires* the model to call a tool.
+
+        Offering tools and requiring one are different capabilities. Every
+        adapter that takes tool definitions can offer them; only a request layer
+        that enforces the choice can require one, and a model asked to do
+        something its provider does not implement fails the whole turn rather
+        than answering it. So a caller with a reason to force a call — the agent
+        loop after a model said it would use a tool and then did not — has to be
+        able to ask first.
+
+        The default is ``False``: an adapter advertises this only once its
+        request shaping is known to carry the constraint through, so an adapter
+        that has not considered it degrades to asking in words rather than
+        sending a request the provider will reject.
+
+        Returns:
+            bool: True if ``tool_choice="required"`` reaches the provider in a
+            form it honours.
+        """
+        return False
+
+    def capability_key(self) -> str | None:
+        """A key for what this model does with a tool, or ``None`` if it is known.
+
+        An adapter whose behaviour is fixed by its provider answers ``None`` and
+        is never probed — no request is ever made to find out. An adapter in
+        front of weights the caller chose (a model served behind a URL, a local
+        engine) answers a key that changes whenever the weights, the chat
+        template or the endpoint change, and
+        :func:`~effgen.models.capability_probe.probe_tool_calling` measures the
+        model once per key and keeps the result. Nothing branches on the key's
+        content; it only names a cache entry.
+
+        Returns:
+            str | None: The key, or ``None`` for an adapter that is not probed.
+        """
+        return None
+
+    def forwards_reasoning_effort(self) -> bool:
+        """Whether a ``reasoning_effort`` set on a request reaches the provider.
+
+        The default is ``False``: an adapter that does not send the field says
+        so, and the agent reports a pinned value it cannot deliver once per
+        model instead of dropping it without a word.
+
+        Returns:
+            bool: True if ``GenerationConfig.reasoning_effort`` is sent.
+        """
+        return False
+
+    # ------------------------------------------------------------------
+    # Multi-turn tool loop
+    # ------------------------------------------------------------------
+    #
+    # ``metadata["tool_calls"]`` has one shape on every adapter, so *reading* a
+    # call is portable. Re-submitting the turn was not: the loop in the examples
+    # appended ``metadata["message"]`` — written by the OpenAI adapter and by no
+    # other — and a ``{"role": "tool", ...}`` message, which is the OpenAI wire
+    # format and not Gemini's or Anthropic's. The two methods below make the
+    # loop portable by giving each adapter a way to build its *own* provider's
+    # shape, so a caller driving ``chat()``/``generate_with_tools()`` by hand
+    # across providers writes one loop.
+    #
+    # ``Agent`` already does this internally and remains the easier route; these
+    # are for a caller who wants the raw loop.
+
+    def build_assistant_message(self, result: "GenerationResult") -> dict[str, Any]:
+        """Return the assistant turn of *result*, in this provider's wire shape.
+
+        Append it to the conversation before the tool results, so the model sees
+        the call it made.
+
+        The default is the OpenAI-compatible shape, which groq, together,
+        fireworks, cerebras, hf and any OpenAI-protocol endpoint also speak. A
+        provider-native message the adapter kept (``metadata["message"]``) is
+        preferred when present, because it round-trips fields the uniform shape
+        does not carry.
+
+        Args:
+            result: The turn to re-submit.
+
+        Returns:
+            One message dict for this provider's conversation format.
+        """
+        metadata = result.metadata or {}
+        native = metadata.get("message")
+        if isinstance(native, dict):
+            return native
+        message: dict[str, Any] = {"role": "assistant", "content": result.text or None}
+        calls = metadata.get("tool_calls")
+        if calls:
+            message["tool_calls"] = calls
+        return message
+
+    def build_tool_result_message(
+        self, call_id: str, name: str, content: str
+    ) -> dict[str, Any]:
+        """Return one tool's result, in this provider's wire shape.
+
+        Append it after the assistant message, once per call the turn made.
+
+        Args:
+            call_id: The ``id`` of the call being answered, from
+                ``metadata["tool_calls"][i]["id"]``.
+            name: The tool's name — unused in the OpenAI shape, required by
+                Gemini's and carried here so one call site serves every
+                provider.
+            content: What the tool returned, as text.
+
+        Returns:
+            One message dict for this provider's conversation format.
+        """
+        _ = name
+        return {"role": "tool", "tool_call_id": call_id, "content": content}
+
+    def streams_tool_calls(self) -> bool:
+        """Report whether ``generate_stream`` records the turn's tool calls.
+
+        An adapter that returns ``True`` writes every call the stream declares
+        into the buffer :func:`get_stream_tool_calls` reads, as soon as the
+        call's first delta arrives. That is what lets a caller stream a turn's
+        assistant text while still dispatching the calls the same turn makes;
+        an adapter that returns ``False`` drops them, so a tool loop has to run
+        the turn without streaming.
+
+        Returns:
+            bool: True when streamed tool calls are recorded.
+        """
+        return False
+
+    def is_loaded(self) -> bool:
+        """
+        Check if the model is currently loaded.
+
+        Returns:
+            bool: True if model is loaded and ready for inference
+        """
+        return self._is_loaded
+
+    def get_total_cost(self) -> float:
+        """Cumulative cost (USD) charged to this model instance.
+
+        Accumulates each call's ``cost_usd`` since creation or the last
+        :meth:`reset_cost`; local/unpriced engines stay at ``0.0``.
+        """
+        return getattr(self, "total_cost", 0.0)
+
+    def reset_cost(self) -> None:
+        """Reset the cumulative cost counter (see :meth:`get_total_cost`) to zero."""
+        self.total_cost = 0.0
+
+    def get_metadata(self) -> dict[str, Any]:
+        """
+        Get model metadata and information.
+
+        Returns:
+            Dict containing model information such as:
+            - Model architecture
+            - Parameter count
+            - Quantization details
+            - Device allocation
+            - Memory usage
+        """
+        return self._metadata
+
+    def validate_prompt(self, prompt: str) -> bool:
+        """
+        Validate that a prompt is within context length limits.
+
+        Some providers publish no context window for a model (Fireworks reports
+        ``contextLength: 0`` for a custom deployment, for instance). An unknown
+        window is not a zero-token window, so the length check is skipped rather
+        than rejecting every prompt; the provider still enforces its own limit
+        and reports a truncated result.
+
+        Args:
+            prompt: Prompt to validate
+
+        Returns:
+            bool: True if prompt is valid
+
+        Raises:
+            ValueError: If prompt exceeds a known context length
+        """
+        token_count = self.count_tokens(prompt)
+        max_length = self.get_context_length()
+
+        if not max_length or max_length <= 0:
+            return True
+
+        if token_count.count > max_length:
+            raise ValueError(
+                f"Prompt length ({token_count.count} tokens) exceeds "
+                f"model context length ({max_length} tokens)"
+            )
+
+        return True
+
+    def __enter__(self) -> BaseModel:
+        """Context manager entry."""
+        if not self._is_loaded:
+            self.load()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        """Context manager exit."""
+        self.unload()
+
+    def __repr__(self) -> str:
+        """String representation of the model."""
+        return (
+            f"{self.__class__.__name__}("
+            f"model_name='{self.model_name}', "
+            f"type={self.model_type.value}, "
+            f"loaded={self._is_loaded})"
+        )
+
+
+class BatchModel(BaseModel):
+    """
+    Extended base class for models that support batch processing.
+
+    This class extends BaseModel with batch generation capabilities,
+    useful for high-throughput scenarios.
+    """
+
+    @abstractmethod
+    def generate_batch(
+        self,
+        prompts: list[str],
+        config: GenerationConfig | None = None,
+        **kwargs: Any
+    ) -> list[GenerationResult]:
+        """
+        Generate text for multiple prompts in a batch.
+
+        Args:
+            prompts: List of input prompts
+            config: Generation configuration parameters
+            **kwargs: Additional generation parameters
+
+        Returns:
+            List of GenerationResult objects, one per prompt
+
+        Raises:
+            RuntimeError: If batch generation fails
+            ValueError: If any prompt is invalid
+        """
+        pass
+
+    def get_max_batch_size(self) -> int:
+        """
+        Get the maximum batch size supported.
+
+        Returns:
+            int: Maximum number of prompts that can be processed in one batch
+        """
+        return 1  # Default to no batching
+
+
+class FunctionCallingModel(BaseModel):
+    """
+    Extended base class for models that support function/tool calling.
+
+    This class extends BaseModel with function calling capabilities,
+    primarily used by API adapters (OpenAI, Anthropic, Gemini).
+    """
+
+    @abstractmethod
+    def generate_with_tools(
+        self,
+        prompt: str,
+        tools: list[dict[str, Any]],
+        config: GenerationConfig | None = None,
+        **kwargs: Any
+    ) -> GenerationResult:
+        """
+        Generate text with tool/function calling support.
+
+        Args:
+            prompt: Input text prompt
+            tools: List of tool definitions in OpenAI function format
+            config: Generation configuration parameters
+            **kwargs: Additional generation parameters
+
+        Returns:
+            GenerationResult with potential tool calls in metadata
+
+        Raises:
+            RuntimeError: If generation fails
+            ValueError: If tools are malformed
+        """
+        pass
+
+    @abstractmethod
+    def supports_function_calling(self) -> bool:
+        """
+        Check if the model supports function calling.
+
+        Returns:
+            bool: True if function calling is supported
+        """
+        pass

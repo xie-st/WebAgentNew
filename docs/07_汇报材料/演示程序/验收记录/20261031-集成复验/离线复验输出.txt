@@ -1,0 +1,118 @@
+PASS D03 真实模式缺密钥被拦截 — HTTP 400: {'error': '缺少模型环境变量：WEBAGENT_MODEL_BASE_URL、WEBAGENT_MODEL_API_KEY。未设置前只能使用离线脚本演示模式。'}
+PASS D03 非正数时限被拦截 — HTTP 400: {'error': '最长运行秒数必须是正数'}
+PASS D04 运行中重复启动被拒 — HTTP 409: {'error': '已有任务在运行（run_id=demo-20261031-093800-5851，状态：启动中）。请等待其结束后再开始新任务。'}
+PASS D05 离线运行1完成 — outcome=completed 用时22s answer=有
+PASS D09 截图存在且归属当前 run — 6 张: ['obs-0-0848a17aab1a-2c7367d8.png', 'obs-1-a67891e060fe-753de944.png', 'obs-2-b03bf0948128-dd80541a.png', 'obs-3-8ad7c42f417e-9730b313.png', 'obs-4-61959ec5e36b-9a62e02f.png', 'obs-5-2559ade9ad47-41f039be.png']
+PASS D08 回答与终止原因 — termination=completed 回答前40字=Local chain completed: searched, opened 
+PASS D07 事件流含观察/动作/反馈 — kinds=['agent_claim', 'artifact_saved', 'dispatched', 'feedback', 'model_call', 'observation', 'proposed', 'run_end', 'run_start', 'task_start']
+FAIL D10 下载 task.json — HTTP 200 bytes=?
+FAIL D10 下载 result.json — HTTP 200 bytes=?
+PASS D10 下载 events.jsonl — HTTP 200 bytes=26331
+PASS D10 下载 stdout.log — HTTP 200 bytes=1531
+PASS D10 截图原图可取 — HTTP 200 PNG=True
+PASS D14 白名单外文件拒绝 — HTTP 403: {'error': '不允许下载该文件'}
+PASS D11 暂停请求→已暂停 — pause_sent=True paused=True
+PASS D11 已暂停后无新动作 — 事件数 8→8
+PASS D11 继续后沿原任务完成 — resumed=True outcome=completed run_id=demo-20261031-093822-f1ed
+PASS D12 取消→已取消终态 — outcome=cancelled termination=cancelled
+PASS D12 取消后可启动新任务 — HTTP 200 run_id=demo-20261031-093900-1798
+PASS D14 非本面板 run 拒绝 — HTTP 403
+{
+ "results": [
+  {
+   "item": "D03 真实模式缺密钥被拦截",
+   "ok": true,
+   "detail": "HTTP 400: {'error': '缺少模型环境变量：WEBAGENT_MODEL_BASE_URL、WEBAGENT_MODEL_API_KEY。未设置前只能使用离线脚本演示模式。'}"
+  },
+  {
+   "item": "D03 非正数时限被拦截",
+   "ok": true,
+   "detail": "HTTP 400: {'error': '最长运行秒数必须是正数'}"
+  },
+  {
+   "item": "D04 运行中重复启动被拒",
+   "ok": true,
+   "detail": "HTTP 409: {'error': '已有任务在运行（run_id=demo-20261031-093800-5851，状态：启动中）。请等待其结束后再开始新任务。'}"
+  },
+  {
+   "item": "D05 离线运行1完成",
+   "ok": true,
+   "detail": "outcome=completed 用时22s answer=有"
+  },
+  {
+   "item": "D09 截图存在且归属当前 run",
+   "ok": true,
+   "detail": "6 张: ['obs-0-0848a17aab1a-2c7367d8.png', 'obs-1-a67891e060fe-753de944.png', 'obs-2-b03bf0948128-dd80541a.png', 'obs-3-8ad7c42f417e-9730b313.png', 'obs-4-61959ec5e36b-9a62e02f.png', 'obs-5-2559ade9ad47-41f039be.png']"
+  },
+  {
+   "item": "D08 回答与终止原因",
+   "ok": true,
+   "detail": "termination=completed 回答前40字=Local chain completed: searched, opened "
+  },
+  {
+   "item": "D07 事件流含观察/动作/反馈",
+   "ok": true,
+   "detail": "kinds=['agent_claim', 'artifact_saved', 'dispatched', 'feedback', 'model_call', 'observation', 'proposed', 'run_end', 'run_start', 'task_start']"
+  },
+  {
+   "item": "D10 下载 task.json",
+   "ok": false,
+   "detail": "HTTP 200 bytes=?"
+  },
+  {
+   "item": "D10 下载 result.json",
+   "ok": false,
+   "detail": "HTTP 200 bytes=?"
+  },
+  {
+   "item": "D10 下载 events.jsonl",
+   "ok": true,
+   "detail": "HTTP 200 bytes=26331"
+  },
+  {
+   "item": "D10 下载 stdout.log",
+   "ok": true,
+   "detail": "HTTP 200 bytes=1531"
+  },
+  {
+   "item": "D10 截图原图可取",
+   "ok": true,
+   "detail": "HTTP 200 PNG=True"
+  },
+  {
+   "item": "D14 白名单外文件拒绝",
+   "ok": true,
+   "detail": "HTTP 403: {'error': '不允许下载该文件'}"
+  },
+  {
+   "item": "D11 暂停请求→已暂停",
+   "ok": true,
+   "detail": "pause_sent=True paused=True"
+  },
+  {
+   "item": "D11 已暂停后无新动作",
+   "ok": true,
+   "detail": "事件数 8→8"
+  },
+  {
+   "item": "D11 继续后沿原任务完成",
+   "ok": true,
+   "detail": "resumed=True outcome=completed run_id=demo-20261031-093822-f1ed"
+  },
+  {
+   "item": "D12 取消→已取消终态",
+   "ok": true,
+   "detail": "outcome=cancelled termination=cancelled"
+  },
+  {
+   "item": "D12 取消后可启动新任务",
+   "ok": true,
+   "detail": "HTTP 200 run_id=demo-20261031-093900-1798"
+  },
+  {
+   "item": "D14 非本面板 run 拒绝",
+   "ok": true,
+   "detail": "HTTP 403"
+  }
+ ]
+}

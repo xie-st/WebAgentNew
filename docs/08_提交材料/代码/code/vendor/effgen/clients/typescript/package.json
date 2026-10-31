@@ -1,0 +1,40 @@
+{
+  "name": "effgen-client",
+  "version": "0.1.0",
+  "description": "Official TypeScript / JavaScript client for the effGen API",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "echo 'no tests yet'"
+  },
+  "keywords": [
+    "effgen",
+    "llm",
+    "agent",
+    "ai",
+    "slm",
+    "openai"
+  ],
+  "author": "Gaurav Srivastava",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ctrl-gaurav/effGen.git",
+    "directory": "clients/typescript"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.39",
+    "typescript": "^5.4.5"
+  }
+}

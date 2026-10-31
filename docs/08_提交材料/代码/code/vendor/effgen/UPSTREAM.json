@@ -1,0 +1,20 @@
+{
+  "source": "https://github.com/ctrl-gaurav/effGen.git",
+  "commit": "37de05a6b4ed01c90ee38b9c254a162927ca2ac2",
+  "version": "1.3.0",
+  "scope": "all tracked files via git archive; no .git, cache or local configuration",
+  "local_patches": [
+    {
+      "batch": "A2",
+      "date": "2026-10-30",
+      "files": [
+        "effgen/core/agent.py",
+        "effgen/core/agent_loop.py",
+        "effgen/core/agent_tool_loop.py",
+        "effgen/core/agent_interactive.py",
+        "tests/unit/test_interactive_loop.py"
+      ],
+      "summary": "Adds Agent.run_interactive(): the existing drive/step loop as a generator that yields InteractiveToolRequest for externally executed tools and resumes on send(); the single-call dispatch site yields instead of executing, and a native batch containing a page action is refused as a batch. External tools are excluded from record replay, the drift threshold, repeated-result stop, input-error withdrawal and post-tool nudges. Per-advance run scope install/remove; no new thread, worker or event loop. Ordinary Agent.run and in-process tools are unchanged."
+    }
+  ]
+}

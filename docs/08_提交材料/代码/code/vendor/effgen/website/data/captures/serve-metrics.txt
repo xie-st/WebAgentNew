@@ -1,0 +1,152 @@
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 48690.0
+python_gc_objects_collected_total{generation="1"} 5868.0
+python_gc_objects_collected_total{generation="2"} 1984.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+python_gc_objects_uncollectable_total{generation="1"} 0.0
+python_gc_objects_uncollectable_total{generation="2"} 0.0
+# HELP python_gc_collections_total Number of times this generation was collected
+# TYPE python_gc_collections_total counter
+python_gc_collections_total{generation="0"} 1201.0
+python_gc_collections_total{generation="1"} 109.0
+python_gc_collections_total{generation="2"} 8.0
+# HELP python_info Python platform information
+# TYPE python_info gauge
+python_info{implementation="CPython",major="3",minor="11",patchlevel="15",version="3.11.15"} 1.0
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 2.071785472e+010
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 4.210688e+08
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.78739272692e+09
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 10.950000000000001
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 25.0
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.048576e+06
+
+# HELP effgen_model_call_latency_seconds Latency of model (LLM) calls in seconds
+# TYPE effgen_model_call_latency_seconds histogram
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="0.05"} 0
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="0.1"} 0
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="0.25"} 0
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="0.5"} 0
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="1.0"} 0
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="2.5"} 3
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="5.0"} 3
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="10.0"} 3
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="20.0"} 3
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="30.0"} 3
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="60.0"} 3
+effgen_model_call_latency_seconds_bucket{model="gpt-5-nano",outcome="ok",provider="openai",le="+Inf"} 3
+effgen_model_call_latency_seconds_sum{model="gpt-5-nano",outcome="ok",provider="openai"} 5.076216697692871
+effgen_model_call_latency_seconds_count{model="gpt-5-nano",outcome="ok",provider="openai"} 3
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="0.05"} 0
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="0.1"} 0
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="0.25"} 0
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="0.5"} 0
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="1.0"} 1
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="2.5"} 1
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="5.0"} 1
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="10.0"} 1
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="20.0"} 1
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="30.0"} 1
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="60.0"} 1
+effgen_model_call_latency_seconds_bucket{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini",le="+Inf"} 1
+effgen_model_call_latency_seconds_sum{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini"} 0.6873214244842529
+effgen_model_call_latency_seconds_count{model="gemini-3.1-flash-lite",outcome="ok",provider="gemini"} 1
+
+# HELP effgen_tool_call_latency_seconds Latency of tool calls in seconds
+# TYPE effgen_tool_call_latency_seconds histogram
+
+# HELP effgen_agent_iteration_latency_seconds Latency of a single agent iteration in seconds
+# TYPE effgen_agent_iteration_latency_seconds histogram
+
+# HELP effgen_tokens_total Total tokens consumed, by provider/model/kind
+# TYPE effgen_tokens_total counter
+effgen_tokens_total{kind="input",model="gpt-5-nano",provider="openai"} 72.0
+effgen_tokens_total{kind="output",model="gpt-5-nano",provider="openai"} 798.0
+effgen_tokens_total{kind="input",model="gemini-3.1-flash-lite",provider="gemini"} 18.0
+effgen_tokens_total{kind="output",model="gemini-3.1-flash-lite",provider="gemini"} 2.0
+
+# HELP effgen_http_requests_total Total HTTP requests to the server, by route/method/status
+# TYPE effgen_http_requests_total counter
+effgen_http_requests_total{method="GET",route="/health",status="200"} 1.0
+effgen_http_requests_total{method="GET",route="/v1/models",status="401"} 2.0
+effgen_http_requests_total{method="POST",route="/v1/chat/completions",status="200"} 4.0
+effgen_http_requests_total{method="POST",route="/v1/chat/completions",status="404"} 1.0
+effgen_http_requests_total{method="GET",route="/v1/models",status="200"} 3.0
+effgen_http_requests_total{method="GET",route="/v1/models",status="429"} 18.0
+
+# HELP effgen_circuit_breaker_state Circuit breaker state per provider (0=closed, 1=half_open, 2=open)
+# TYPE effgen_circuit_breaker_state gauge
+
+# HELP effgen_bulkhead_active Active in-flight calls held by the bulkhead, per provider
+# TYPE effgen_bulkhead_active gauge
+
+# HELP effgen_bulkhead_queued Calls waiting for a bulkhead permit, per provider
+# TYPE effgen_bulkhead_queued gauge
+
+# HELP effgen_bulkhead_utilization_pct Bulkhead active/max_concurrency utilization percentage, per provider
+# TYPE effgen_bulkhead_utilization_pct gauge
+
+# HELP effgen_requests_total Total number of agent run requests
+# TYPE effgen_requests_total counter
+effgen_requests_total{agent_name="api:openai:gpt-5-nano"} 3.0
+effgen_requests_total{agent_name="api:gemini:gemini-3.1-flash-lite"} 1.0
+
+# HELP effgen_tool_calls_total Total number of tool calls
+# TYPE effgen_tool_calls_total counter
+
+# HELP effgen_tool_failures_total Total number of failed tool calls
+# TYPE effgen_tool_failures_total counter
+
+# HELP effgen_errors_total Total number of errors
+# TYPE effgen_errors_total counter
+
+# HELP effgen_fallbacks_total Total number of fallback invocations
+# TYPE effgen_fallbacks_total counter
+
+# HELP effgen_circuit_breaker_trips_total Total number of circuit breaker trips
+# TYPE effgen_circuit_breaker_trips_total counter
+
+# HELP effgen_tokens_used_total Total tokens consumed
+# TYPE effgen_tokens_used_total counter
+effgen_tokens_used_total{agent_name="api:openai:gpt-5-nano"} 870.0
+effgen_tokens_used_total{agent_name="api:gemini:gemini-3.1-flash-lite"} 20.0
+
+# HELP effgen_response_latency_seconds Agent response latency in seconds
+# TYPE effgen_response_latency_seconds histogram
+effgen_response_latency_seconds_sum{agent_name="api:openai:gpt-5-nano"} 5.076216697692871
+effgen_response_latency_seconds_count{agent_name="api:openai:gpt-5-nano"} 3
+effgen_response_latency_seconds_sum{agent_name="api:gemini:gemini-3.1-flash-lite"} 0.6873214244842529
+effgen_response_latency_seconds_count{agent_name="api:gemini:gemini-3.1-flash-lite"} 1
+
+# HELP effgen_token_usage Token usage per request
+# TYPE effgen_token_usage histogram
+effgen_token_usage_sum{agent_name="api:openai:gpt-5-nano"} 870.0
+effgen_token_usage_count{agent_name="api:openai:gpt-5-nano"} 3
+effgen_token_usage_sum{agent_name="api:gemini:gemini-3.1-flash-lite"} 20.0
+effgen_token_usage_count{agent_name="api:gemini:gemini-3.1-flash-lite"} 1
+
+# HELP effgen_tool_execution_seconds Tool execution duration in seconds
+# TYPE effgen_tool_execution_seconds histogram
+
+# HELP effgen_active_agents Number of currently active agents
+# TYPE effgen_active_agents gauge
+effgen_active_agents{agent_name="api:openai:gpt-5-nano"} 0.0
+effgen_active_agents{agent_name="api:gemini:gemini-3.1-flash-lite"} 0.0
+
+# HELP effgen_gpu_memory_used_bytes GPU memory used in bytes
+# TYPE effgen_gpu_memory_used_bytes gauge
+

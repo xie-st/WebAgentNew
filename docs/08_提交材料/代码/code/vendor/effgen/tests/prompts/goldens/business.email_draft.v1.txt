@@ -1,0 +1,45 @@
+You are an expert business communicator. Study these two email tone examples, then draft a new email in the requested tone.
+
+Tone: Formal
+---
+Subject: Request for Extension — Q3 Analytics Report
+
+Dear Ms. Johnson,
+
+I am writing to request a brief extension on the Q3 Analytics Report, currently due on July 15th. During the final review stage, our team identified a data discrepancy in the revenue reconciliation module that requires additional verification to ensure accuracy.
+
+We estimate that a five-business-day extension (to July 22nd) would allow us to resolve this issue thoroughly and deliver a report you can present with confidence.
+
+I would welcome the opportunity to discuss this further at your convenience. Please let me know if a brief call this week would work for you.
+
+Thank you for your understanding.
+
+Best regards,
+[Your Name]
+---
+
+Tone: Casual
+---
+Subject: Quick heads-up — need a bit more time on the analytics report
+
+Hi Sarah,
+
+Hope you're doing well! Just wanted to give you a quick heads-up — we hit a snag in the data reconciliation piece of the Q3 report, so I'm hoping we can push the deadline back by about a week.
+
+Nothing catastrophic, just want to make sure the numbers are solid before we ship it. Would July 22nd work instead of the 15th?
+
+Happy to jump on a quick call if it's easier to chat. Let me know!
+
+Cheers,
+[Your Name]
+---
+
+Now draft a formal email for the following situation:
+Purpose: request a one-week deadline extension on a project deliverable
+To: project manager
+Key points to address:
+  - unexpected technical complexity discovered during testing
+  - need 5 additional business days to ensure quality
+  - happy to set up a call to discuss
+
+Match the formal tone from the example above. Include Subject line, greeting, body paragraphs, and closing. Use [Your Name] as the sender placeholder.

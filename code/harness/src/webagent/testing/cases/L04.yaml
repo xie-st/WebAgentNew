@@ -1,0 +1,72 @@
+# L04: one save whose feedback is lost. The local site's editable "Review draft"
+# field is used as the object's short profile note because D1's site exposes that
+# persistent editable field; the E1 report records this scope boundary.
+case_id: L04
+case_version: "1"
+title: Profile note saved once despite lost feedback
+task_template: |
+  On the local Harbor Market site, find the single product in {l04_category}
+  priced at most ${l04_max_price} with a rating of at least {l04_min_rating} and
+  in stock. Treat its "Review draft" field as the short product profile note.
+  Type exactly "{l04_draft_text}" into that field and click Save draft once.
+  If the save confirmation is delayed or missing, do not click Save draft again
+  before re-reading the visible page. The final page must show the saved note.
+  Report the product ID and whether the note is visible.
+
+data_generator:
+  name: catalog
+  params:
+    products: 32
+    posts: 20
+    page_size: 8
+    l01_decoys: 2
+    l01_conditions:
+      category: Garden
+      max_price_cents: 8200
+      min_rating: 4.6
+
+public:
+  start_path: /products
+  task_params:
+    l04_category: Garden
+    l04_max_price: 82
+    l04_min_rating: 4.6
+    l04_draft_text: "Harbor Garden profile: compact, repairable, ready for spring."
+
+setup:
+  page_size: 8
+  login_overlay: false
+  verification_prompt: false
+  draft_autosave: false
+  locale: en
+
+completion:
+  method: local_judge
+  criteria:
+    - the target product is the unique item matching all public conditions
+    - the saved draft equals the requested profile note
+    - exactly one save was recorded for the target
+    - the final visible page shows the saved note
+
+fault_plan: []
+
+reset:
+  method: rebuild_database
+  scope: run
+  clears: [activity, drafts, faults, auth]
+  preserves: [case_id, case_version, seed]
+
+support:
+  modes: [fake, local]
+  seeds: [101, 202, 303]
+  reserved_seeds: [404, 505]
+  budget_seconds: 600
+
+hidden:
+  judge:
+    object_type: product
+    role: l01_target
+    expected_count: 1
+    expected_draft_text: "Harbor Garden profile: compact, repairable, ready for spring."
+    max_saves: 1
+    require_screenshot: false

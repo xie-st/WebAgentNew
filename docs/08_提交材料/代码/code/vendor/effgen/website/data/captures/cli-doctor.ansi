@@ -1,0 +1,54 @@
+[3m              effgen doctor — Provider Status              [0m
+┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃[1;36m [0m[1;36mProvider         [0m[1;36m [0m┃[1;36m [0m[1;36mKey    [0m[1;36m [0m┃[1;36m [0m[1;36mEnv Var         [0m[1;36m [0m┃[1;36m [0m[1;36mModels[0m[1;36m [0m┃
+┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│[36m [0m[36manthropic        [0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m    17[0m[2m [0m│
+│[36m [0m[36mcerebras         [0m[36m [0m│[37m [0m[32mpresent[0m[37m [0m│[2m [0m[2mCEREBRAS_API_KEY[0m[2m [0m│[2m [0m[2m     2[0m[2m [0m│
+│[36m [0m[36mfireworks        [0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m    16[0m[2m [0m│
+│[36m [0m[36mgemini           [0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m     8[0m[2m [0m│
+│[36m [0m[36mgroq             [0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m    15[0m[2m [0m│
+│[36m [0m[36mhf               [0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m   124[0m[2m [0m│
+│[36m [0m[36mopenai           [0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m    30[0m[2m [0m│
+│[36m [0m[36mopenai_compatible[0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m     0[0m[2m [0m│
+│[36m [0m[36mreplicate        [0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m    37[0m[2m [0m│
+│[36m [0m[36mtogether         [0m[36m [0m│[37m [0m[31mmissing[0m[37m [0m│[2m [0m[2m—               [0m[2m [0m│[2m [0m[2m   168[0m[2m [0m│
+└───────────────────┴─────────┴──────────────────┴────────┘
+
+[1;36mSystem[0m
+┌───────────────────────────┬─────────────────────┐
+│[36m [0m[36mPhysical GPUs (NVML)     [0m[36m [0m│[37m [0m[37m8                  [0m[37m [0m│
+│[36m [0m[36mDriver CUDA              [0m[36m [0m│[37m [0m[37m13.3               [0m[37m [0m│
+│[36m [0m[36mtorch CUDA build         [0m[36m [0m│[37m [0m[37m13.0               [0m[37m [0m│
+│[36m [0m[36mtorch.cuda.is_available()[0m[36m [0m│[37m [0m[37mTrue               [0m[37m [0m│
+│[36m [0m[36mtorch                    [0m[36m [0m│[37m [0m[37m2.11.0+cu130       [0m[37m [0m│
+│[36m [0m[36mvLLM                     [0m[36m [0m│[37m [0m[37mimportable (0.26.0)[0m[37m [0m│
+└───────────────────────────┴─────────────────────┘
+
+[1;36mCoding (effgen code)[0m
+┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃[1;36m [0m[1;36mCheck    [0m[1;36m [0m┃[1;36m [0m[1;36mStatus       [0m[1;36m [0m┃[1;36m [0m[1;36mDetail                                                  [0m[1;36m [0m┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│[36m [0m[36mworkspace[0m[36m [0m│[37m [0m[32mready[0m[37m        [0m[37m [0m│[37m [0m[37m/data/wang/gks/effgen-demo (from current directory)     [0m[37m [0m│
+│[36m [0m[36msandbox  [0m[36m [0m│[37m [0m[33mlimited[0m[37m      [0m[37m [0m│[37m [0m[37msubprocess — network isolated, writes confined to the   [0m[37m [0m│
+│[36m           [0m│[37m               [0m│[37m [0m[37mworkspace                                               [0m[37m [0m│
+│[36m [0m[36mgit      [0m[36m [0m│[37m [0m[32mno repository[0m[37m [0m│[37m [0m[37mgit version 2.34.1; /data/wang/gks/effgen-demo is not   [0m[37m [0m│
+│[36m           [0m│[37m               [0m│[37m [0m[37minside a repository                                     [0m[37m [0m│
+└───────────┴───────────────┴──────────────────────────────────────────────────────────┘
+  [33msandbox[0m: Install Docker to confine reads as well; the subprocess sandbox is used until
+then.
+  [33mgit[0m: Run effgen code from a repository (or git init the workspace) for branch/status 
+context.
+  Try it: [1meffgen code "write fib.py and run it"[0m
+
+[33mMissing keys — set in ~/.effgen/.env or export:[0m
+  export ANTHROPIC_API_KEY=<your-key>
+  export FIREWORKS_API_KEY=<your-key>
+  export GOOGLE_API_KEY=<your-key>
+  export GROQ_API_KEY=<your-key>
+  export HF_TOKEN or HUGGINGFACE_API_KEY=<your-key>
+  export OPENAI_API_KEY=<your-key>
+  export EFFGEN_BASE_URL or OPENAI_BASE_URL or OPENAI_API_BASE=<your-key>
+  export REPLICATE_API_TOKEN=<your-key>
+  export TOGETHER_API_KEY=<your-key>
+
+💡 Tip: set EFFGEN_TIPS=0 to silence these tips.

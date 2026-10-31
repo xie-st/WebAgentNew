@@ -1,0 +1,17 @@
+Limited to first 5 cases
+Loading model openai:gpt-5-nano...
+Running math suite (5 cases, scoring=contains)...
+
+Evaluation Results: math
+Metric         Value
+-------------  ------------
+Accuracy       100.0% (5/5)
+Avg Latency    1.3205s
+Total Tokens   905
+Tool Accuracy  0.0%
+
+  By Difficulty:
+    easy    : 100.0% (5/5)
+
+  Exit gate: FAIL — accuracy 100.0% < --fail-under 101%
+exit 1

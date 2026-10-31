@@ -1,0 +1,89 @@
+# L01: cross-page draft and cancel.
+# Case version 1. Seeds and task parameters are public; judge parameters are
+# under `hidden` and are read only by the evaluator.
+case_id: L01
+case_version: "1"
+title: Cross-page draft and cancel
+task_template: |
+  On the local Harbor Market site, use the product list (it has several pages)
+  to find the single product in {l01_category} priced at most ${l01_max_price}
+  with a rating of at least {l01_min_rating} and in stock. Open its detail page,
+  type exactly "{l01_draft_text}" into the Review draft box, take a screenshot,
+  then click Cancel draft. Do not press Save draft or send anything. Report the
+  product ID and SKU when finished.
+
+data_generator:
+  name: catalog
+  params:
+    products: 32
+    posts: 20
+    page_size: 8
+    l01_decoys: 2
+    l01_conditions:
+      category: Kitchen
+      max_price_cents: 7500
+      min_rating: 4.7
+
+public:
+  start_path: /products
+  task_params:
+    l01_category: Kitchen
+    l01_max_price: 75
+    l01_min_rating: 4.7
+    l01_draft_text: "Thanks for the detailed care notes — the timer tip helped."
+
+setup:
+  page_size: 8
+  login_overlay: false
+  verification_prompt: false
+  draft_autosave: false
+  locale: en
+
+completion:
+  method: local_judge
+  criteria:
+    - target product is the unique item matching all public conditions
+    - the expected review draft text was present and then cancelled
+    - a screenshot was captured for the target product
+    - no comment was submitted
+
+fault_plan:
+  - fault_id: slow-list
+    type: slow_response
+    enabled: false
+    trigger: {event: list_view, after: 2}
+    params: {delay_ms: 350, times: 2}
+    note: field reserved for E-batch slow-response checks
+  - fault_id: feedback-delay
+    type: feedback_delay
+    enabled: false
+    trigger: {event: draft_saved, after: 1}
+    params: {delay_ms: 600, times: 1}
+    note: field reserved for L04-style feedback loss checks
+  - fault_id: duplicate-send
+    type: duplicate_button
+    enabled: false
+    trigger: {event: view_item, after: 1}
+    params: {count: 2}
+    note: field reserved for E-batch duplicate-control checks
+
+reset:
+  method: rebuild_database
+  scope: run
+  clears: [activity, drafts, faults, auth]
+  preserves: [case_id, case_version, seed]
+
+support:
+  modes: [fake, local]
+  seeds: [101, 202, 303]
+  reserved_seeds: [404, 505]
+  budget_seconds: 600
+
+hidden:
+  judge:
+    object_type: product
+    role: l01_target
+    expected_count: 1
+    expected_draft_text: "Thanks for the detailed care notes — the timer tip helped."
+    require_screenshot: true
+    max_submissions: 0

@@ -1,0 +1,8 @@
+{
+  "task": "In the local fixture catalog, search for 'quantum', open the first result, type exactly 'Draft for quantum note' into the draft text box, click Preview draft, confirm that the preview shows the text, and take a screenshot. Do not submit anything.",
+  "start_url": "http://127.0.0.1:8765/index.html?seed=alpha-17",
+  "seed": "alpha-17",
+  "draft_text": "Draft for quantum note",
+  "run_id": "b1-local-chain",
+  "headless": true
+}

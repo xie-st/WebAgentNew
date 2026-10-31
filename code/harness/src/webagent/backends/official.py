@@ -25,6 +25,7 @@ import hashlib
 import json
 import re
 import struct
+from enum import Enum
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -108,67 +109,85 @@ def parse_ax_elements(
     return elements
 
 
-def _escape_text(value: str, field: str) -> str:
-    """Encode free text so it cannot terminate or split an action command.
+class TextMode(str, Enum):
+    """How free text is put on the official action wire.
 
-    The official README does not define an unescape routine, but it does fix the
-    surrounding brackets. A raw ``]`` or line break would break that structure,
-    so the adapter uses a documented backslash wire encoding for ``\\``,
-    ``[``, ``]``, newline, carriage return and tab. Unsupported control characters
-    and lone surrogates are refused explicitly instead of silently corrupted.
+    ``RAW`` sends the text unchanged (including line breaks). ``DECOMPOSE``
+    forbids a line break inside one ``type`` action: the execution layer splits a
+    multi-line proposal into ``type`` + ``press [Enter]`` sub-actions first.
+    Neither mode escapes backslashes or brackets: the platform does not implement
+    an unescape routine (batch C task 731 typed a literal ``\\n``), so escaping
+    would silently change the text.
+    """
+
+    RAW = "raw"
+    DECOMPOSE = "decompose"
+
+
+DEFAULT_TEXT_MODE = TextMode.DECOMPOSE
+
+# The platform executes an empty ``type`` field with submit as an error and sends
+# no feedback (batch 2da7a209 task 605: ``type [815] [] [1]``). An empty text with
+# submit means "press Enter on the focused field", so it is sent as the existing
+# Enter command instead of an empty type. An empty text without submit has no
+# page effect at all and is refused locally before anything is dispatched.
+TYPE_SUBMIT_ENTER_COMMAND = "press [Enter]"
+EMPTY_TYPE_CORRECTION = (
+    "web_type needs non-empty text when submit is false; no action was sent. "
+    "To submit the field's current content, call web_press with keys='Enter'. "
+    "To replace existing content, press Ctrl+A and Backspace first, then type "
+    "the new value."
+)
+
+
+def normalize_text_mode(value: str | TextMode) -> TextMode:
+    if isinstance(value, TextMode):
+        return value
+    try:
+        return TextMode(str(value))
+    except ValueError as exc:
+        raise OfficialActionFormatError(
+            f"unknown official text_mode {value!r}; use 'raw' or 'decompose'"
+        ) from exc
+
+
+def validate_action_text(value: str, field: str) -> str:
+    """Refuse only characters the action wire cannot carry; never rewrite.
+
+    Line breaks, tabs and carriage returns are allowed so a real-page run can
+    observe their true semantics; other C0 controls, DEL and lone UTF-16
+    surrogates have no representable wire form and raise explicitly.
     """
 
     if not isinstance(value, str):
         raise OfficialActionFormatError(f"{field} must be a string")
-    pieces: list[str] = []
     for char in value:
         code = ord(char)
         if 0xD800 <= code <= 0xDFFF:
             raise OfficialActionFormatError(f"{field} contains an unencodable UTF-16 surrogate")
-        if char == "\\":
-            pieces.append("\\\\")
-        elif char == "[":
-            pieces.append("\\[")
-        elif char == "]":
-            pieces.append("\\]")
-        elif char == "\n":
-            pieces.append("\\n")
-        elif char == "\r":
-            pieces.append("\\r")
-        elif char == "\t":
-            pieces.append("\\t")
-        elif code < 0x20 or code == 0x7F:
+        if code < 0x20 and char not in "\n\r\t":
             raise OfficialActionFormatError(
                 f"{field} contains control character U+{code:04X}, which the action grammar "
                 "cannot represent"
             )
-        else:
-            pieces.append(char)
-    return "".join(pieces)
+        if code == 0x7F:
+            raise OfficialActionFormatError(
+                f"{field} contains control character U+007F, which the action grammar "
+                "cannot represent"
+            )
+    return value
 
 
-def unescape_text(value: str, field: str = "text") -> str:
-    """Reverse :func:`_escape_text`; used by tests and diagnostics."""
-
+def _wire_text(value: str, field: str, text_mode: TextMode) -> str:
     if not isinstance(value, str):
         raise OfficialActionFormatError(f"{field} must be a string")
-    pieces: list[str] = []
-    index = 0
-    mapping = {"\\": "\\", "[": "[", "]": "]", "n": "\n", "r": "\r", "t": "\t"}
-    while index < len(value):
-        char = value[index]
-        if char != "\\":
-            pieces.append(char)
-            index += 1
-            continue
-        if index + 1 >= len(value):
-            raise OfficialActionFormatError(f"{field} ends with an incomplete escape")
-        marker = value[index + 1]
-        if marker not in mapping:
-            raise OfficialActionFormatError(f"{field} contains unknown escape \\{marker}")
-        pieces.append(mapping[marker])
-        index += 2
-    return "".join(pieces)
+    validate_action_text(value, field)
+    if text_mode is TextMode.DECOMPOSE and ("\n" in value or "\r" in value):
+        raise OfficialActionFormatError(
+            f"{field} contains a line break; text_mode=decompose sends it as separate "
+            "type/press sub-actions, so it must be split before serialization"
+        )
+    return value
 
 
 def _escape_url(value: str) -> str:
@@ -188,10 +207,23 @@ def _escape_url(value: str) -> str:
     return value
 
 
-def serialize_stop(message: str) -> str:
-    """Return the official ``stop [说明]`` command."""
+def serialize_stop(
+    message: str,
+    *,
+    text_mode: TextMode | str = DEFAULT_TEXT_MODE,
+) -> str:
+    """Return the official ``stop [说明]`` command.
 
-    text = _escape_text(message or "task stopped", "stop.message")
+    A stop ends the task and cannot be split into sub-actions, so its message is
+    kept to one line: line breaks become spaces. Brackets and backslashes are
+    sent unchanged; the previous custom escape produced literal ``\\n`` text on
+    the platform and is not used.
+    """
+
+    del text_mode  # one terminal control line in both modes
+    text = validate_action_text(message or "task stopped", "stop.message")
+    text = text.replace("\r\n", " ").replace("\r", " ").replace("\n", " ").strip()
+    text = text or "task stopped"
     return f"stop [{text}]"
 
 
@@ -216,12 +248,14 @@ class OfficialBackend:
         download_artifacts: frozenset[str] | set[str] | tuple[str, ...] = frozenset({"screenshot"}),
         deadline_check: Any | None = None,
         redactor: Redactor | None = None,
+        text_mode: TextMode | str = DEFAULT_TEXT_MODE,
     ) -> None:
         validate_run_id(run_id)
         if session is not None and not isinstance(session, Session):
             raise OfficialBackendError("session must be a webagent Session")
         self.run_id = run_id
         self.page_id = page_id
+        self.text_mode = normalize_text_mode(text_mode)
         self.session = session
         self.evidence = evidence if evidence is not None else (
             session.evidence if session is not None else None
@@ -368,6 +402,12 @@ class OfficialBackend:
         self._current = observation
         self._current_raw = raw
         self._raw_by_observation[observation_id] = raw
+        if (
+            previous_action is not None
+            and previous_action.op is ActionOp.TYPE
+            and previous_action.submit
+        ):
+            self._mark_post_submit_observation(previous_action, observation)
         return observation
 
     # --------------------------------------------------------------- actions
@@ -427,6 +467,45 @@ class OfficialBackend:
                     details=[f"AX element {target!r} is not in the current observation"],
                     correction="Use an AX number printed in the current observation.",
                 )
+        if action.op is ActionOp.TYPE and (action.text or "") == "" and not action.submit:
+            self._refuse_empty_type(action)
+
+    def _refuse_empty_type(self, action: WebAction) -> None:
+        """Refuse an empty non-submitting type locally, with a model-facing reason."""
+
+        error = ActionRejected(
+            RejectReason.INVALID_ARGUMENTS,
+            details=[
+                f"web_type target {action.target!r} has empty text and submit=false; "
+                "an empty type has no page effect"
+            ],
+            correction=EMPTY_TYPE_CORRECTION,
+        )
+        self._log_empty_type_refusal(action)
+        raise error
+
+    def _log_empty_type_refusal(self, action: WebAction) -> None:
+        if self.session is None:
+            return
+        observation = self._current
+        try:
+            self.session.logger.emit(
+                "format_correction",
+                page_id=action.page_id,
+                url=None if observation is None else observation.url,
+                observation_id=action.observation_id,
+                action_id=action.action_id,
+                action_type=action.op.value,
+                result={
+                    "reason": "empty_type_text",
+                    "scope": "action",
+                    "tool": "web_type",
+                    "correction": EMPTY_TYPE_CORRECTION,
+                    "dispatched": False,
+                },
+            )
+        except Exception:  # noqa: BLE001 - logging must not replace the refusal
+            return
 
     def serialize_action(
         self,
@@ -440,11 +519,17 @@ class OfficialBackend:
         if op is ActionOp.CLICK:
             return f"click [{action.target}]"
         if op is ActionOp.TYPE:
-            text = _escape_text(action.text or "", "type.text")
+            text = action.text or ""
+            if text == "" and action.submit:
+                # Equivalent to pressing Enter on the focused field. The platform
+                # rejects ``type [n] [] [1]`` and returns no feedback, so that
+                # command must never reach the wire.
+                return TYPE_SUBMIT_ENTER_COMMAND
+            text = _wire_text(text, "type.text", self.text_mode)
             submit = "1" if action.submit else "0"
             return f"type [{action.target}] [{text}] [{submit}]"
         if op is ActionOp.PRESS:
-            keys = _escape_text(action.keys or "", "press.keys")
+            keys = _wire_text(action.keys or "", "press.keys", self.text_mode)
             if not keys:
                 raise OfficialActionFormatError("press.keys must not be empty")
             return f"press [{keys}]"
@@ -459,7 +544,7 @@ class OfficialBackend:
         raise OfficialActionFormatError(f"unsupported official action {op!r}")
 
     def serialize_stop(self, message: str) -> str:
-        return serialize_stop(message)
+        return serialize_stop(message, text_mode=self.text_mode)
 
     # -------------------------------------------------------------- artifacts
     def _build_artifacts(
@@ -805,6 +890,53 @@ class OfficialBackend:
             )
 
     # --------------------------------------------------------------- internals
+    def _mark_post_submit_observation(
+        self,
+        action: WebAction,
+        observation: Observation,
+    ) -> None:
+        """Record that a submitted action produced the new observation.
+
+        This is an event-only forensics marker: the EvidenceStore interface is
+        unchanged and the observation is still saved by the Session through its
+        normal path. The marker lets a later audit find the observation that must
+        be inspected after a save/submit, without treating the page's "updated"
+        banner as proof that the submitted value is correct.
+        """
+
+        if self.session is None:
+            return
+        artifacts = {
+            kind: {
+                "available": artifact.available,
+                "reason": artifact.reason,
+                "reference": artifact.reference,
+            }
+            for kind in ("screenshot", "html", "dom")
+            if (artifact := observation.artifacts.get(kind)) is not None
+        }
+        try:
+            self.session.logger.emit(
+                "artifact_saved",
+                page_id=observation.page_id,
+                url=observation.url,
+                observation_id=observation.observation_id,
+                action_id=action.action_id,
+                action_type=action.op.value,
+                result={
+                    "kind": "post_submit_observation",
+                    "post_submit_evidence": True,
+                    "submit_action_id": action.action_id,
+                    "submit_target": action.target,
+                    "submit_text_chars": len(action.text or ""),
+                    "submit_was_empty": (action.text or "") == "",
+                    "observation_id": observation.observation_id,
+                    "artifacts": artifacts,
+                },
+            )
+        except Exception:  # noqa: BLE001 - a marker must not break the observation
+            return
+
     def _platform_error(
         self,
         request: Mapping[str, Any],
@@ -949,11 +1081,16 @@ class OfficialBackend:
         return self.browser_api
 
 __all__ = [
+    "DEFAULT_TEXT_MODE",
+    "EMPTY_TYPE_CORRECTION",
     "OfficialActionFormatError",
     "OfficialArtifactError",
     "OfficialBackend",
     "OfficialBackendError",
+    "TYPE_SUBMIT_ENTER_COMMAND",
+    "TextMode",
+    "normalize_text_mode",
     "parse_ax_elements",
     "serialize_stop",
-    "unescape_text",
+    "validate_action_text",
 ]

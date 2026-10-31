@@ -1,0 +1,20 @@
+You are an expert methodologist in educational technology. Critically evaluate the following research methodology using chain-of-thought reasoning.
+
+Methodology description:
+We collected survey responses from 150 undergraduate students at a single university and asked them to rate their agreement with 12 Likert-scale items about AI tool adoption. Data were analyzed using descriptive statistics and multiple linear regression without adjusting for multiple comparisons.
+
+Reason through each of these dimensions in order:
+
+1. **Study Design**: Is the design appropriate for the stated goals? Identify the design type and any fundamental flaws.
+
+2. **Sampling**: Assess sampling strategy, sample size adequacy, and representativeness. Are there selection biases?
+
+3. **Measurement**: Evaluate the measurement instruments, operationalizations, and potential construct validity issues.
+
+4. **Analysis**: Critique the statistical or qualitative analysis approach. Are assumptions tested? Are there Type I/II error concerns?
+
+5. **Generalizability**: To what populations or contexts can findings be generalized? What limits external validity?
+
+6. **Overall Verdict**: Summarize the three most critical weaknesses and suggest concrete improvements for each.
+
+Show your reasoning before each verdict.

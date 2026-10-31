@@ -1,0 +1,93 @@
+{"query": "What is 42 * 17?", "expected": "714", "tools": ["calculator"], "tags": ["calculator"], "difficulty": "easy"}
+{"query": "Calculate the square root of 169.", "expected": "13", "tools": ["calculator"], "tags": ["calculator"], "difficulty": "easy"}
+{"query": "Calculate 15% tip on a $85 meal.", "expected": "12.75", "tools": ["calculator"], "tags": ["calculator"], "difficulty": "medium"}
+{"query": "Convert 100 miles to kilometers.", "expected": "160.934", "tools": ["calculator"], "tags": ["calculator", "conversion"], "difficulty": "medium"}
+{"query": "Calculate factorial of 8.", "expected": "40320", "tools": ["calculator"], "tags": ["calculator"], "difficulty": "medium"}
+{"query": "What is the current date and time?", "expected": "", "tools": ["datetime"], "tags": ["datetime"], "difficulty": "easy"}
+{"query": "What day of the week is 2025-01-01?", "expected": "Wednesday", "tools": ["datetime"], "tags": ["datetime"], "difficulty": "medium"}
+{"query": "How many days are between 2025-01-01 and 2025-03-01?", "expected": "59", "tools": ["datetime"], "tags": ["datetime"], "difficulty": "medium"}
+{"query": "What was the date 100 days ago?", "expected": "", "tools": ["datetime"], "tags": ["datetime"], "difficulty": "medium"}
+{"query": "Convert the current time to UTC+9 (Tokyo timezone).", "expected": "", "tools": ["datetime"], "tags": ["datetime", "timezone"], "difficulty": "medium"}
+{"query": "Parse this JSON and tell me how many keys it has: {\"a\": 1, \"b\": 2, \"c\": 3}", "expected": "3", "tools": ["json_tool"], "tags": ["json"], "difficulty": "easy"}
+{"query": "Get the keys from this JSON: {\"name\": \"Alice\", \"age\": 30}", "expected": "name", "tools": ["json_tool"], "tags": ["json"], "difficulty": "easy"}
+{"query": "Validate this JSON: {\"valid\": true}", "expected": "valid", "tools": ["json_tool"], "tags": ["json"], "difficulty": "easy"}
+{"query": "Format this JSON prettily: {\"a\":1,\"b\":[2,3]}", "expected": "\"a\"", "tools": ["json_tool"], "tags": ["json"], "difficulty": "medium"}
+{"query": "What is the length of this JSON array: [1, 2, 3, 4, 5]?", "expected": "5", "tools": ["json_tool"], "tags": ["json"], "difficulty": "easy"}
+{"query": "Extract the value of 'nested.key' from: {\"nested\": {\"key\": \"found\"}}", "expected": "found", "tools": ["json_tool"], "tags": ["json"], "difficulty": "medium"}
+{"query": "Validate this JSON and report if it's malformed: {missing_quotes: true}", "expected": "invalid", "tools": ["json_tool"], "tags": ["json"], "difficulty": "medium"}
+{"query": "Count the words in this text: The quick brown fox jumps over the lazy dog", "expected": "9", "tools": ["text_processing"], "tags": ["text"], "difficulty": "easy"}
+{"query": "Convert 'hello world' to uppercase.", "expected": "HELLO WORLD", "tools": ["text_processing"], "tags": ["text"], "difficulty": "easy"}
+{"query": "Reverse the string 'abcdef'.", "expected": "fedcba", "tools": ["text_processing"], "tags": ["text"], "difficulty": "easy"}
+{"query": "Count characters in 'Hello, World!' excluding spaces.", "expected": "12", "tools": ["text_processing"], "tags": ["text"], "difficulty": "medium"}
+{"query": "Convert 'HELLO WORLD' to lowercase.", "expected": "hello world", "tools": ["text_processing"], "tags": ["text"], "difficulty": "easy"}
+{"query": "Replace all occurrences of 'cat' with 'dog' in: 'the cat sat on the cat mat'.", "expected": "the dog sat on the dog mat", "tools": ["text_processing"], "tags": ["text"], "difficulty": "medium"}
+{"query": "Summarize this text in 1 sentence: 'Machine learning is a subset of AI. It allows computers to learn from data. Models improve with experience.'", "expected": "machine learning", "tools": ["text_processing"], "tags": ["text", "summarize"], "difficulty": "hard"}
+{"query": "Find all email addresses in: 'Contact alice@example.com or bob@test.org for info.'", "expected": "alice@example.com", "tools": ["text_processing"], "tags": ["text", "regex"], "difficulty": "medium"}
+{"query": "Search Wikipedia for 'Python programming language' and give me a summary.", "expected": "Python", "tools": ["wikipedia"], "tags": ["wikipedia"], "difficulty": "easy"}
+{"query": "Look up 'Albert Einstein' on Wikipedia.", "expected": "Einstein", "tools": ["wikipedia"], "tags": ["wikipedia"], "difficulty": "easy"}
+{"query": "Search Wikipedia for 'quantum computing' and tell me the first 3 sentences.", "expected": "quantum", "tools": ["wikipedia"], "tags": ["wikipedia"], "difficulty": "medium"}
+{"query": "Search the web for 'latest Python 3.12 features'.", "expected": "Python", "tools": ["web_search"], "tags": ["web_search"], "difficulty": "easy"}
+{"query": "Search the web for 'best practices for REST API design'.", "expected": "REST", "tools": ["web_search"], "tags": ["web_search"], "difficulty": "medium"}
+{"query": "Search for 'machine learning frameworks comparison 2025'.", "expected": "", "tools": ["web_search"], "tags": ["web_search"], "difficulty": "medium"}
+{"query": "Write a Python function that returns the factorial of a number, then execute it with n=6.", "expected": "720", "tools": ["code_executor"], "tags": ["code_executor"], "difficulty": "medium"}
+{"query": "Execute this Python code: print(sum(range(1, 101)))", "expected": "5050", "tools": ["code_executor"], "tags": ["code_executor"], "difficulty": "easy"}
+{"query": "Write and run Python code to check if 'racecar' is a palindrome.", "expected": "True", "tools": ["code_executor"], "tags": ["code_executor"], "difficulty": "medium"}
+{"query": "Execute Python code to find all prime numbers less than 30.", "expected": "29", "tools": ["code_executor"], "tags": ["code_executor"], "difficulty": "medium"}
+{"query": "Run Python: sorted([5,2,8,1,9,3])", "expected": "[1, 2, 3, 5, 8, 9]", "tools": ["code_executor"], "tags": ["code_executor"], "difficulty": "easy"}
+{"query": "Run a Python REPL to compute the first 10 Fibonacci numbers.", "expected": "55", "tools": ["python_repl"], "tags": ["python_repl"], "difficulty": "medium"}
+{"query": "In the Python REPL, define a function to compute GCD and test it with 48 and 18.", "expected": "6", "tools": ["python_repl"], "tags": ["python_repl"], "difficulty": "medium"}
+{"query": "Use Python REPL to create a dictionary, add 3 items, and return its length.", "expected": "3", "tools": ["python_repl"], "tags": ["python_repl"], "difficulty": "easy"}
+{"query": "Read the file at /etc/hostname and tell me its contents.", "expected": "", "tools": ["file_operations"], "tags": ["file_ops"], "difficulty": "easy"}
+{"query": "List all files in the current directory.", "expected": "", "tools": ["file_operations"], "tags": ["file_ops"], "difficulty": "easy"}
+{"query": "Check the file size of /etc/passwd.", "expected": "", "tools": ["file_operations"], "tags": ["file_ops"], "difficulty": "medium"}
+{"query": "Run the bash command 'echo Hello World' and show the output.", "expected": "Hello World", "tools": ["bash"], "tags": ["bash"], "difficulty": "easy"}
+{"query": "Use bash to count the number of lines in /etc/passwd.", "expected": "", "tools": ["bash"], "tags": ["bash"], "difficulty": "medium"}
+{"query": "Run 'uname -a' to show system information.", "expected": "Linux", "tools": ["bash"], "tags": ["bash"], "difficulty": "easy"}
+{"query": "Get the current weather in London.", "expected": "London", "tools": ["weather"], "tags": ["weather"], "difficulty": "easy"}
+{"query": "What's the temperature in Tokyo right now?", "expected": "", "tools": ["weather"], "tags": ["weather"], "difficulty": "easy"}
+{"query": "What's the weather forecast for New York in Celsius?", "expected": "", "tools": ["weather"], "tags": ["weather"], "difficulty": "medium"}
+{"query": "Fetch the contents of https://example.com and tell me the page title.", "expected": "Example", "tools": ["url_fetch"], "tags": ["url_fetch"], "difficulty": "easy"}
+{"query": "Fetch https://httpbin.org/json and extract the 'slideshow' title.", "expected": "", "tools": ["url_fetch"], "tags": ["url_fetch"], "difficulty": "medium"}
+{"query": "Get the stock price of AAPL.", "expected": "", "tools": ["stock_price"], "tags": ["finance"], "difficulty": "easy"}
+{"query": "What is the current price of Tesla (TSLA) stock?", "expected": "", "tools": ["stock_price"], "tags": ["finance"], "difficulty": "easy"}
+{"query": "Convert 100 USD to EUR.", "expected": "", "tools": ["currency_converter"], "tags": ["finance"], "difficulty": "easy"}
+{"query": "Convert 500 Japanese Yen to British Pounds.", "expected": "", "tools": ["currency_converter"], "tags": ["finance"], "difficulty": "medium"}
+{"query": "What is the current price of Bitcoin?", "expected": "", "tools": ["crypto_price"], "tags": ["finance"], "difficulty": "easy"}
+{"query": "Get the price of Ethereum in USD.", "expected": "", "tools": ["crypto_price"], "tags": ["finance"], "difficulty": "easy"}
+{"query": "Calculate the mean and standard deviation of [10, 20, 30, 40, 50].", "expected": "30", "tools": ["stats"], "tags": ["data_analysis"], "difficulty": "medium"}
+{"query": "Compute the correlation between [1,2,3,4,5] and [2,4,6,8,10].", "expected": "1", "tools": ["stats"], "tags": ["data_analysis"], "difficulty": "medium"}
+{"query": "Perform a linear regression on x=[1,2,3,4,5] y=[2.1,3.9,6.2,7.8,10.1].", "expected": "", "tools": ["stats"], "tags": ["data_analysis"], "difficulty": "hard"}
+{"query": "Draft an email to bob@example.com with subject 'Meeting Tomorrow' and body 'Can we meet at 3pm?'", "expected": "bob@example.com", "tools": ["email_draft"], "tags": ["communication"], "difficulty": "easy"}
+{"query": "Draft a professional email to the team about project deadline extension to next Friday.", "expected": "deadline", "tools": ["email_draft"], "tags": ["communication"], "difficulty": "medium"}
+{"query": "Draft a Slack message to #engineering channel saying 'Deploy v2.1 is complete'.", "expected": "Deploy", "tools": ["slack_draft"], "tags": ["communication"], "difficulty": "easy"}
+{"query": "Create a Slack message draft for #alerts channel with a deployment status update.", "expected": "", "tools": ["slack_draft"], "tags": ["communication"], "difficulty": "medium"}
+{"query": "Send a notification with title 'Build Complete' and message 'All tests passed'.", "expected": "Build Complete", "tools": ["notification"], "tags": ["communication"], "difficulty": "easy"}
+{"query": "Search arXiv for papers on 'transformer architecture attention mechanism'.", "expected": "attention", "tools": ["arxiv"], "tags": ["knowledge"], "difficulty": "medium"}
+{"query": "Find recent arXiv papers on 'large language model evaluation'.", "expected": "", "tools": ["arxiv"], "tags": ["knowledge"], "difficulty": "medium"}
+{"query": "Search StackOverflow for 'how to handle async exceptions in Python'.", "expected": "async", "tools": ["stackoverflow"], "tags": ["knowledge"], "difficulty": "medium"}
+{"query": "Find StackOverflow answers about 'Python memory leak debugging'.", "expected": "", "tools": ["stackoverflow"], "tags": ["knowledge"], "difficulty": "medium"}
+{"query": "Search GitHub for repositories related to 'agentic AI framework'.", "expected": "", "tools": ["github"], "tags": ["knowledge"], "difficulty": "medium"}
+{"query": "Find GitHub issues about 'vLLM memory management'.", "expected": "", "tools": ["github"], "tags": ["knowledge"], "difficulty": "medium"}
+{"query": "Get git status of the current repository.", "expected": "", "tools": ["git"], "tags": ["devops"], "difficulty": "easy"}
+{"query": "Show the last 5 git commits in the current repo.", "expected": "", "tools": ["git"], "tags": ["devops"], "difficulty": "easy"}
+{"query": "Show the current git branch name.", "expected": "", "tools": ["git"], "tags": ["devops"], "difficulty": "easy"}
+{"query": "List running Docker containers.", "expected": "", "tools": ["docker"], "tags": ["devops"], "difficulty": "easy"}
+{"query": "Show Docker images available on this system.", "expected": "", "tools": ["docker"], "tags": ["devops"], "difficulty": "easy"}
+{"query": "Show system CPU, memory and disk usage.", "expected": "", "tools": ["system_info"], "tags": ["devops"], "difficulty": "easy"}
+{"query": "Get the system's OS information and kernel version.", "expected": "Linux", "tools": ["system_info"], "tags": ["devops"], "difficulty": "easy"}
+{"query": "Make an HTTP GET request to https://httpbin.org/get.", "expected": "", "tools": ["http"], "tags": ["devops"], "difficulty": "medium"}
+{"query": "First, calculate 7 * 8, then tell me what day of the week today is.", "expected": "56", "tools": ["calculator", "datetime"], "tags": ["multi_tool"], "difficulty": "medium"}
+{"query": "Calculate 2^16 and format the result as JSON.", "expected": "65536", "tools": ["calculator", "json_tool"], "tags": ["multi_tool"], "difficulty": "medium"}
+{"query": "Search Wikipedia for 'Python' and then count the words in the summary.", "expected": "Python", "tools": ["wikipedia", "text_processing"], "tags": ["multi_tool"], "difficulty": "hard"}
+{"query": "Get the current date, then compute how many days until 2025-12-31.", "expected": "", "tools": ["datetime", "calculator"], "tags": ["multi_tool"], "difficulty": "hard"}
+{"query": "Parse this JSON array, count items, and calculate their sum: [10, 20, 30, 40]", "expected": "100", "tools": ["json_tool", "calculator"], "tags": ["multi_tool"], "difficulty": "hard"}
+{"query": "Fetch https://example.com, count the words on the page, and report.", "expected": "", "tools": ["url_fetch", "text_processing"], "tags": ["multi_tool"], "difficulty": "hard"}
+{"query": "Get the stock price of MSFT and convert the dollar value to EUR.", "expected": "", "tools": ["stock_price", "currency_converter"], "tags": ["multi_tool", "finance"], "difficulty": "hard"}
+{"query": "Search for 'Python async' on StackOverflow and summarize the top answer.", "expected": "", "tools": ["stackoverflow", "text_processing"], "tags": ["multi_tool", "knowledge"], "difficulty": "hard"}
+{"query": "Run Python code to generate 5 random numbers, then compute their statistics.", "expected": "", "tools": ["python_repl", "stats"], "tags": ["multi_tool", "data_analysis"], "difficulty": "hard"}
+{"query": "Get system info, then draft a Slack message to #ops with the CPU usage.", "expected": "", "tools": ["system_info", "slack_draft"], "tags": ["multi_tool", "devops"], "difficulty": "hard"}
+{"query": "Calculate the area of a triangle with base 10 and height 6, format as JSON.", "expected": "30", "tools": ["calculator", "json_tool"], "tags": ["multi_tool"], "difficulty": "hard"}
+{"query": "Search arXiv for 'RLHF', fetch the first paper's abstract, and summarize it.", "expected": "", "tools": ["arxiv", "text_processing"], "tags": ["multi_tool", "knowledge"], "difficulty": "hard"}
+{"query": "Get Bitcoin price, convert it from USD to GBP, and format the result as JSON.", "expected": "", "tools": ["crypto_price", "currency_converter", "json_tool"], "tags": ["multi_tool", "finance"], "difficulty": "hard"}
+{"query": "Execute Python code to sort [5,3,8,1] and then validate the output is valid JSON.", "expected": "[1, 3, 5, 8]", "tools": ["code_executor", "json_tool"], "tags": ["multi_tool"], "difficulty": "hard"}
+{"query": "Read the current git log, extract the latest commit message, and count its words.", "expected": "", "tools": ["git", "text_processing"], "tags": ["multi_tool", "devops"], "difficulty": "hard"}

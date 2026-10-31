@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- No data-theme on first paint so the CSS follows the OS color scheme with no
+     JavaScript; app.js overrides only when the user has a stored choice. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>effGen Playground</title>
+  <link rel="stylesheet" href="webui.css" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- All assets are served locally; the page renders with no external network. -->
+</head>
+<body>
+  <a class="eff-skip-link" href="#main-content">Skip to content</a>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="logo"><span aria-hidden="true">⚡</span> effGen</h1>
+      <span class="tagline">Playground</span>
+    </div>
+    <div class="header-right">
+      <a class="nav-link" href="/dashboard">Dashboard</a>
+      <span class="eff-sr-only" id="theme-status" role="status" aria-live="polite"></span>
+      <button id="palette-btn" type="button" aria-label="Open the command palette"
+              title="Open the command palette">
+        <span aria-hidden="true">⌕</span>
+      </button>
+      <button id="theme-btn" type="button" aria-label="Switch color theme" title="Switch color theme">
+        <span aria-hidden="true" id="theme-icon">◐</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="auth-banner" class="banner banner-warn" role="alert" hidden></div>
+  <div id="error-banner" class="banner banner-err" role="alert" hidden></div>
+
+  <main class="main" id="main-content" tabindex="-1">
+    <!-- Controls -->
+    <section class="panel" aria-label="Request controls">
+      <h2>Compose</h2>
+
+      <div class="field" id="key-field" hidden>
+        <label for="api-key">API key</label>
+        <input type="password" id="api-key" autocomplete="off" spellcheck="false"
+               placeholder="Authorization: Bearer &lt;key&gt;" />
+        <p class="hint">Held in memory for this tab only — never written to disk.</p>
+      </div>
+
+      <div class="field">
+        <label for="preset-select">Preset (optional)</label>
+        <select id="preset-select">
+          <option value="">None — model only</option>
+        </select>
+        <p class="hint" id="preset-hint"></p>
+      </div>
+
+      <fieldset class="field mode-field">
+        <legend>Mode</legend>
+        <label class="radio-row">
+          <input type="radio" name="mode" value="single" id="mode-single" checked />
+          Single run — one model answers
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="mode" value="battle" id="mode-battle" />
+          Battle — several models answer the same prompt, side by side
+        </label>
+      </fieldset>
+
+      <div class="field" id="model-field">
+        <label for="model-select">Model</label>
+        <select id="model-select">
+          <option value="">Loading catalog…</option>
+        </select>
+        <p class="hint" id="model-hint"></p>
+      </div>
+
+      <div class="field" id="battle-field" hidden>
+        <label for="battle-models">Contenders (pick two or more)</label>
+        <select id="battle-models" multiple size="8"></select>
+        <p class="hint" id="battle-hint">
+          Every contender answers the same prompt at once, so a battle spends
+          once per model.
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="prompt">Prompt</label>
+        <textarea id="prompt" placeholder="Ask anything…">What is 8347 * 219?</textarea>
+      </div>
+
+      <details class="advanced">
+        <summary>Advanced controls</summary>
+        <fieldset class="field tool-field">
+          <legend>Attach tools</legend>
+          <div class="tool-list" id="tool-list"></div>
+          <p class="hint">Tools run server-side; the step trace shows what ran (non-streamed runs).</p>
+        </fieldset>
+        <div class="row-2">
+          <div class="field">
+            <label for="temperature">Temperature</label>
+            <input type="number" id="temperature" min="0" max="2" step="0.1" value="0.7" />
+          </div>
+          <div class="field">
+            <label for="max-tokens">Max tokens</label>
+            <input type="number" id="max-tokens" min="1" step="1" value="512" />
+          </div>
+        </div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="stream-toggle" checked /> Stream tokens live
+        </label>
+      </details>
+
+      <button class="run-btn" id="run-btn" type="button">Run</button>
+    </section>
+
+    <!-- Battle results -->
+    <section class="panel results" id="battle-results" aria-label="Battle results" hidden>
+      <h2>Battle</h2>
+      <div class="battle-grid" id="battle-grid" aria-live="off" aria-busy="false"></div>
+      <div class="battle-verdict" id="battle-verdict" role="status" hidden></div>
+    </section>
+
+    <!-- Results -->
+    <section class="panel results" id="single-results" aria-label="Results">
+      <h2>Result</h2>
+      <div class="answer placeholder" id="answer" aria-live="polite"
+           aria-atomic="false" aria-busy="false">
+        The answer appears here after you Run.
+      </div>
+
+      <div class="stats" id="stats" hidden>
+        <div class="stat"><div class="stat-label">Model</div><div class="stat-value" id="stat-model">—</div></div>
+        <div class="stat"><div class="stat-label">Tokens (in/out)</div><div class="stat-value" id="stat-tokens">—</div></div>
+        <div class="stat"><div class="stat-label">Total</div><div class="stat-value" id="stat-total">—</div></div>
+        <div class="stat"><div class="stat-label">Cost</div><div class="stat-value" id="stat-cost">—</div></div>
+        <div class="stat"><div class="stat-label">Latency</div><div class="stat-value" id="stat-latency">—</div></div>
+      </div>
+
+      <div class="trace" id="trace-wrap" hidden>
+        <h2>Tool trace</h2>
+        <div id="trace"></div>
+      </div>
+
+      <div id="snippets" hidden>
+        <h2>Copy this run</h2>
+        <div class="snippet-tabs" role="tablist" aria-label="Snippet language">
+          <button class="snippet-tab active" data-kind="curl" role="tab" id="snippet-tab-curl"
+                  aria-controls="snippet-panel" aria-selected="true" tabindex="0">curl</button>
+          <button class="snippet-tab" data-kind="cli" role="tab" id="snippet-tab-cli"
+                  aria-controls="snippet-panel" aria-selected="false" tabindex="-1">CLI</button>
+          <button class="snippet-tab" data-kind="python" role="tab" id="snippet-tab-python"
+                  aria-controls="snippet-panel" aria-selected="false" tabindex="-1">Python</button>
+        </div>
+        <div class="snippet-box" id="snippet-panel" role="tabpanel"
+             aria-labelledby="snippet-tab-curl" tabindex="0">
+          <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+          <pre id="snippet-code">—</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="webui.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

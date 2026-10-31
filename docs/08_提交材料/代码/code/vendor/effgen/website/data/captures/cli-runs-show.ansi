@@ -1,0 +1,14 @@
+Run:      7bd4e604266d
+When:     2026-08-20T12:56:28-04:00
+Status:   error
+Model:    no-such-model (gemini)
+Agent:    api:gemini:no-such-model
+Tokens:   0 in / 0 out
+Cost:     —
+Duration: 0.22s
+
+Task:
+user: hi
+
+Error:
+Generation failed: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/no-such-model is not found for API version v1beta, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported metho… (516 characters). Model id not found — run `effgen models list` to see ids, `effgen models refresh` to update the catalog, and verify the id/provider prefix.

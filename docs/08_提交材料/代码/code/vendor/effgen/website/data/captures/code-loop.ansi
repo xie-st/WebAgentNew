@@ -1,0 +1,99 @@
+Workspace: /data/wang/gks/effgen-demo/textkit
+Repo: textkit · branch main · clean tree · 4 file(s)
+Project instructions: /data/wang/gks/effgen-demo/textkit/AGENTS.md
+Permissions: yes — apply writes, runs and shell commands without asking
+2026-08-20 12:53:08,563 - effgen.security.sandbox - WARNING - 
+┌─────────────────────────────────────────────────────────────┐
+│  effGen SANDBOX WARNING                                      │
+│                                                              │
+│  Code execution is using SubprocessSandbox, which provides   │
+│  PARTIAL isolation only.                                     │
+│                                                              │
+│  Limitations:                                                │
+│  • Executed code can READ any host file the calling          │
+│    process's user can read — reads are NOT confined          │
+│  • Writes are confined to the run's working directory only   │
+│    where the kernel allows it; each result reports what was  │
+│    enforced in 'filesystem_confined' / 'writable_root'       │
+│  • Network isolation via unshare (may require privileges)    │
+│  • Memory limit is advisory, not hard-enforced               │
+│                                                              │
+│  To confine reads as well, install Docker and ensure the     │
+│  daemon is running and accessible by the current user.       │
+└─────────────────────────────────────────────────────────────┘
+
+[1;36mnew file textkit/case.py (+7/-0)[0m
+[2m--- a/textkit/case.py[0m
+[2m+++ b/textkit/case.py[0m
+[36m@@ -0,0 +1,7 @@[0m
+[1;32m+"""Case conversion helpers."""[0m
+[1;32m+[0m
+[1;32m+[0m
+[1;32m+def title_case(text: str) -> str:[0m
+[1;32m+    if not isinstance(text, str):[0m
+[1;32m+        raise TypeError("text must be a string")[0m
+[1;32m+    return " ".join(word.capitalize() for word in text.split())[0m
+[1;32m  ✓ Write textkit/case.py (+7/-0)[0m
+[1;36medit textkit/__init__.py (+2/-1)[0m
+[2m--- a/textkit/__init__.py[0m
+[2m+++ b/textkit/__init__.py[0m
+[36m@@ -1,5 +1,6 @@[0m
+ """Small text helpers."""
+ 
+[1;32m+from .case import title_case[0m
+ from .wrap import wrap_words
+ 
+[1;31m-__all__ = ["wrap_words"][0m
+[1;32m+__all__ = ["wrap_words", "title_case"][0m
+[1;32m  ✓ Write textkit/__init__.py (+2/-1)[0m
+[1;36mnew file tests/test_case.py (+16/-0)[0m
+[2m--- a/tests/test_case.py[0m
+[2m+++ b/tests/test_case.py[0m
+[36m@@ -0,0 +1,16 @@[0m
+[1;32m+from textkit import title_case[0m
+[1;32m+[0m
+[1;32m+[0m
+[1;32m+[0m
+[1;32m+def test_title_cases_each_word():[0m
+[1;32m+    assert title_case("hello world from textkit") == "Hello World From Textkit"[0m
+[1;32m+[0m
+[1;32m+[0m
+[1;32m+[0m
+[1;32m+def test_title_case_rejects_non_string():[0m
+[1;32m+    try:[0m
+[1;32m+        title_case(123)[0m
+[1;32m+    except TypeError:[0m
+[1;32m+        pass[0m
+[1;32m+    else:[0m
+[1;32m+        raise AssertionError("expected TypeError")[0m
+[1;32m  ✓ Write tests/test_case.py (+16/-0)[0m
+[1;32m  ✓ Run python: import subprocess, sys result = subprocess.run([sys.executable, '-m', [0m
+[1;32m'pytest',…[0m
+[1;32m╭─[0m[1;32m───────────────────────────────────[0m[1;32m [0m[1;32mCoding Agent[0m[1;32m [0m[1;32m───────────────────────────────────[0m[1;32m─╮[0m
+[1;32m│[0m I added [1;36;40mtitle_case[0m and the requested tests, then ran [1;36;40mpytest[0m.                         [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m Files changed:                                                                       [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m [1m • [0m[1;36;40mtextkit/case.py[0m                                                                   [1;32m│[0m
+[1;32m│[0m [1m • [0m[1;36;40mtextkit/__init__.py[0m                                                               [1;32m│[0m
+[1;32m│[0m [1m • [0m[1;36;40mtests/test_case.py[0m                                                                [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m Implemented:                                                                         [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m [1m • [0m[1;36;40mtitle_case(text)[0m title-cases each whitespace-separated word                       [1;32m│[0m
+[1;32m│[0m [1m • [0mRaises [1;36;40mTypeError[0m if [1;36;40mtext[0m is not a string                                          [1;32m│[0m
+[1;32m│[0m [1m • [0mRe-exported from [1;36;40mtextkit.__init__[0m                                                 [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m Pytest result:                                                                       [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m [1m • [0mThe test run did [1mnot complete successfully[0m                                        [1;32m│[0m
+[1;32m│[0m [1m • [0mActual execution result: [1;36;40mEXIT_CODE=-9[0m                                             [1;32m│[0m
+[1;32m│[0m                                                                                      [1;32m│[0m
+[1;32m│[0m That means the pytest process was killed by the environment before producing test    [1;32m│[0m
+[1;32m│[0m output. So I can’t honestly report passing/failing tests from this run, only that    [1;32m│[0m
+[1;32m│[0m the run was terminated.                                                              [1;32m│[0m
+[1;32m╰──────────────────────────────────────────────────────────────────────────────────────╯[0m
+[32m✓[0m Done in 47.9s · 8 tools · 8,136 tokens · $0.0275
+Tool calling: hybrid — provider tool API first, falling back to the text
+Files written in /data/wang/gks/effgen-demo/textkit: textkit/case.py, 
+textkit/__init__.py, tests/test_case.py

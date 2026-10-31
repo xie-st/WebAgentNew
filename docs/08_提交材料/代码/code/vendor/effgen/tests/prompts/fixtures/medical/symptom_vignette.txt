@@ -1,0 +1,7 @@
+De-identified symptom vignette (for testing only):
+
+Patient: Adult, no known chronic conditions, vaccinated against flu.
+Symptoms: Fever of 38.5°C (101.3°F) for 2 days, dry cough, mild sore throat,
+fatigue, and mild headache. No shortness of breath. No chest pain. No rash.
+No recent travel to high-risk areas. No contact with confirmed infectious cases.
+Onset: Gradual over 48 hours.

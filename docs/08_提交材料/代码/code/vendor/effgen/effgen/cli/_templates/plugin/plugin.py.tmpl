@@ -1,0 +1,12 @@
+"""Plugin registration for __PLUGIN_NAME__."""
+
+from effgen.tools.plugin import ToolPlugin
+
+from __PLUGIN_NAME__.tools import ExampleTool
+
+
+class __PLUGIN_CLASS__Plugin(ToolPlugin):
+    name = "__PLUGIN_NAME__"
+    version = "0.1.0"
+    description = "A custom effGen tool plugin."
+    tools = [ExampleTool]
