@@ -4,7 +4,7 @@
   "pages": [
     {
       "page": 1,
-      "characters": 1432,
+      "characters": 1208,
       "size_pt": [
         595.28,
         841.89
@@ -13,7 +13,7 @@
     },
     {
       "page": 2,
-      "characters": 1045,
+      "characters": 828,
       "size_pt": [
         595.28,
         841.89
@@ -22,7 +22,7 @@
     },
     {
       "page": 3,
-      "characters": 1137,
+      "characters": 1079,
       "size_pt": [
         595.28,
         841.89
@@ -31,7 +31,7 @@
     },
     {
       "page": 4,
-      "characters": 1018,
+      "characters": 1517,
       "size_pt": [
         595.28,
         841.89
@@ -40,8 +40,8 @@
     }
   ],
   "page_count": 4,
-  "byte_size": 216430,
-  "sha256": "8f4dbfeb750cb7661d3cb02e62e50a24f6a1f7eedae31f0519f098167a32f7a7",
+  "byte_size": 217007,
+  "sha256": "f1edd529194acc3102bee7c2cd1c5433b06645729350196e73251b067dde3664",
   "paper_links": 11,
   "figures": 3,
   "pseudocode_blocks": 1,
@@ -50,6 +50,6 @@
     "实验结果",
     "最终设计"
   ],
-  "visual_review": "All four final PNG pages inspected; no clipping, overlap, broken glyphs or table overflow.",
+  "visual_review": "All final PNG pages inspected; no clipping, overlap, broken glyphs or table overflow.",
   "text_and_layout_checks": "passed"
 }

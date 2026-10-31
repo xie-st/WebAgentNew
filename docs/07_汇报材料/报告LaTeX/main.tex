@@ -1,6 +1,6 @@
 \documentclass[UTF8,zihao=5,fontset=windows,a4paper]{ctexart}
 \usepackage[left=20mm,right=20mm,top=24mm,bottom=22mm,headheight=20pt,headsep=5mm,footskip=10mm]{geometry}
-\usepackage{fontspec,xcolor,graphicx,tikz,booktabs,tabularx,array,caption,fancyhdr,lastpage,enumitem,needspace}
+\usepackage{fontspec,xcolor,graphicx,tikz,booktabs,tabularx,array,colortbl,caption,fancyhdr,lastpage,enumitem,needspace}
 \usepackage{amsmath}
 \usepackage[hidelinks,unicode]{hyperref}
 \usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds}
@@ -9,46 +9,49 @@
 \setmonofont{Consolas}
 \setCJKmainfont{SimSun}[BoldFont=SimHei]
 \setCJKsansfont{Microsoft YaHei}
-\definecolor{navy}{HTML}{000000}
-\definecolor{blue}{HTML}{000000}
-\definecolor{ink}{HTML}{000000}
-\definecolor{muted}{HTML}{333333}
-\definecolor{rulegray}{HTML}{777777}
-\definecolor{pale}{HTML}{F7F7F7}
+\definecolor{navy}{HTML}{244B6A}
+\definecolor{blue}{HTML}{397BA7}
+\definecolor{ink}{HTML}{202A33}
+\definecolor{muted}{HTML}{536473}
+\definecolor{rulegray}{HTML}{BDCEDA}
+\definecolor{pale}{HTML}{EDF4F9}
+\definecolor{teal}{HTML}{3D7066}
+\definecolor{paleteal}{HTML}{ECF4F1}
 \color{ink}
 \hypersetup{pdftitle={Web Agent 的并行执行与容错调度},pdfauthor={陈思旭，寇之洲，谢树韬},pdfsubject={勇闯天涯：方案与工程过程}}
 \ctexset{
- section={format=\heiti\fontsize{12}{17}\selectfont,number=\arabic{section},aftername=\quad,beforeskip=10pt,afterskip=5pt},
- subsection={format=\heiti\fontsize{10.5}{15}\selectfont,number=\thesection.\arabic{subsection},aftername=\quad,beforeskip=8pt,afterskip=4pt}
+ section={format=\heiti\color{navy}\fontsize{12}{18}\selectfont,number=\arabic{section},aftername=\quad,beforeskip=14pt,afterskip=8pt},
+ subsection={format=\heiti\color{navy}\fontsize{10.5}{16}\selectfont,number=\thesection.\arabic{subsection},aftername=\quad,beforeskip=10pt,afterskip=6pt}
 }
 \setlength{\parindent}{2em}
-\setlength{\parskip}{1.5pt}
-\linespread{1.13}
+\setlength{\parskip}{3pt}
+\linespread{1.22}
 \clubpenalty=10000
 \widowpenalty=10000
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\footnotesize Web Agent 的并行执行与容错调度}
-\fancyhead[R]{\footnotesize 勇闯天涯}
-\fancyfoot[C]{\footnotesize\thepage}
+\fancyhead[L]{\footnotesize\color{muted} Web Agent 的并行执行与容错调度}
+\fancyhead[R]{\footnotesize\color{muted} 勇闯天涯}
+\fancyfoot[C]{\footnotesize\color{muted}\thepage}
 \renewcommand{\headrulewidth}{0.35pt}
 \renewcommand{\footrulewidth}{0pt}
 \renewcommand{\headrule}{\hbox to\headwidth{\color{rulegray}\leaders\hrule height \headrulewidth\hfill}}
-\captionsetup{font=small,labelfont=bf,textfont=normalfont,labelsep=quad,skip=5pt,hypcap=false}
+\captionsetup{font=small,labelfont={bf,color=navy},textfont={color=muted},labelsep=quad,skip=7pt,hypcap=false}
 \DeclareCaptionType{algorithm}[算法]
-\setlength{\textfloatsep}{10pt}
-\setlength{\intextsep}{9pt}
-\setlength{\floatsep}{9pt}
+\setlength{\textfloatsep}{14pt}
+\setlength{\intextsep}{13pt}
+\setlength{\floatsep}{13pt}
 \renewcommand{\topfraction}{0.85}
 \renewcommand{\bottomfraction}{0.75}
 \renewcommand{\textfraction}{0.12}
 \setlength{\tabcolsep}{5pt}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 \newcommand{\kw}[1]{\textsf{\color{navy}#1}}
 \newcommand{\citepaper}[1]{\textsuperscript{\textcolor{blue}{\cite{#1}}}}
 \newcommand{\algline}[2]{\makebox[1.4em][r]{\scriptsize\color{muted}#1}\hspace{0.7em}#2\par}
 \tikzset{
- box/.style={draw=rulegray,fill=white,line width=.5pt,align=center,inner sep=5pt,font=\small,minimum height=13mm},
+ box/.style={draw=rulegray,fill=white,line width=.6pt,align=center,inner sep=6pt,font=\small,minimum height=14mm},
  core/.style={box,draw=blue,fill=pale},
  arr/.style={-{Stealth[length=2mm,width=1.4mm]},draw=blue,line width=.75pt},
  note/.style={font=\scriptsize,text=muted,align=center}
@@ -56,7 +59,7 @@
 \begin{document}
 \thispagestyle{plain}
 \begin{center}
-{\heiti\fontsize{18}{25}\selectfont Web Agent 的并行执行与容错调度}\\[8pt]
+{\heiti\color{navy}\fontsize{18}{25}\selectfont Web Agent 的并行执行与容错调度}\\[10pt]
 {\fontsize{11}{16}\selectfont 陈思旭\quad 寇之洲\quad 谢树韬}\\[3pt]
 {\small 勇闯天涯}\\[4pt]
 {\footnotesize 代码仓库：\href{https://github.com/xie-st/WebAgentNew}{\texttt{github.com/xie-st/WebAgentNew}}}
@@ -110,7 +113,7 @@
 \node[core,text width=4.2cm,minimum height=18mm] (agent) at (0,0) {\textbf{EffGen 决策循环}\\[-1pt]\footnotesize Qwen3.6-35B-A3B};
 \node[box,text width=3.0cm,minimum height=18mm] (tools) at (5.2,0) {\textbf{统一网页工具}\\[-1pt]\footnotesize 动作、观察与元素语义};
 \node[box,text width=3.2cm] (official) at (10.2,.9) {\textbf{官方平台}\\[-1pt]\footnotesize SDK · 单动作交互};
-\node[box,text width=3.2cm] (real) at (10.2,-.9) {\textbf{真实浏览器}\\[-1pt]\footnotesize Playwright · 渲染与截图};
+\node[box,draw=teal,fill=paleteal,text width=3.2cm] (real) at (10.2,-.9) {\textbf{真实浏览器}\\[-1pt]\footnotesize Playwright · 渲染与截图};
 \draw[arr] ([yshift=3mm]agent.east)--node[above,note]{交出动作}([yshift=3mm]tools.west);
 \draw[arr] ([yshift=-3mm]tools.west)--node[below,note]{接回观察}([yshift=-3mm]agent.east);
 \draw[arr] (tools.east)--++(.35,0)|- (official.west);
@@ -124,12 +127,12 @@
 两端共用点击、输入、按键、滚动和导航等工具，执行流程见算法\ref{alg:loop}。每个动作绑定当前页面、观察版本和有效元素编号；页面更新或人工接管后重新生成定位信息。日志为后续核验与恢复保留依据。
 
 \begin{algorithm}[htbp]
-\hrule height .6pt
+{\color{blue}\hrule height .6pt}
 \caption{可暂停的观察—动作循环}\label{alg:loop}
-\hrule height .3pt
-\vspace{4pt}
+{\color{rulegray}\hrule height .3pt}
+\vspace{6pt}
 \begingroup
-\small\setlength{\parindent}{0pt}\setlength{\parskip}{2pt}
+\small\setlength{\parindent}{0pt}\setlength{\parskip}{3pt}
 \algline{1}{初始化 EffGen、会话和预算，安装首个观察 $o$}
 \algline{2}{\kw{while} 任务仍活动且预算可用：}
 \algline{3}{\hspace*{1.3em}依据 $o$、任务状态和近期反馈推进同一循环，取得提案 $p$}
@@ -141,13 +144,14 @@
 \algline{9}{\hspace*{1.3em}$o \leftarrow$ 新观察与动作反馈；安装新版本，记录证据}
 \endgroup
 \vspace{2pt}
-\noindent{\rule{\linewidth}{.4pt}}\par
+\noindent{\color{rulegray}\rule{\linewidth}{.4pt}}\par
 {\footnotesize 注：第 5—6 行对应第二阶段接入的完成核验；第一阶段先建立动作交出与反馈返回。}
 \end{algorithm}
 
 \vspace{7pt}
 真实浏览器接入比较了 Playwright 与 browser-use 的浏览器层，选择 Playwright 为默认后端。阶段交付覆盖真实模型调用、本地页面任务、公开网页访问、人工暂停继续，以及官方任务的基本运行链路。
 
+\Needspace{10\baselineskip}
 \section{第二阶段：基础能力与测试环境}
 \subsection{任务状态、结果确认与恢复}
 第二阶段的建设方案围绕长任务建立状态与证据之间的联系。账本保存目标、已知事实、缺失信息、待确认操作和证据引用；EffGen 负责规划与行动，程序负责状态转换、版本检查和持久化。模型只表达业务目标与判断，版本号、分支和证据归属由程序绑定。
@@ -168,8 +172,8 @@
 \centering
 \begin{tikzpicture}[x=1cm,y=1cm]
 \node[core,text width=13.8cm,minimum height=9mm] (root) at (6.4,0) {\textbf{根协调器}\quad\small 依赖与就绪队列\quad / \quad 共享账本\quad / \quad 总预算与站点限流};
-\node[box,text width=4.15cm,minimum height=16mm] (a) at (1.65,-1.4) {\textbf{分支 A · Tab A}\\[-1pt]\footnotesize 独立循环、会话与观察};
-\node[box,text width=4.15cm,minimum height=16mm] (b) at (6.4,-1.4) {\textbf{分支 B · Tab B}\\[-1pt]\footnotesize 独立循环、会话与观察};
+\node[box,fill=pale,text width=4.15cm,minimum height=16mm] (a) at (1.65,-1.4) {\textbf{分支 A · Tab A}\\[-1pt]\footnotesize 独立循环、会话与观察};
+\node[box,draw=teal,fill=paleteal,text width=4.15cm,minimum height=16mm] (b) at (6.4,-1.4) {\textbf{分支 B · Tab B}\\[-1pt]\footnotesize 独立循环、会话与观察};
 \node[box,text width=4.15cm,minimum height=16mm] (w) at (11.15,-1.4) {\textbf{共享写任务}\\[-1pt]\footnotesize 串行队列};
 \draw[arr] (root.south-|a.north)--(a.north);
 \draw[arr] (root.south)--(b.north);
@@ -192,11 +196,13 @@
 \caption{候选优化方向及其论文依据}\label{tab:methods}
 \centering
 \begingroup
-\fontsize{9.4}{13.3}\selectfont
-\renewcommand{\arraystretch}{1.17}
-\noindent\begin{tabularx}{\linewidth}{@{}p{27mm}p{39mm}Y@{}}
+\linespread{1.02}
+\fontsize{9.8}{14.5}\selectfont
+\renewcommand{\arraystretch}{1.22}
+\noindent\begin{tabularx}{\linewidth}{@{}L{27mm}L{39mm}Y@{}}
 \toprule
-\textbf{优化方向} & \textbf{论文依据} & \textbf{采用或候选方式}\\
+\rowcolor{pale}
+\textbf{\color{navy}优化方向} & \textbf{\color{navy}论文依据} & \textbf{\color{navy}采用或候选方式}\\
 \midrule
 状态与停滞诊断 & PoS / BeliefState\citepaper{pos} & 区分事实、未解决要求与待确认结果；依据目标进展和证据变化诊断停滞。\\
 结果核验与纠错 & WALT\citepaper{walt}、Reflexion\citepaper{reflexion} & 明确子目标完成条件，核验反馈回同一循环；短反思记录具体修正办法。\\
@@ -205,14 +211,14 @@
 观察与历史差分 & Read More, Think More\citepaper{readmore} & 保留当前观察；候选：用差分表达旧观察，减少历史重复内容。\\
 页面候选筛选 & Prune4Web\citepaper{prune} & 候选：模型给关键词和权重，固定程序评分，保留当前有效元素映射。\\
 多页面依赖调度 & Flash-Searcher\citepaper{flash} & 以依赖图组织独立任务，补充页面归属、共享状态约束和统一限流。\\
-截图与行动效率 & UI-TARS\citepaper{uitars}、WebClipper\citepaper{clipper} & 截图先留证；视觉决策、轨迹依赖分析和通用动作组合列为后续候选。\\
+截图与行动效率 & \mbox{UI-TARS}\citepaper{uitars}、\mbox{WebClipper}\citepaper{clipper} & 截图先留证；视觉决策、轨迹依赖分析和通用动作组合列为后续候选。\\
 \bottomrule
 \end{tabularx}
 \endgroup
-\end{table}
-
 \vspace{6pt}
+\par
 \noindent{\footnotesize\color{muted}摘要、差分、折叠、筛选及动作组合保留为待比较的方法，最终选择在后续章节填写。}
+\end{table}
 
 \section{第三阶段：实验验证}
 \vspace{5mm}
@@ -225,11 +231,12 @@
 \begingroup
 \renewcommand{\refname}{参考文献}
 \ctexset{section={beforeskip=5pt,afterskip=4pt}}
-\fontsize{9}{12}\selectfont
+\linespread{1.0}
+\fontsize{9.3}{13.2}\selectfont
 \setlength{\parskip}{0pt}
 \begin{thebibliography}{11}
 \raggedright
-\setlength{\itemsep}{1.7pt}
+\setlength{\itemsep}{3pt}
 \setlength{\parsep}{0pt}
 \bibitem{effgen} \href{https://arxiv.org/abs/2602.00887}{EffGen: Enabling Small Language Models as Capable Autonomous Agents}. arXiv:2602.00887, 2026.
 \bibitem{pos} \href{https://arxiv.org/abs/2610.01415}{Beyond Memory: Harnessing Long-Horizon Agents with Explicit Belief States}. arXiv:2610.01415, 2026.
