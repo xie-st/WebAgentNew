@@ -18,7 +18,7 @@
 \definecolor{teal}{HTML}{3D7066}
 \definecolor{paleteal}{HTML}{ECF4F1}
 \color{ink}
-\hypersetup{pdftitle={Web Agent 的并行执行与容错调度},pdfauthor={陈思旭，寇之洲，谢树韬},pdfsubject={勇闯天涯：方案与工程过程}}
+\hypersetup{pdftitle={Web Agent 的并行执行与容错调度},pdfauthor={陈思旭，寇之洲，谢树韬},pdfsubject={勇攀高峰：方案与工程过程}}
 \ctexset{
  section={format=\heiti\color{navy}\fontsize{12}{18}\selectfont,number=\arabic{section},aftername=\quad,beforeskip=14pt,afterskip=8pt},
  subsection={format=\heiti\color{navy}\fontsize{10.5}{16}\selectfont,number=\thesection.\arabic{subsection},aftername=\quad,beforeskip=10pt,afterskip=6pt}
@@ -31,7 +31,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\footnotesize\color{muted} Web Agent 的并行执行与容错调度}
-\fancyhead[R]{\footnotesize\color{muted} 勇闯天涯}
+\fancyhead[R]{\footnotesize\color{muted} 勇攀高峰}
 \fancyfoot[C]{\footnotesize\color{muted}\thepage}
 \renewcommand{\headrulewidth}{0.35pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -61,27 +61,27 @@
 \begin{center}
 {\heiti\color{navy}\fontsize{18}{25}\selectfont Web Agent 的并行执行与容错调度}\\[10pt]
 {\fontsize{11}{16}\selectfont 陈思旭\quad 寇之洲\quad 谢树韬}\\[3pt]
-{\small 勇闯天涯}\\[4pt]
+{\small 第 7 队\quad 勇攀高峰}\\[4pt]
 {\footnotesize 代码仓库：\href{https://github.com/xie-st/WebAgentNew}{\texttt{github.com/xie-st/WebAgentNew}}}
 \end{center}
 \vspace{3pt}
 \begingroup
 \small
-\noindent\textbf{摘要：}针对网页任务中的长程状态维护、执行容错和多页面协作问题，本文基于 EffGen 构建统一的网页智能体执行框架，通过可暂停的生成器接口连接官方评测平台与真实浏览器。在此基础上，设计任务账本、过程核验、局部恢复、人工接管及独立只读任务并行机制，并梳理观察筛选、历史压缩与经验复用等候选优化方法。工程实现采用人工规划、文档约束与多智能体分工相结合的流程。
+\noindent\textbf{摘要：}针对网页任务中的连续交互、结果确认和容错调度问题，本文基于 EffGen 构建统一的网页智能体执行框架，通过可暂停的生成器连接官方评测平台与 Playwright 浏览器。最终官方配置采用单 Agent 串行执行，启用任务状态工具与基于页面证据的完成核验，将不合法动作和核验缺口反馈给同一执行循环。恢复与接管、必要上下文保护、批准文本经验和只读并行调度作为独立配置或扩展模块保留。工程过程由人工规划、文档约束、智能体分工与统一集成组成，形成可追溯的代码、配置和运行记录。
 \par\vspace{3pt}
-\noindent\textbf{关键词：}网页智能体；并发调度；容错恢复；结果核验；上下文管理
+\noindent\textbf{关键词：}网页智能体；结果核验；状态管理；容错调度；并发控制
 \par
 \endgroup
 \vspace{4pt}
 \section{问题定义与基础工具}
-本项目面向网页任务中的并行执行、结果确认、容错恢复和频率控制。在比赛指定的 Qwen3.6-35B-A3B 模型下，我们希望让 Agent 根据页面反馈持续推进任务，在操作失败、结果不明或需要人工介入时保留有效进度，并利用独立页面之间的并行空间缩短执行时间。
 
-开发工具采用 Codex、WorkBuddy 和 DeepSeek Harness（DSH），提供文件读写、代码检索、命令执行、测试及任务派发等通用工程能力。Codex 使用 GPT-6.1 Sol，推理强度为 Medium；WorkBuddy 使用 GLM-5.3-flash；DSH 通过硅基流动 API 调用 DeepSeek v4 flash 1013。上述开发工具不包括本项目所需的 Web Agent 具体知识；赛题理解、论文方法选择和路线规划由团队完成。
+本项目面向网页任务的并行执行、结果确认、容错恢复与频率控制。比赛运行模型为 Qwen3.6-35B-A3B，官方端通过 SDK 获取页面观察、调用统一模型并返回单个网页动作，真实端由 Playwright 驱动浏览器渲染、操作与截图。系统以 EffGen 为基础，复用其观察—思考—工具调用—反馈循环，以及轨迹、输入预算和历史压缩机制。\citepaper{effgen}
 
-运行系统以 EffGen 为基础，复用其观察—思考—工具调用—反馈循环，以及轨迹、预算和上下文压缩机制。\citepaper{effgen} Playwright 提供真实浏览器的页面操作、观察与截图，官方 SDK 提供评测平台的观察、动作和模型接口。我们补充统一网页工具、环境适配和任务状态管理。开发模型构建工程，提交的 Web Agent 使用比赛指定模型执行网页任务。
+开发工具采用 Codex、WorkBuddy 和 DeepSeek Harness（DSH），提供文件读写、代码检索、命令执行、测试和任务派发能力。Codex 使用 GPT-6.1 Sol，推理强度为 Medium；WorkBuddy 使用 GLM-5.3-flash；DSH 经硅基流动 API 调用 DeepSeek v4 flash 1013。这些开发工具提供通用工程能力，不包括本项目所需的 Web Agent 具体知识；赛题理解、论文选择与路线规划由团队完成。
 
-\section{从人工规划到工程实现}
-开发流程如图\ref{fig:workflow}所示。团队先阅读赛题与接口要求，围绕观察效率、长期任务状态、核验恢复和并发调度查询论文，再形成 RoadMap，确定优先级与三阶段路线。Codex 将 RoadMap 翻译成详细方案、DSH 实施说明、验收要求和测试任务，明确输入输出、模块职责、文件归属与前置依赖。
+\section{工程过程与分工}
+
+团队先确定赛题约束与优化方向，查询状态维护、观察压缩、完成核验和并发调度等论文，形成 RoadMap。Codex 将其翻译为阶段方案、接口约定、文件归属和验收要求；人工审定后，WorkBuddy 向 DSH 派发任务，主线程统一集成并核对实际入口。工程先接通两套环境，再建设状态、核验、恢复与调度能力，最后按主树入口和配置收敛提交方案。
 
 \begin{figure}[htbp]
 \centering
@@ -98,14 +98,15 @@
 \end{tikzpicture}
 \caption{人机协作的工程开发流程}\label{fig:workflow}
 \end{figure}
-方案经人工审定后，由 WorkBuddy 交给 DSH 实现与离线验证；主线程负责集成、真实模型与浏览器验证、官方平台接入，每批结果反馈后再确定后续工作。
 
-开发并行沿用模块边界：输入与观察适配、状态与恢复支持、本地任务与判定可独立开发。各写任务使用独立源码副本，测试前确认导入该副本；公共驱动、官方入口、配置和命令行由一个集成负责人顺序合入。强依赖部分先固定接口，真实模型与官方评测顺序运行。
+并行开发沿用模块边界。输入与观察适配、状态与恢复支持、本地任务与判定分别在独立源码副本中实现；运行测试前确认导入各自副本。公共驱动、官方入口、配置和命令行由一名负责人顺序合入，跨模块功能在接口稳定后连接。真实模型与官方平台任务顺序执行，开发智能体的并行不改变比赛执行端的并发约束。
 
-\section{第一阶段：双环境跑通}
-第一阶段解决同一个 Agent 如何在官方平台与真实浏览器中连续执行，接入结构如图\ref{fig:architecture}所示。我们固定 EffGen 源码和官方 SDK 版本，建立模型适配器、统一观察与动作协议、会话管理和证据存储，再连接两套环境。
+\Needspace{7\baselineskip}
+\section{最终官方执行方案}
 
-关键改动是在 EffGen 原有循环中加入可暂停的生成器接口：需要执行网页动作时交出动作并暂停，环境执行后将新观察送回同一生成器。官方端每次 \texttt{step()} 返回一个动作，真实端由本地浏览器执行并回传观察；内部状态与证据工具在本地完成。
+\subsection{统一接口与可暂停循环}
+
+最终入口为 \path{webagent.official_agent.OfficialAgent}，提交配置为 \path{code/harness/configs/official.yaml}。每个任务建立独立 Session、状态库、模型适配器和 EffGen 驱动。官方端模型调用仅经过 SDK；统一网页工具向后端交付点击、输入、按键、滚动、导航等动作，模型依据返回的可访问性树（AX）继续决策。
 
 \begin{figure}[htbp]
 \centering
@@ -118,116 +119,115 @@
 \draw[arr] ([yshift=-3mm]tools.west)--node[below,note]{接回观察}([yshift=-3mm]agent.east);
 \draw[arr] (tools.east)--++(.35,0)|- (official.west);
 \draw[arr] (tools.east)--++(.35,0)|- (real.west);
-\node[note,draw=rulegray,fill=pale,rounded corners=1pt,text width=10.1cm,minimum height=8mm] (evidence) at (3.8,-2.1) {会话与证据存储：任务 · 观察 · 动作 · 反馈 · 模型调用 · 截图};
+\node[note,draw=rulegray,fill=pale,rounded corners=1pt,text width=10.1cm,minimum height=8mm] (evidence) at (3.8,-2.1) {状态与证据：目标 · 观察 · 动作反馈 · 完成核验 · 模型调用 · 截图};
 \draw[draw=rulegray,line width=.6pt] (agent.south)--(agent.south|-evidence.north);
 \draw[draw=rulegray,line width=.6pt] (tools.south)--(tools.south|-evidence.north);
 \end{tikzpicture}
 \caption{共用决策循环的双环境接入结构}\label{fig:architecture}
 \end{figure}
-两端共用点击、输入、按键、滚动和导航等工具，执行流程见算法\ref{alg:loop}。每个动作绑定当前页面、观察版本和有效元素编号；页面更新或人工接管后重新生成定位信息。日志为后续核验与恢复保留依据。
+
+网页动作处通过生成器暂停，下一次 \path{step()} 将观察送回原循环；状态读取、计划更新和证据记录等内部工具直接本地执行。动作绑定页面、观察版本和当前有效元素编号，错误目标或不合法参数在发送前拒绝，并通过工具反馈继续纠正，默认最多允许两次格式纠正。
+
+输入采用 \path{decompose} 语义：多行文本拆成输入与 Enter 子动作，每个子动作接收新的页面反馈，完整序列结束后再交回模型；空文本提交转换为 Enter，空文本且不提交的动作直接反馈纠正。文本替换由明确的选中、清除和输入动作完成，保留真实浏览器输入语义。
+
 
 \begin{algorithm}[htbp]
 {\color{blue}\hrule height .6pt}
-\caption{可暂停的观察—动作循环}\label{alg:loop}
+\caption{最终官方入口的连续执行流程}\label{alg:loop}
 {\color{rulegray}\hrule height .3pt}
 \vspace{6pt}
 \begingroup
 \small\setlength{\parindent}{0pt}\setlength{\parskip}{3pt}
-\algline{1}{初始化 EffGen、会话和预算，安装首个观察 $o$}
-\algline{2}{\kw{while} 任务仍活动且预算可用：}
-\algline{3}{\hspace*{1.3em}依据 $o$、任务状态和近期反馈推进同一循环，取得提案 $p$}
-\algline{4}{\hspace*{1.3em}\kw{if} $p$ 是内部工具：本地执行，将结果送回循环；\kw{continue}}
-\algline{5}{\hspace*{1.3em}\kw{if} $p$ 请求完成：}
-\algline{6}{\hspace*{2.6em}核验当前要求；通过则结束，否则将缺口送回循环；\kw{continue}}
-\algline{7}{\hspace*{1.3em}校验当前观察与动作目标；失败则反馈并 \kw{continue}}
-\algline{8}{\hspace*{1.3em}记录待确认操作；\kw{yield} 网页动作，暂停并等待环境}
-\algline{9}{\hspace*{1.3em}$o \leftarrow$ 新观察与动作反馈；安装新版本，记录证据}
+\algline{1}{建立任务预算、状态库和会话，注册启用工具，安装首个观察}
+\algline{2}{\kw{while} 任务活动且未到平台截止时间：}
+\algline{3}{\hspace*{1.3em}推进同一 EffGen 生成器，取得提案 $p$}
+\algline{4}{\hspace*{1.3em}\kw{if} $p$ 是内部工具：本地执行并反馈；\kw{continue}}
+\algline{5}{\hspace*{1.3em}\kw{if} $p$ 请求完成：核验已声明目标；通过则结束}
+\algline{6}{\hspace*{2.6em}否则返回缺口继续修正，超出限额则记为 \texttt{incomplete}}
+\algline{7}{\hspace*{1.3em}\kw{else} 校验观察版本与动作目标；不合法则反馈纠正}
+\algline{8}{\hspace*{2.6em}必要时拆分输入；逐个交出动作，接回新观察和反馈}
+\algline{9}{\hspace*{2.6em}保存动作与证据，推进原循环}
+\algline{10}{保存终态、核验结果、请求记录与终止原因}
 \endgroup
 \vspace{2pt}
-\noindent{\color{rulegray}\rule{\linewidth}{.4pt}}\par
-{\footnotesize 注：第 5—6 行对应第二阶段接入的完成核验；第一阶段先建立动作交出与反馈返回。}
+\noindent{\color{rulegray}\rule{\linewidth}{.4pt}}
 \end{algorithm}
 
-\vspace{7pt}
-真实浏览器接入比较了 Playwright 与 browser-use 的浏览器层，选择 Playwright 为默认后端。阶段交付覆盖真实模型调用、本地页面任务、公开网页访问、人工暂停继续，以及官方任务的基本运行链路。
 
-\Needspace{10\baselineskip}
-\section{第二阶段：基础能力与测试环境}
-\subsection{任务状态、结果确认与恢复}
-第二阶段的建设方案围绕长任务建立状态与证据之间的联系。账本保存目标、已知事实、缺失信息、待确认操作和证据引用；EffGen 负责规划与行动，程序负责状态转换、版本检查和持久化。模型只表达业务目标与判断，版本号、分支和证据归属由程序绑定。
+\subsection{状态账本与完成核验}
 
-结果确认放在保存、提交、子目标结束和任务结束等关键节点。可直接判断的条件由程序检查，需要语义判断的条件交给比赛模型。核验未通过时，将缺口反馈给同一循环继续纠正。恢复时依据证据撤回受影响的完成判断，保留其他已确认进度；有副作用的操作超时后，先核实页面结果再决定是否重试。
+默认注册 \path{goal_declare}、状态读写和计划更新工具。模型声明业务要求及可观察的完成条件，程序绑定当前版本、分支和证据来源。状态库保存目标、事实、依赖与证据引用，更新时校验版本，再将完整 JSON 快照原子替换；截图与原始观察沿用证据存储，不在账本中重复保存。
 
-人工接管覆盖登录、验证码、二次验证和主动暂停。系统停止新动作并处理在途操作后交出浏览器；用户确认继续时重新观察页面，使旧提案和元素编号失效，再依据新状态推进。
+完成判定检查已声明目标。官方路径使用确定性条件核对当前 URL、AX 文本、字段值和已保存证据，核验器自身不执行网页动作。\path{request_finish} 未通过时，把未满足的目标与条件反馈给同一生成器，允许两次继续修正，超过限额则以 \path{incomplete} 结束。字段值核验适配官方 AX 的属性后缀和子级文本，区分操作意图与实际页面结果。
 
-测试采用本地可重置网站、官方论坛与电商调测、公开真实网站三层，分别检查可控故障和接管机制、完整任务结果、实际交互与多页面协作。各能力通过独立开关接入实际运行入口。
+\subsection{提交配置与预算}
 
-\Needspace{8\baselineskip}
-\subsection{运行时的并发处理}
-真实端首版将独立只读任务分配到不同 Tab，每个分支拥有独立循环、会话和观察，共享写操作串行，调度关系如图\ref{fig:scheduler}所示。每个 Tab 最多一个在途动作，一个生成器由单一所有者推进；浏览器操作由统一所有者调度，不将同步页面对象交给多个线程。
-
-并行从两个分支起步，容量可配置；模型调用并发初始为一，先重叠不同页面的等待。所有分支共用根任务预算、站点访问节奏与退避状态。共享账本更新由协调器串行提交，过期版本重新核对。人工接管触发全任务暂停，恢复前统一刷新相关页面。官方端保持单任务、单动作串行交互。
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[x=1cm,y=1cm]
-\node[core,text width=13.8cm,minimum height=9mm] (root) at (6.4,0) {\textbf{根协调器}\quad\small 依赖与就绪队列\quad / \quad 共享账本\quad / \quad 总预算与站点限流};
-\node[box,fill=pale,text width=4.15cm,minimum height=16mm] (a) at (1.65,-1.4) {\textbf{分支 A · Tab A}\\[-1pt]\footnotesize 独立循环、会话与观察};
-\node[box,draw=teal,fill=paleteal,text width=4.15cm,minimum height=16mm] (b) at (6.4,-1.4) {\textbf{分支 B · Tab B}\\[-1pt]\footnotesize 独立循环、会话与观察};
-\node[box,text width=4.15cm,minimum height=16mm] (w) at (11.15,-1.4) {\textbf{共享写任务}\\[-1pt]\footnotesize 串行队列};
-\draw[arr] (root.south-|a.north)--(a.north);
-\draw[arr] (root.south)--(b.north);
-\draw[arr] (root.south-|w.north)--(w.north);
-\node[note,text width=14.5cm,minimum height=8mm] (pause) at (6.4,-2.65) {全局接管：停止新动作 → 处理在途操作 → 用户操作 → 重新观察 → 恢复};
-\draw[draw=rulegray,dashed] (a.south)--(a.south|-pause.north);
-\draw[draw=rulegray,dashed] (b.south)--(b.south|-pause.north);
-\draw[draw=rulegray,dashed] (w.south)--(w.south|-pause.north);
-\end{tikzpicture}
-\caption{独立只读分支并行、共享写串行的真实端调度方案}\label{fig:scheduler}
-\end{figure}
-
-\noindent{\heiti\color{navy}开发过程中的依赖与集成}\par
-这一分工已用于输入适配、状态恢复和本地判定三线开发。之后，恢复接线、上下文与经验加载、并行调度骨架分开准备；调度的全局暂停仍依赖恢复与接管接口，待接口合入后集成验证。开发并行管理源码归属，运行并行管理页面与业务状态。
-
-\subsection{优化方向与论文来源}
-候选方法与论文依据见表\ref{tab:methods}。团队从任务失败方式出发，将论文思路转成适合固定模型与浏览器接口的设计。实施时优先完成基础状态、最小核验和同循环纠错，再接恢复与接管；上下文先保护当前观察和必要账本，提供独立开关与批准文本加载。
+下表依据当前主树配置及其实际解析结果。状态工具与完成核验进入默认执行路径；其余扩展通过独立开关控制。
 
 \begin{table}[htbp]
-\caption{候选优化方向及其论文依据}\label{tab:methods}
-\centering
-\begingroup
-\linespread{1.02}
-\fontsize{9.8}{14.5}\selectfont
-\renewcommand{\arraystretch}{1.22}
-\noindent\begin{tabularx}{\linewidth}{@{}L{27mm}L{39mm}Y@{}}
-\toprule
-\rowcolor{pale}
-\textbf{\color{navy}优化方向} & \textbf{\color{navy}论文依据} & \textbf{\color{navy}采用或候选方式}\\
+\caption{主树最终官方配置}\label{tab:config}
+\centering\begingroup
+\linespread{1.02}\fontsize{9.5}{14}\selectfont
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{@{}L{31mm}Y@{}}
+\toprule\rowcolor{pale}
+\textbf{\color{navy}项目} & \textbf{\color{navy}最终官方配置}\\
 \midrule
-状态与停滞诊断 & PoS / BeliefState\citepaper{pos} & 区分事实、未解决要求与待确认结果；依据目标进展和证据变化诊断停滞。\\
-结果核验与纠错 & WALT\citepaper{walt}、Reflexion\citepaper{reflexion} & 明确子目标完成条件，核验反馈回同一循环；短反思记录具体修正办法。\\
-同轮摘要与经验 & M²\citepaper{m2} & 候选：行动同轮生成短摘要；经验先加载人工批准文本，默认空库。\\
-子目标历史折叠 & AgentProg\citepaper{agentprog} & 候选：折叠已完成过程，把后续仍需使用的对象值和证据保存到账本。\\
-观察与历史差分 & Read More, Think More\citepaper{readmore} & 保留当前观察；候选：用差分表达旧观察，减少历史重复内容。\\
-页面候选筛选 & Prune4Web\citepaper{prune} & 候选：模型给关键词和权重，固定程序评分，保留当前有效元素映射。\\
-多页面依赖调度 & Flash-Searcher\citepaper{flash} & 以依赖图组织独立任务，补充页面归属、共享状态约束和统一限流。\\
-截图与行动效率 & \mbox{UI-TARS}\citepaper{uitars}、\mbox{WebClipper}\citepaper{clipper} & 截图先留证；视觉决策、轨迹依赖分析和通用动作组合列为后续候选。\\
+决策与执行 & 单 Agent、文本 ReAct；同一时刻仅一个任务、一个动作和一次模型调用；关闭自动子智能体、推测执行和跨任务记忆。\\
+默认能力 & \path{state_tools=true}，\path{verification=true}。\\
+可选开关 & \path{recovery=false}，\path{context.enabled=false}，\path{experience.enabled=false}，\path{parallel.enabled=false}。\\
+输入预算 & 原生压缩输入预算 24,000 token，规划上下文 32,768 token；采用估算计数。\\
+请求约束 & 模型出口检查最多 256 条消息、1 MiB JSON 请求；必要任务与当前观察不因字节超限而静默删除。\\
+截止与终态 & 提前截止余量为 0，遵守平台绝对截止时间；终止时保存结果、调用记录和错误原因。\\
 \bottomrule
 \end{tabularx}
-\endgroup
-\vspace{6pt}
-\par
-\noindent{\footnotesize\color{muted}摘要、差分、折叠、筛选及动作组合保留为待比较的方法，最终选择在后续章节填写。}
-\end{table}
+\endgroup\end{table}
 
-\section{第三阶段：实验验证}
-\vspace{5mm}
-\section{实验结果}
-\vspace{5mm}
-\section{最终设计}
-\vspace{5mm}
+\Needspace{7\baselineskip}
+\section{可选机制与并发调度}
 
-\vspace{1pt}
+\subsection{恢复、接管与上下文}
+
+开启恢复开关后，官方入口连接故障分类、停滞检测和有界恢复。恢复依据失败证据与目标依赖撤回受影响的完成判断，保留其他已确认进度；每目标最多两次、全任务最多五次恢复。待确认副作用在动作发出前入账，反馈未知时保留未知状态，先核实再决定后续动作。
+
+同一开关接入单任务人工接管：登录、验证或主动暂停时关闭动作出口，处理已执行反馈后等待明确继续信号；恢复时重新观察，废弃旧提案与旧元素编号。快照重启恢复业务状态与证据，并重新建立执行循环。
+
+必要上下文保护开启后，在模型发送前核对任务、当前 AX、账本短视图及待确认副作用，超限时明确拒绝发送。经验加载开启后，仅从本地批准清单选择版本与适用条件匹配的文本，进入既有提示词装配；当前提交配置关闭这两项，默认执行沿用 EffGen 原生上下文管理。
+
+\subsection{只读并行与统一限流}
+
+调度模块通过独立协调器接收分支任务，每个分支关联会话、循环和页面槽位；仅独立只读分支可并行，计划中出现写任务时整批退回串行。所有分支共用模型调用门控、访问节奏与根预算，失败、取消和丢弃分支同样计入汇总。模型并发固定为一，站点操作间隔默认一秒，遇到冷却提示时共享退避状态。
+
+当前正式官方入口采用串行路径，配置拒绝开启多 Tab；独立调度模块保留给真实端扩展。并行模块的多分支暂停、继续与排空仍是预留接口，单任务恢复与接管由官方入口中的控制层承担。
+
+\subsection{论文方法与方案取舍}
+
+论文为机制选择提供依据，具体接入以当前代码和配置为准。状态、核验与统一执行进入官方主流程，其他方法按下表保留相应模块或候选形式。
+
+\begin{table}[htbp]
+\caption{论文方法与最终方案的对应}\label{tab:methods}
+\centering\begingroup
+\linespread{1.02}\fontsize{9.5}{14}\selectfont
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\linewidth}{@{}L{25mm}L{39mm}Y@{}}
+\toprule\rowcolor{pale}
+\textbf{\color{navy}方向} & \textbf{\color{navy}论文依据} & \textbf{\color{navy}本项目采用方式}\\
+\midrule
+状态与停滞 & PoS / BeliefState \citepaper{pos} & 账本区分事实和目标缺口；停滞诊断随恢复开关启用。\\
+核验与纠错 & WALT \citepaper{walt}、Reflexion \citepaper{reflexion} & 默认核验已声明目标，反馈送回同一循环；有界恢复按证据撤回受影响状态。\\
+摘要与经验 & M² \citepaper{m2} & 提供批准文本经验加载，默认关闭；同轮摘要保留为候选。\\
+历史管理 & AgentProg \citepaper{agentprog}、Read More, Think More \citepaper{readmore} & 复用原生轨迹与压缩；子目标折叠、历史差分保留为候选。\\
+页面筛选 & Prune4Web \citepaper{prune} & 关键词与固定程序评分保留为候选，当前主流程读取 AX。\\
+依赖调度 & Flash-Searcher \citepaper{flash} & 独立协调器实现只读分支调度、共享写退回串行及根预算汇总。\\
+视觉与行动效率 & UI-TARS \citepaper{uitars}、\mbox{WebClipper\citepaper{clipper}} & 截图用于留证；截图参与决策、轨迹裁剪及动作组合保留为候选。\\
+\bottomrule
+\end{tabularx}
+\endgroup\end{table}
+
+\section{工程交付与追溯}
+
+提交工程包含 \path{code/harness/}、固定版本及补丁的 EffGen、官方 SDK 和配置。两套后端共用观察、动作、会话与证据协议；日志关联任务、页面、动作反馈、模型请求和终止原因。官方请求的真实 token 用量以平台记录为准，本地估算值单独标明。最终方案以本次读取的主树源码和配置为依据，相关文件哈希保存在报告来源目录，便于材料与工程版本核对。
+
 \begingroup
 \renewcommand{\refname}{参考文献}
 \ctexset{section={beforeskip=5pt,afterskip=4pt}}

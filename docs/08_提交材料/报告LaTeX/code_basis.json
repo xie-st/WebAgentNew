@@ -1,0 +1,103 @@
+{
+  "repository_root": "D:\\Dwen\\Alpha26fall\\WebAgentNew",
+  "entry_point": "webagent.official_agent.OfficialAgent",
+  "resolved_entry": "code\\harness\\src\\webagent\\official_agent.py",
+  "basis": "Current main working tree including uncommitted source; file hashes are the version reference.",
+  "read_date": "2026-10-31",
+  "config": {
+    "profile": "official",
+    "backend": "official",
+    "behaviors": {
+      "verification": true,
+      "state_tools": true,
+      "recovery": false
+    },
+    "text_mode": "decompose",
+    "context_enabled": false,
+    "experience_enabled": false,
+    "parallel": {
+      "enabled": false,
+      "capacity": 1,
+      "model_concurrency": 1,
+      "site_ops_per_second": 1.0,
+      "backoff_seconds": [
+        5.0,
+        10.0,
+        20.0
+      ],
+      "max_rate_retries": 3
+    },
+    "budget": {
+      "input_tokens": 24000,
+      "planned_context_tokens": 32768,
+      "max_model_calls": null,
+      "deadline_margin_seconds": 0.0
+    },
+    "limits": {
+      "max_messages": 256,
+      "max_request_bytes": 1048576
+    }
+  },
+  "sources": [
+    {
+      "path": "code/harness/configs/official.yaml",
+      "sha256": "e2d942d1f734da49f3a39047944bf2f9a6a7059c15ab031119fa6c663b430235"
+    },
+    {
+      "path": "code/harness/src/webagent/official_agent.py",
+      "sha256": "5dcdef7ab023df25dc254322d5b0fe3e501ca0ff3b2ba186f3fa51c8348c5565"
+    },
+    {
+      "path": "code/harness/src/webagent/effgen_bridge.py",
+      "sha256": "301a97f02c661cc6d354008765791b6704e87c8c4a6e787e38d0b2a7cf636aaa"
+    },
+    {
+      "path": "code/harness/src/webagent/config.py",
+      "sha256": "48328e51396ad6c9a424ff7fd86e9a769615fe181d3d4ca315105f8dc0190656"
+    },
+    {
+      "path": "code/harness/src/webagent/budget.py",
+      "sha256": "ef95091421c15801bd72e537d6822c94f8ad7dee4f0b26653a09791afe05e3f4"
+    },
+    {
+      "path": "code/harness/src/webagent/models/official.py",
+      "sha256": "b5b300204827c32519cb01d3c6caf2a0850a5e4f9b15b5bfce53e9206b80cbb7"
+    },
+    {
+      "path": "code/harness/src/webagent/backends/official.py",
+      "sha256": "fd44a451d1aa9dd1f6b3e3e5646ba1bf1e2e29596a01b79a6f171776387708d3"
+    },
+    {
+      "path": "code/harness/src/webagent/state/store.py",
+      "sha256": "fb677ed213de12f1f7325c241a8be3a95c8c523f659b22afd36ae667cae0445a"
+    },
+    {
+      "path": "code/harness/src/webagent/verification/checks.py",
+      "sha256": "7d8d586ad87963c15e35a384d70ee7636b4e00619c233b3804ddf048d0fc8dfb"
+    },
+    {
+      "path": "code/harness/src/webagent/verification/completion.py",
+      "sha256": "ad6623b7f2b23190c3627a8ef9230e22a985fb858b49f6b8f6158e55a164990f"
+    },
+    {
+      "path": "code/harness/src/webagent/recovery/wiring.py",
+      "sha256": "e901193615a956ac3c9a62d47ea192383fefd1fa8576d04b940c9bc69ad02316"
+    },
+    {
+      "path": "code/harness/src/webagent/scheduling/coordinator.py",
+      "sha256": "ea7a6c6c607b5c728dd0dd922542195c88d620d24e03a6f7a9bbcffff7e3115d"
+    },
+    {
+      "path": "code/harness/src/webagent/scheduling/limiter.py",
+      "sha256": "9e5c0c578d0ba9c3626e0405907e380ab9a55aeaaa528a5312f2e31a0c507f7e"
+    },
+    {
+      "path": "code/harness/src/webagent/context/protector.py",
+      "sha256": "b6490ac7011ee29b85b9f3317dd55446201f874ad3abb568890df3305773a15c"
+    },
+    {
+      "path": "code/harness/src/webagent/experience/loader.py",
+      "sha256": "df0b5d136a1fba3e05691b63798165256f9d7f97ebf44f37e5b09aa472e9dc3a"
+    }
+  ]
+}

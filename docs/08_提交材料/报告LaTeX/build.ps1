@@ -10,7 +10,7 @@ try {
         & xelatex -interaction=nonstopmode -halt-on-error -file-line-error -output-directory=build main.tex
         if ($LASTEXITCODE -ne 0) { throw "XeLaTeX compilation failed on pass $reportPass" }
     }
-    Copy-Item -LiteralPath (Join-Path $reportBuildDir 'main.pdf') -Destination (Join-Path $reportOutputDir 'WebAgent_方案报告.pdf') -Force
+    Copy-Item -LiteralPath (Join-Path $reportBuildDir 'main.pdf') -Destination (Join-Path $reportOutputDir '30WebAgent_7勇攀高峰_方案报告.pdf') -Force
 } finally {
     Pop-Location
 }
